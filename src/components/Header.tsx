@@ -52,7 +52,13 @@ export default function Header({ user }: { user: { name: string } | null }) {
     <header className="anim-fade-up sticky top-0 z-20 border-b" style={{ background: "var(--bg)", borderColor: "var(--border)" }}>
       <div className="mx-auto flex max-w-xl items-center justify-between gap-2 px-4 py-3">
         <Link href="/" className="flex items-baseline gap-2">
-          <span className="text-lg font-extrabold tracking-tight" style={{ color: "var(--accent)" }}>
+          <span
+            className="bg-clip-text text-lg font-extrabold tracking-tight"
+            style={{
+              backgroundImage: "linear-gradient(90deg, var(--accent), #00C1B1)",
+              color: "transparent",
+            }}
+          >
             {t.appName}
           </span>
           <span className="hidden text-xs sm:inline" style={{ color: "var(--muted)" }}>

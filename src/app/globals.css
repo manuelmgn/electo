@@ -48,8 +48,13 @@
 }
 
 body {
-  background: var(--bg);
+  background:
+    radial-gradient(90% 40% at 50% 0%, color-mix(in srgb, var(--accent) 6%, transparent), transparent),
+    var(--bg);
   color: var(--text);
+  font-family:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -134,6 +139,14 @@ body {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 1rem;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.05);
+}
+
+/* Tarxeta principal cunha luz de acento na parte superior */
+.hero-card {
+  background:
+    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 55%),
+    var(--surface);
 }
 
 .btn {
@@ -186,4 +199,40 @@ body {
 input[type="range"] {
   accent-color: var(--accent);
   cursor: pointer;
+}
+
+/* Botóns pequenos de paso (− / +) nas filas de partidos */
+.step-btn {
+  display: flex;
+  height: 1.9rem;
+  width: 1.9rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-weight: 700;
+  transition:
+    transform 0.12s ease,
+    opacity 0.12s ease;
+}
+
+.step-btn:active {
+  transform: scale(0.88);
+}
+
+.step-btn:disabled {
+  opacity: 0.3;
+}
+
+/* Input numérico sen frechas nativas (máis limpo) */
+.seat-input::-webkit-outer-spin-button,
+.seat-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.seat-input {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }

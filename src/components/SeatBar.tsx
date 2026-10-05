@@ -1,4 +1,4 @@
-import { PARTIES, TOTAL_SEATS } from "@/lib/parties";
+import { PARTIES, TOTAL_SEATS, axisValue } from "@/lib/parties";
 
 export default function SeatBar({
   seats,
@@ -7,8 +7,9 @@ export default function SeatBar({
   seats: Record<string, number>;
   height?: string;
 }) {
+  // Orde esquerda → dereita polo eixo; os empates mantén a orde da lista.
   const withSeats = PARTIES.filter((p) => (seats[p.id] ?? 0) > 0).sort(
-    (a, b) => (seats[b.id] ?? 0) - (seats[a.id] ?? 0)
+    (a, b) => axisValue(a) - axisValue(b) || PARTIES.indexOf(a) - PARTIES.indexOf(b)
   );
 
   return (

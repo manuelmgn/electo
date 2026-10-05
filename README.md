@@ -27,9 +27,12 @@ tema claro/oscuro automático. Optimizada para móbil.
 
 Para engadir, quitar ou modificar partidos edita **`src/lib/parties.ts`**:
 é a única táboa que necesitas tocar. Cada partido ten `id` (non o cambies se
-hai predicicións gardadas), `name`, `short` (siglas), `color` e `logo`
+hai predicicións gardadas), `name`, `short` (siglas), `color`, `logo`
 (nome do ficheiro dentro de `/public/logos/`; cando subas os logos a esa
-carpeta, a app xa os ten referenciados).
+carpeta, a app xa os ten referenciados) e `axis`: a súa posición no eixo
+esquerda-dereita, un **enteiro entre -3 e 3**. O `axis` decide onde se
+senta o partido no hemiciclo e na barra: canto maior, máis á dereita;
+se dous empatan, mántense na orde da lista.
 
 ## Desenvolvemento local
 

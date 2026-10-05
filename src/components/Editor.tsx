@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { PARTIES, TOTAL_SEATS, textOn } from "@/lib/parties";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
+import Hemicycle from "./Hemicycle";
 
 type Seats = Record<string, number>;
 
@@ -19,6 +20,48 @@ type LocalPrediction = {
 
 function emptySeats(): Seats {
   return Object.fromEntries(PARTIES.map((p) => [p.id, 0]));
+}
+
+// Input numérico editable a man: mantén o texto mentres hai foco e
+// só propaga valores enteiros válidos (limitados ao máximo posible).
+function SeatInput({
+  value,
+  max,
+  label,
+  onChange,
+}: {
+  value: number;
+  max: number;
+  label: string;
+  onChange: (v: number) => void;
+}) {
+  const [text, setText] = useState(String(value));
+  const [focused, setFocused] = useState(false);
+
+  useEffect(() => {
+    if (!focused) setText(String(value));
+  }, [value, focused]);
+
+  return (
+    <input
+      type="number"
+      inputMode="numeric"
+      min={0}
+      max={max}
+      aria-label={label}
+      value={text}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      onChange={(e) => {
+        const raw = e.target.value;
+        setText(raw);
+        const n = parseInt(raw, 10);
+        if (!Number.isNaN(n)) onChange(Math.max(0, Math.min(n, max)));
+      }}
+      className="seat-input w-12 rounded-lg border py-1 text-center text-sm font-bold tabular-nums outline-none focus:border-[var(--accent)]"
+      style={{ borderColor: "var(--border)", background: "transparent", color: "var(--text)" }}
+    />
+  );
 }
 
 export default function Editor({
@@ -37,7 +80,6 @@ export default function Editor({
   const [title, setTitle] = useState(initialTitle ?? "");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [justSaved, setJustSaved] = useState(false);
   const [local, setLocal] = useState<LocalPrediction[]>([]);
 
   useEffect(() => {
@@ -64,9 +106,7 @@ export default function Editor({
 
   const notify = (msg: string) => {
     setToast(msg);
-    setJustSaved(true);
     window.setTimeout(() => setToast(null), 2600);
-    window.setTimeout(() => setJustSaved(false), 3400);
   };
 
   const persistLocal = (list: LocalPrediction[]) => {
@@ -123,95 +163,78 @@ export default function Editor({
 
   return (
     <div className="anim-fade-up space-y-4 px-4 py-4">
-      {/* Resumo */}
-      <section className="card anim-glow space-y-3 p-4">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
-              {t.totalLabel}
-            </p>
-            <p className="text-4xl font-extrabold tabular-nums leading-none">
-              {total}
-              <span className="text-lg font-medium" style={{ color: "var(--muted)" }}>
-                {" "}
-                / {TOTAL_SEATS}
+      {/* Hemiciclo + estado */}
+      <section className="card hero-card space-y-3 overflow-hidden p-4">
+        <Hemicycle seats={seats} />
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-bold ${
+                exact ? "" : total > TOTAL_SEATS ? "anim-pulse-danger" : ""
+              }`}
+              style={{
+                background: exact
+                  ? "color-mix(in srgb, var(--ok) 15%, transparent)"
+                  : "color-mix(in srgb, var(--danger) 12%, transparent)",
+                color: exact ? "var(--ok)" : "var(--danger)",
+              }}
+            >
+              {exact
+                ? t.complete
+                : total > TOTAL_SEATS
+                  ? `${t.over} ${-diff}`
+                  : `${t.remaining} ${diff}`}
+            </span>
+            {!exact && total > 0 && (
+              <span className="text-xs font-medium" style={{ color: "var(--danger)" }}>
+                {t.invalidSum}
               </span>
-            </p>
+            )}
           </div>
-          <div
-            className={`rounded-full px-3 py-1 text-sm font-bold ${
-              exact ? "" : total > TOTAL_SEATS ? "anim-pulse-danger" : ""
-            }`}
-            style={{
-              background: exact
-                ? "color-mix(in srgb, var(--ok) 15%, transparent)"
-                : "color-mix(in srgb, var(--danger) 12%, transparent)",
-              color: exact ? "var(--ok)" : "var(--danger)",
-            }}
-          >
-            {exact ? t.complete : total > TOTAL_SEATS ? `${t.over} ${-diff}` : `${t.remaining} ${diff}`}
-          </div>
+          <SeatBar seats={seats} height="h-3.5" />
         </div>
-
-        <SeatBar seats={seats} height="h-5" />
-
-        {!exact && total === 0 && (
-          <p className="text-sm" style={{ color: "var(--muted)" }}>
-            {t.emptySeats}
-          </p>
-        )}
-        {!exact && total > 0 && (
-          <p className="text-xs font-medium" style={{ color: "var(--danger)" }}>
-            {t.invalidSum}
-          </p>
-        )}
       </section>
 
-      {/* Partidos */}
-      <section className="card divide-y" style={{ borderColor: "var(--border)" }}>
+      {/* Partidos: lista compacta con input numérico */}
+      <section className="card divide-y overflow-hidden" style={{ borderColor: "var(--border)" }}>
         {PARTIES.map((p, i) => {
           const value = seats[p.id] ?? 0;
           const maxForParty = TOTAL_SEATS - (total - value);
           return (
             <div
               key={p.id}
-              className="anim-fade-up space-y-2 p-3"
-              style={{ animationDelay: `${60 + i * 30}ms`, borderColor: "var(--border)" }}
+              className="anim-fade-up flex items-center gap-2.5 px-3 py-2"
+              style={{ animationDelay: `${40 + i * 20}ms`, borderColor: "var(--border)" }}
             >
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <span
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-[10px] font-extrabold"
-                    style={{ background: p.color, color: textOn(p.color) }}
-                  >
-                    {p.short}
-                  </span>
-                  <span className="truncate text-sm font-medium">{p.name}</span>
-                </div>
-                <span className="text-xl font-extrabold tabular-nums">{value}</span>
-              </div>
-              <div className="flex items-center gap-2">
+              <span
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[9px] font-extrabold"
+                style={{ background: p.color, color: textOn(p.color) }}
+              >
+                {p.short}
+              </span>
+              <span className="min-w-0 flex-1 truncate text-xs font-medium leading-tight">
+                {p.name}
+              </span>
+              <div className="flex shrink-0 items-center gap-1">
                 <button
                   onClick={() => setParty(p.id, value - 1)}
                   disabled={value === 0}
-                  className="btn btn-ghost h-9 w-9 !p-0 text-lg font-bold"
+                  className="step-btn"
                   aria-label={`${p.short} −1`}
                 >
                   −
                 </button>
-                <input
-                  type="range"
-                  min={0}
-                  max={maxForParty}
+                <SeatInput
                   value={value}
-                  onChange={(e) => setParty(p.id, Number(e.target.value))}
-                  className="min-w-0 flex-1"
-                  aria-label={p.name}
+                  max={maxForParty}
+                  label={p.name}
+                  onChange={(v) => setParty(p.id, v)}
                 />
                 <button
                   onClick={() => setParty(p.id, value + 1)}
                   disabled={value >= maxForParty}
-                  className="btn btn-ghost h-9 w-9 !p-0 text-lg font-bold"
+                  className="step-btn"
                   aria-label={`${p.short} +1`}
                 >
                   +
@@ -261,7 +284,7 @@ export default function Editor({
       {/* Predicicións locais */}
       {!user && local.length > 0 && (
         <section className="space-y-2">
-          <h2 className="px-1 text-sm font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+          <h2 className="px-1 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
             {t.onThisDevice}
           </h2>
           {local.map((entry) => (
