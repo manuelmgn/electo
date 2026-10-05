@@ -181,7 +181,7 @@ export default function Editor({
               }}
             >
               {exact
-                ? t.complete
+                ? t.majorityInfo
                 : total > TOTAL_SEATS
                   ? `${t.over} ${-diff}`
                   : `${t.remaining} ${diff}`}

@@ -1,17 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { PARTIES, TOTAL_SEATS, axisValue } from "@/lib/parties";
+import { PARTIES, TOTAL_SEATS, axisValue, type Party } from "@/lib/parties";
+import { useI18n } from "@/lib/i18n";
 
-type Seat = { x: number; y: number; color: string };
+type Seat = { x: number; y: number; color: string; party: Party; count: number };
 
 const CX = 200; // centro X
 const CY = 210; // centro Y (base do semicírculo)
 const R_INNER = 64;
-const R_OUTER = 196;
+const R_OUTER = 188;
 const ROWS = 10;
 const SEAT_R = 5.6;
 const MARGIN = (6 * Math.PI) / 180; // marxe nos extremos
+const MAJORITY = 176; // maioría absoluta: primeiro asento á dereita do centro
 
 // Xeración dos asentos: filas concéntricas proporcionais ao raio,
 // ordenadas esquerda → dereita polo eixo (-3 a 3) do partido.
@@ -62,6 +64,8 @@ function buildSeats(seats: Record<string, number>): Seat[] {
         x: CX + r * Math.cos(angle),
         y: CY - r * Math.sin(angle),
         color: p.color,
+        party: p,
+        count: n,
       });
     }
   }
@@ -69,6 +73,7 @@ function buildSeats(seats: Record<string, number>): Seat[] {
 }
 
 export default function Hemicycle({ seats }: { seats: Record<string, number> }) {
+  const { t } = useI18n();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -80,7 +85,29 @@ export default function Hemicycle({ seats }: { seats: Record<string, number> }) 
   const total = all.length;
 
   return (
-    <svg viewBox="0 0 400 216" className="w-full" role="img" aria-label="Hemiciclo de escaños">
+    <svg viewBox="0 0 400 224" className="w-full" role="img" aria-label="Hemiciclo de escaños">
+      {/* Liña da maioría absoluta: no centro separa os asentos 175 e 176 */}
+      <line
+        x1={CX}
+        y1={18}
+        x2={CX}
+        y2={CY - R_INNER + 6}
+        stroke="currentColor"
+        strokeOpacity={0.35}
+        strokeWidth={1.5}
+        strokeDasharray="3 3"
+      />
+      <text
+        x={CX}
+        y={12}
+        textAnchor="middle"
+        fill="currentColor"
+        opacity={0.55}
+        style={{ fontSize: 11, fontWeight: 800 }}
+      >
+        {MAJORITY}
+      </text>
+
       {all.map((s, i) => (
         <circle
           key={i}
@@ -92,8 +119,13 @@ export default function Hemicycle({ seats }: { seats: Record<string, number> }) 
               : `translate(${CX}px, ${CY}px) scale(0)`,
             transition: `transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) ${Math.min(i * 1.5, 450)}ms`,
           }}
-        />
+        >
+          <title>
+            {`${s.party.name} (${s.party.short}) — ${s.count} ${t.seats} · ${((s.count / TOTAL_SEATS) * 100).toFixed(1)}%`}
+          </title>
+        </circle>
       ))}
+
       <text
         x={CX}
         y={CY - 34}
