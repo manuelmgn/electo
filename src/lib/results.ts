@@ -12,6 +12,10 @@
 //   (por exemplo "2016").
 // - Os bloques baleiros non se amosan na app ata que lle engadas
 //   algún partido.
+// - A continuación van dúas táboas paralelas, coas mesmas claves:
+//   ELECTION_GOVERNMENT (quen formou parte do goberno) e
+//   ELECTION_ALLIES (quen apoiou a investidura ou ao goberno sen
+//   formar parte del). Un partido non pode estar nas dúas á vez.
 //
 // NOTA: a vista editable da app NON usa esta táboa; os valores por
 // defecto do editor veñen do campo `seats` de parties.ts. Esta táboa
@@ -31,6 +35,21 @@ export const ELECTION_GOVERNMENT: ElectionGovernment = {
   "2019 I": {  },
   "2019 II": { psoe: true, podemos: true },
   "2016": { pp: true },
+};
+
+// Aliados de cada elección: para cada elección (clave, a mesma que en
+// ELECTION_RESULTS), un mapa de id de partido → true se apoiou ao
+// goberno (pacto de investidura, abstención favorable, apoio externo)
+// sen formar parte del. Úsase para iluminar en ámbar os partidos
+// aliados nas vistas de resultados anteriores. Un partido non pode ser
+// á vez goberno e aliado na mesma elección.
+export type ElectionAllies = Record<string, Record<string, boolean>>;
+
+export const ELECTION_ALLIES: ElectionAllies = {
+  "2023": { erc: true, jxc: true, ehb: true, pnv: true, bng: true, cc: true },
+  "2019 I": {  },
+  "2019 II": { ehb: true, pnv: true },
+  "2016": { cs: true },
 };
 
 export const ELECTION_RESULTS: ElectionResults = {
