@@ -5,6 +5,7 @@ import { setSessionCookie } from "@/lib/auth";
 
 export async function POST(req: Request) {
   if (!dbConfigured()) {
+    console.error("[register] POSTGRES_URL non configurado");
     return NextResponse.json({ message: "no-db" }, { status: 500 });
   }
 
@@ -42,7 +43,8 @@ export async function POST(req: Request) {
     const res = NextResponse.json({ user: rows[0] });
     setSessionCookie(res, rows[0].id as number);
     return res;
-  } catch {
+  } catch (err) {
+    console.error("[register] erro:", err);
     return NextResponse.json({ message: "errorGeneric" }, { status: 500 });
   }
 }
