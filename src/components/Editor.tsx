@@ -193,6 +193,16 @@ export default function Editor({
     [viewGovs, viewAllies, viewResults]
   );
 
+  // Cor do partido gobernante con máis escaños da elección vista, para
+  // a leyenda da barra (igual que topGovColor no editor).
+  const viewTopGovColor = useMemo(() => {
+    if (!viewResults) return governmentShade(0, 1);
+    const top = PARTIES.filter(
+      (p) => viewGovs[p.id] && (viewResults[p.id] ?? 0) > 0
+    ).sort((a, b) => (viewResults[b.id] ?? 0) - (viewResults[a.id] ?? 0))[0];
+    return top?.color ?? governmentShade(0, 1);
+  }, [viewGovs, viewResults]);
+
   // Partidos marcados como gobernantes no editor, ordenados polos
   // escaños actuais (o maior leva a tonalidade de verde máis intensa).
   const governmentRanks = useMemo(() => {
@@ -362,13 +372,17 @@ export default function Editor({
             </div>
             <Hemicycle seats={viewResults} />
             <SeatBar seats={viewResults} height="h-3.5" majorityLabel={t.majorityInfo} />
+          </section>
 
-            {/* Suma de goberno + aliados daquela lexislatura, coa liña
-                da maioría. Só se amosa se hai algún partido marcado. */}
-            {viewGovTotal > 0 && (
-              <div className="space-y-2">
+          {/* Suma de goberno + aliados daquela lexislatura: mesma estrutura
+              ca na vista de edición (tarxeta coa fila de insignia + leyenda
+              e a barra debaixo), coa liña da maioría. Só se amosa se hai
+              algún partido marcado. */}
+          {viewGovTotal > 0 && (
+            <section className="card space-y-2 p-4">
+              <div className="flex items-center justify-between gap-2">
                 <span
-                  className="inline-flex rounded-full px-3 py-1 text-xs font-bold"
+                  className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold"
                   style={{
                     background: `color-mix(in srgb, ${governmentSumColor(viewGovTotal)} 15%, transparent)`,
                     color: governmentSumColor(viewGovTotal),
@@ -376,10 +390,31 @@ export default function Editor({
                 >
                   {t.government}: {viewGovTotal}
                 </span>
-                <GovBar seats={viewResults} governs={viewGovs} allies={viewAllies} />
+                <div
+                  className="flex shrink-0 items-center gap-3 text-[11px] font-semibold"
+                  style={{ color: "var(--muted)" }}
+                >
+                  <span className="flex items-center gap-1">
+                    <span
+                      aria-hidden="true"
+                      className="inline-block h-2.5 w-2.5 rounded-sm"
+                      style={{ background: viewTopGovColor }}
+                    />
+                    🏛️ {t.government}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span
+                      aria-hidden="true"
+                      className="inline-block h-2.5 w-2.5 rounded-sm"
+                      style={{ backgroundColor: viewTopGovColor, backgroundImage: ALLY_HATCH }}
+                    />
+                    🤝 {t.ally}
+                  </span>
+                </div>
               </div>
-            )}
-          </section>
+              <GovBar seats={viewResults} governs={viewGovs} allies={viewAllies} />
+            </section>
+          )}
 
           <section
             className="card divide-y overflow-hidden"
