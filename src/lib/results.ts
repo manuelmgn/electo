@@ -32,8 +32,8 @@ export type ElectionGovernment = Record<string, Record<string, boolean>>;
 
 export const ELECTION_GOVERNMENT: ElectionGovernment = {
   "2023": { psoe: true, s: true },
-  "2019 I": {  },
-  "2019 II": { psoe: true, podemos: true },
+  "2019 (I)": {  },
+  "2019 (II)": { psoe: true, podemos: true },
   "2016": { pp: true },
 };
 
@@ -47,8 +47,8 @@ export type ElectionAllies = Record<string, Record<string, boolean>>;
 
 export const ELECTION_ALLIES: ElectionAllies = {
   "2023": { erc: true, jxc: true, ehb: true, pnv: true, bng: true, cc: true },
-  "2019 I": {  },
-  "2019 II": { pnv: true, mp: true, nc: true, com: true, te: true, bng: true },
+  "2019 (I)": {  },
+  "2019 (II)": { pnv: true, mp: true, nc: true, com: true, te: true, bng: true },
   "2016": { cs: true, cc:true },
 };
 
