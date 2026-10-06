@@ -24,13 +24,12 @@ function emptySeats(): Seats {
   return Object.fromEntries(PARTIES.map((p) => [p.id, 0]));
 }
 
-// Valores por defecto do editor: os resultados de 2023 (que son
-// totalmente modificables), limitados aos partidos que se presentan
+// Valores por defecto do editor: o campo `seats` de cada partido
+// (totalmente modificables), limitados aos que se presentan
 // (runs: true). O botón "Limpar" pon todo a 0.
-const DEFAULT_RESULTS = ELECTION_RESULTS["2023"] ?? {};
 function defaultSeats(): Seats {
   return Object.fromEntries(
-    PARTIES.map((p) => [p.id, p.runs ? (DEFAULT_RESULTS[p.id] ?? 0) : 0])
+    PARTIES.map((p) => [p.id, p.runs ? p.seats : 0])
   );
 }
 
