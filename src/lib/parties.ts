@@ -56,7 +56,7 @@ export const PARTIES: Party[] = [
   { id: "bng",     name: "Bloque Nacionalista Galego",                       order: 6, short: "BNG",   color: "#7FC4E8", logo: "bng.png",    axis: -3, runs: true, seats: 1,   emoji: "🧀" },
   { id: "upn",     name: "Unión del Pueblo Navarro",                         order: 6, short: "UPN",   color: "#3A5FBD", logo: "upn.jpg",    axis: 2, runs: true, seats: 1,   emoji: "🥔" },
   { id: "cc",      name: "Coalición Canaria",                                order: 6, short: "CC",    color: "#FFCE00", logo: "cc.png",     axis: 1, runs: true, seats: 1,   emoji: "🍌" },
-  { id: "nc",      name: "Nueva Canarias",                                   order: 6, short: "NC",    color: "#86BD42", logo: "nc.png",     axis: -1, runs: true, seats: 0,   emoji: "🇮🇨" },
+  { id: "nc",      name: "Nueva Canarias",                                   order: 7, short: "NC",    color: "#86BD42", logo: "nc.png",     axis: -1, runs: true, seats: 0,   emoji: "🇮🇨" },
   { id: "cup",     name: "Candidaturas d'Unitat Popular",                    order: 7, short: "CUP",   color: "#FFEE00", logo: "cup.jpeg",   axis: -3, runs: true, seats: 0,   emoji: "🍍" },
   { id: "aa",      name: "Adelante Andalucía",                               order: 8, short: "AA",    color: "#24C87E", logo: "aa.jpeg",    axis: -3, runs: true, seats: 0,   emoji: "🥗" },
   { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     order: 8, short: "PACMA", color: "#00FF7F", logo: "pacma.jpg",  axis: 0, runs: true, seats: 0,   emoji: "🕊️" },
