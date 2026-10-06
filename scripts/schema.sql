@@ -25,3 +25,12 @@ CREATE TABLE IF NOT EXISTS prediction_seats (
 );
 
 CREATE INDEX IF NOT EXISTS idx_predictions_user ON predictions(user_id);
+
+CREATE TABLE IF NOT EXISTS shared_predictions (
+  code TEXT PRIMARY KEY,
+  title TEXT NOT NULL DEFAULT '',
+  seats JSONB NOT NULL,
+  governs JSONB NOT NULL DEFAULT '{}'::jsonb,
+  allies JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);

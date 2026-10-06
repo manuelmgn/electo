@@ -193,12 +193,6 @@ export default function Editor({
   );
   const govColor = governmentSumColor(govTotal);
 
-  const openView = (key: string, type: "election" | "forecast") => {
-    setView(key);
-    setViewType(type);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   const setParty = (id: string, value: number) =>
     setSeats((s) => ({
       ...s,
@@ -284,11 +278,29 @@ export default function Editor({
   };
 
   // Copia no portapapeis un texto co prognóstico (top partidos + 🏛️
-  // goberno + 🤝 aliados) e a ligazón co estado codificado no hash, que
-  // garda os resultados por si mesma. (Integración co menú de compartir
-  // do navegador/sistema: pendente.)
+  // goberno + 🤝 aliados) e a ligazón curta /s/<código>: a API garda a
+  // predición cun código alfanumérico de 20 caracteres único e
+  // inmutable. Se non hai base de datos dispoñible, recae na ligazón
+  // co estado codificado no hash (#p=...), que se basta a si mesma.
   const share = async () => {
-    const url = `${window.location.origin}${window.location.pathname}#p=${encodeShare(seats, governs, allies)}`;
+    let path = "";
+    try {
+      const res = await fetch("/api/share", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, seats, governs, allies }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof data.code === "string") path = `/s/${data.code}`;
+      }
+    } catch {
+      // sen rede/BD: uso o fallback de abaixo
+    }
+    if (!path) {
+      path = `${window.location.pathname}#p=${encodeShare(seats, governs, allies)}`;
+    }
+    const url = `${window.location.origin}${path}`;
     const text = `${t.shareTextTitle}\n\n${buildShareLines(seats, governs, allies, PARTIES).join("\n")}\n\n${url}`;
     try {
       await navigator.clipboard.writeText(text);
@@ -302,120 +314,6 @@ export default function Editor({
 
   return (
     <div className="anim-fade-up space-y-4 px-4 py-4">
-      {viewResults ? (
-        <>
-          {/* Vista de resultados: SÓ LECTURA */}
-          <section className="card hero-card space-y-3 p-4">
-            <div className="flex items-center justify-between">
-              <h2
-                className="text-sm font-bold uppercase tracking-wide"
-                style={{ color: "var(--muted)" }}
-              >
-                {view}
-              </h2>
-              <button
-                onClick={() => setView(null)}
-                className="btn btn-ghost !px-3 !py-1 text-xs"
-              >
-                {t.backToEdit}
-              </button>
-            </div>
-            <Hemicycle seats={viewResults} />
-            <SeatBar seats={viewResults} height="h-3.5" majorityLabel={t.majorityInfo} />
-          </section>
-
-          {/* Suma de goberno + aliados daquela lexislatura: mesma estrutura
-              ca na vista de edición (tarxeta coa fila de insignia + leyenda
-              e a barra debaixo), coa liña da maioría. Só se amosa se hai
-              algún partido marcado. */}
-          {viewGovTotal > 0 && (
-            <section className="card space-y-2 p-4">
-              <div className="flex items-center justify-between gap-2">
-                <span
-                  className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold"
-                  style={{
-                    background: `color-mix(in srgb, ${governmentSumColor(viewGovTotal)} 15%, transparent)`,
-                    color: governmentSumColor(viewGovTotal),
-                  }}
-                >
-                  {t.government}: {viewGovTotal}
-                </span>
-                <div
-                  className="flex shrink-0 items-center gap-3 text-[11px] font-semibold"
-                  style={{ color: "var(--muted)" }}
-                >
-                  <span className="flex items-center gap-1">
-                    <span
-                      aria-hidden="true"
-                      className="inline-block h-2.5 w-2.5 rounded-sm"
-                      style={{ background: viewTopGovColor }}
-                    />
-                    🏛️ {t.government}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span
-                      aria-hidden="true"
-                      className="inline-block h-2.5 w-2.5 rounded-sm"
-                      style={{ backgroundColor: viewTopGovColor, backgroundImage: ALLY_HATCH }}
-                    />
-                    🤝 {t.ally}
-                  </span>
-                </div>
-              </div>
-              <GovBar seats={viewResults} governs={viewGovs} allies={viewAllies} />
-            </section>
-          )}
-
-          <section
-            className="card divide-y overflow-hidden"
-            style={{ borderColor: "var(--border)" }}
-          >
-            {viewParties.map((p, i) => {
-              const gov = viewGovRanks[p.id];
-              const ally = viewAllies[p.id];
-              const shade = gov ? governmentShade(gov.rank, gov.total) : "";
-              const badgeColor = gov ? shade : allyShade();
-              return (
-              <div
-                key={p.id}
-                className="anim-fade-up flex items-center gap-2.5 px-3 py-2"
-                style={{
-                  animationDelay: `${40 + i * 25}ms`,
-                  borderColor: "var(--border)",
-                  background: gov || ally
-                    ? `color-mix(in srgb, ${badgeColor} 20%, transparent)`
-                    : undefined,
-                }}
-              >
-                <PartyLogo party={p} />
-                <span className="min-w-0 flex-1 truncate text-xs font-medium leading-tight">
-                  {p.name}
-                </span>
-                {/* Columna fixa para a etiqueta: resérvase o mesmo ancho
-                    en todas as filas para que quede alineada. */}
-                <span className="flex w-16 shrink-0 justify-end">
-                  {(gov || ally) && (
-                    <span
-                      className="w-full whitespace-nowrap rounded-full border px-1.5 py-px text-center text-[10px] font-bold uppercase leading-tight"
-                      style={{ borderColor: badgeColor, color: badgeColor }}
-                    >
-                      {gov ? t.government : t.ally}
-                    </span>
-                  )}
-                </span>
-                <span className="w-12 shrink-0 text-right text-xs tabular-nums" style={{ color: "var(--muted)" }}>
-                  {(((viewResults[p.id] ?? 0) / TOTAL_SEATS) * 100).toFixed(1)}%
-                </span>
-                <span className="w-10 shrink-0 text-right text-lg font-extrabold tabular-nums">
-                  {viewResults[p.id] ?? 0}
-                </span>
-              </div>
-              );
-            })}
-          </section>
-        </>
-      ) : (
-        <>
       {/* Hemiciclo + estado */}
       <section className="card hero-card space-y-3 overflow-hidden p-4">
         <Hemicycle seats={seats} />
@@ -684,8 +582,6 @@ export default function Editor({
           ))}
         </section>
       )}
-        </>
-      )}
 
       {/* Resultados de eleccións anteriores */}
       {elections.length > 0 && (
@@ -695,13 +591,13 @@ export default function Editor({
           </h2>
           <div className="flex flex-wrap gap-2">
             {elections.map((e) => (
-              <button
-                key={e}
-                onClick={() => openView(e, "election")}
+              <Link
+                key={e.slug}
+                href={`/r/${e.slug}`}
                 className="btn btn-ghost !py-1.5 text-sm"
               >
-                {e}
-              </button>
+                {e.key}
+              </Link>
             ))}
           </div>
         </section>
@@ -715,13 +611,13 @@ export default function Editor({
           </h2>
           <div className="flex flex-wrap gap-2">
             {forecasts.map((f) => (
-              <button
-                key={f}
-                onClick={() => openView(f, "forecast")}
+              <Link
+                key={f.slug}
+                href={`/f/${f.slug}`}
                 className="btn btn-ghost !py-1.5 text-sm"
               >
-                {f}
-              </button>
+                {f.key}
+              </Link>
             ))}
           </div>
         </section>

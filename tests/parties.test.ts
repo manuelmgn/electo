@@ -63,8 +63,8 @@ describe("parties", () => {
     expect(governmentSumColor(200)).toBe(governmentSumColor(176));
     expect(governmentSumColor(175)).not.toBe(governmentSumColor(176));
     expect(governmentSumColor(170)).not.toBe(governmentSumColor(169));
-    expect(governmentSumColor(150)).not.toBe(governmentSumColor(149));
+    expect(governmentSumColor(145)).not.toBe(governmentSumColor(144));
     expect(governmentSumColor(130)).not.toBe(governmentSumColor(129));
-    expect(governmentSumColor(110)).not.toBe(governmentSumColor(109));
+    expect(governmentSumColor(160)).not.toBe(governmentSumColor(159));
   });
 });

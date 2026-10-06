@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildShareLines, decodeShare, encodeShare } from "@/lib/share";
+import { buildShareLines, decodeShare, encodeShare, generateShareCode } from "@/lib/share";
 
 describe("share", () => {
   it("codifica e descodifica sen perder datos", () => {
@@ -101,5 +101,26 @@ describe("buildShareLines", () => {
     expect(buildShareLines({ pp: 0, psoe: 121 }, {}, {}, parties)).toEqual([
       "🌹 PSOE - 121",
     ]);
+  });
+});
+
+describe("generateShareCode", () => {
+  it("xera 20 caracteres alfanuméricos", () => {
+    const code = generateShareCode();
+    expect(code).toMatch(/^[A-Za-z0-9]{20}$/);
+  });
+
+  it("é determinista cos bytes de entrada (probas reproducibles)", () => {
+    const bytes = new Uint8Array(20).map((_, i) => i * 13);
+    const code = generateShareCode(bytes);
+    expect(code).toHaveLength(20);
+    expect(generateShareCode(bytes)).toBe(code);
+    expect(code).toMatch(/^[A-Za-z0-9]{20}$/);
+  });
+
+  it("dous xogos de bytes diferentes dan códigos diferentes", () => {
+    const a = generateShareCode(new Uint8Array(20).fill(1));
+    const b = generateShareCode(new Uint8Array(20).fill(2));
+    expect(a).not.toBe(b);
   });
 });

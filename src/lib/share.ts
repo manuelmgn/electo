@@ -15,8 +15,7 @@ export type SharedPrediction = {
 
 // Empaquetan os datos: omiten partidos con 0 escaños e checks a
 // false para acurtar a ligazón todo o posible.
-export function encodeShare(
-  seats: Record<string, number>,
+export function encodeShare(  seats: Record<string, number>,
   governs: Record<string, boolean>,
   allies: Record<string, boolean>
 ): string {
@@ -83,4 +82,24 @@ export function buildShareLines(
       mark ? ` - ${mark}` : ""
     }`;
   });
+}
+
+// ============================================================
+// LIGAZÓNS CURTAS CON CÓDIGO DE 20 CARACTERES (/s/<código>)
+// ------------------------------------------------------------
+// Cando se comparte unha predición, a API garda o estado na base
+// de datos con un código alfanumérico aleatorio de 20 caracteres.
+// A aleatoriedade (62^20 combinacións) garante que non se repite;
+// a clave primaria da táboa é a última rede de seguridade. A ligazón
+// xerada é inmutable: non se actualiza, só se crea.
+// ============================================================
+
+const CODE_ALPHABET =
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+// Xera un código de 20 caracteres. Acepta bytes opcionais para poder
+// probala de forma determinista nos tests.
+export function generateShareCode(random?: Uint8Array): string {
+  const bytes = random ?? crypto.getRandomValues(new Uint8Array(20));
+  return Array.from(bytes.slice(0, 20), (b) => CODE_ALPHABET[b % 62]).join("");
 }

@@ -49,28 +49,39 @@ e engade `SESSION_SECRET` en Environment Variables.
 ```
 src/
   app/                  # App Router
-    page.tsx            # páxina principal (editor + resultados anteriores)
+    page.tsx            # páxina principal (editor + ligazóns a vistas)
+    r/[slug]/           # vista de só lectura dun resultado electoral
+                        # (/r/2023, /r/2019-ii…); metadatos + OG propios
+    f/[slug]/           # igual para pronósticos publicados
+    s/[code]/           # predición compartida: código de 20 caracteres
+                        # alfanuméricos único e inmutable (gárdase en BD)
     login/, rexistro/   # páxinas de auth
     predicions/         # listado de predicicións na nube
     api/auth/{login,register,logout}/route.ts
     api/predictions/route.ts e api/predictions/[id]/route.ts
-  components/           # client components: Editor, Hemicycle, SeatBar,
-                        # GovBar, Header, AuthForm, PartyLogo,
-                        # PredictionsClient
+    api/share/route.ts  # crea a ligazón curta /s/<código> (POST)
+  components/           # client components: Editor, ResultsView (vista
+                        # só lectura compartida polas rutas r/f/s),
+                        # Hemicycle, SeatBar, GovBar, Header, AuthForm,
+                        # PartyLogo, PredictionsClient
   lib/
     parties.ts          # TÁBOA ÚNICA DE PARTIDOS (ver abaixo)
     results.ts          # resultados de eleccións anteriores (só lectura)
     forecasts.ts        # pronósticos precargados; campo `published`
                         # (true/false) decide se se amosan publicamente
+    views.ts            # slugs e vistas de só lectura (r/f) construídos
+                        # dende results.ts/forecasts.ts; viewSummary
     hemicycle.ts        # xeneración xeométrica dos asentos do hemiciclo
     predictions.ts      # validación do reparto (súa exacta = 350) + SQL
-    share.ts            # codificación/compartición por ligazón (base64url)
+    share.ts            # codificación base64url (#p=...) e
+                        # generateShareCode() (20 caracteres alfanuméricos)
     session.ts, auth.ts # tokens de sesión e usuario da sesión
     db.ts               # cliente postgres.js
     dictionaries.ts     # textos gl/es
     i18n.ts             # hook useI18n + detección de idioma
 tests/                  # tests Vitest (lóxica pura, sen DB nin DOM)
-scripts/schema.sql      # esquema: users, predictions, prediction_seats
+scripts/schema.sql      # esquema: users, predictions, prediction_seats,
+                        # shared_predictions
 public/logos/           # logos dos partidos (nomes referenciados dende parties.ts)
 ```
 
@@ -120,9 +131,10 @@ devolven claves de dicionario (`errorMessage` tradúceas no cliente).
 
 `npm test` (Vitest). Cubren só lóxica pura, sen base de datos nin DOM:
 hemiciclo (`buildSeats`), validación de escaños, sesións (`parseSession`,
-HMAC, expiración), táboas de partidos e compartición (`encodeShare` /
-`decodeShare` / `buildShareLines`). Os tests usan o alias `@/` e viven en
-`tests/**/*.test.ts`. Ao modificar a lóxica de `src/lib`, actualiza ou
+HMAC, expiración), táboas de partidos, vistas de só lectura (slugs en
+`src/lib/views.ts`) e compartición (`encodeShare` / `decodeShare` /
+`buildShareLines` / `generateShareCode`). Os tests usan o alias `@/` e viven
+en `tests/**/*.test.ts`. Ao modificar a lóxica de `src/lib`, actualiza ou
 engade tests no mesmo PR/commit.
 
 ## Seguridade
@@ -140,5 +152,10 @@ engade tests no mesmo PR/commit.
 
 - A suma de escaños debe ser **exactamente 350** para gardar
   (`validateSeats` en `src/lib/predictions.ts`).
-- Compartir codifica o estado (escaños + goberno/aliados) en base64url no
-  hash da URL (`#p=...`), sen tocar a base de datos.
+- Compartir unha predición crea unha ligazón curta `/s/<código>` con un
+  código alfanumérico de 20 caracteres aleatorio e único (PK en
+  `shared_predictions`), **inmutable**: xerada non se cambia nunca. Sen
+  base de datos, recae no hash base64url (`#p=...`), que non toca a BD.
+- Resultados anteriores e pronósticos publicados teñen URL propia breve
+  derivada da súa clave (`/r/2023`, `/f/2026-09-cis-electomania`), construída
+  en `src/lib/views.ts`; os slugs só cambian se se muda a clave na táboa.
