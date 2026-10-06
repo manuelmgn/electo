@@ -83,6 +83,12 @@ export const PARTIES_BY_SEATS: Party[] = [...PARTIES]
   .sort((a, b) => b.p.seats - a.p.seats || a.i - b.i)
   .map(({ p }) => p);
 
+// Partidos ordenados para o listado do editor en modo edición:
+// primeiro polo campo order (ascendente) e, en caso de empate,
+// alfabeticamente polo nome.
+export const PARTIES_BY_ORDER: Party[] = [...PARTIES]
+  .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+
 // Valor de eixo normalizado: enteiro entre -3 e 3 (por se o dato
 // da táboa fose incorrecto, nunca rompe o debuxo).
 export function axisValue(party: Party): number {

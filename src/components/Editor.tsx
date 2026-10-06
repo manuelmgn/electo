@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, allyShade, governmentShade, governmentSumColor } from "@/lib/parties";
+import { PARTIES, PARTIES_BY_SEATS, PARTIES_BY_ORDER, TOTAL_SEATS, allyShade, governmentShade, governmentSumColor } from "@/lib/parties";
 import { ELECTION_VIEWS, FORECAST_VIEWS } from "@/lib/views";
 import { encodeShare, decodeShare, buildShareLines } from "@/lib/share";
 import { useI18n, errorMessage } from "@/lib/i18n";
@@ -403,11 +403,11 @@ export default function Editor({
         <GovBar seats={seats} governs={governs} allies={allies} />
       </section>
 
-      {/* Partidos: lista compacta con input numérico, ordenada polos
-          escaños por defecto (PARTIES_BY_SEATS). Os desactivados
-          (runs: false) non se amosan. */}
+      {/* Partidos: lista compacta con input numérico, ordenada polo
+          campo order (empates alfabéticos, PARTIES_BY_ORDER). Os
+          desactivados (runs: false) non se amosan. */}
       <section className="card divide-y overflow-hidden" style={{ borderColor: "var(--border)" }}>
-        {PARTIES_BY_SEATS.filter((p) => p.runs).map((p, i) => {
+        {PARTIES_BY_ORDER.filter((p) => p.runs).map((p, i) => {
           const value = seats[p.id] ?? 0;
           const maxForParty = TOTAL_SEATS - (total - value);
           const gov = governmentRanks[p.id];
