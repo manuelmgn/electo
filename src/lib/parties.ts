@@ -89,10 +89,10 @@ export function axisValue(party: Party): number {
 
 // Tonalidade de verde para un partido que goberna. O rank 0 (partido
 // con máis escaños entre os que gobernan) leva o verde máis intenso e
-// cada partido adicional acláraese un paso fixo, ata un máximo propio
-// dun quinto socio (co 5º chegaría á tonalidade máis clara).
+// cada partido adicional aclara un paso pequeno e fixo, ata un máximo
+// suave propio dun quinto socio.
 export function governmentShade(rank: number, total: number): string {
-  const light = Math.min(28 + Math.max(rank, 0) * 12, 76);
+  const light = Math.min(28 + Math.max(rank, 0) * 6, 52);
   return `hsl(145, 60%, ${light}%)`;
 }
 

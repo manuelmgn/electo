@@ -307,7 +307,7 @@ export default function Editor({
                     {t.government}
                   </span>
                 )}
-                <span className="shrink-0 text-xs tabular-nums" style={{ color: "var(--muted)" }}>
+                <span className="w-12 shrink-0 text-right text-xs tabular-nums" style={{ color: "var(--muted)" }}>
                   {(((viewResults[p.id] ?? 0) / TOTAL_SEATS) * 100).toFixed(1)}%
                 </span>
                 <span className="w-10 shrink-0 text-right text-lg font-extrabold tabular-nums">
@@ -369,16 +369,35 @@ export default function Editor({
         {PARTIES_BY_SEATS.filter((p) => p.runs).map((p, i) => {
           const value = seats[p.id] ?? 0;
           const maxForParty = TOTAL_SEATS - (total - value);
+          const gov = governmentRanks[p.id];
+          const shade = gov ? governmentShade(gov.rank, gov.total) : "";
           return (
             <div
               key={p.id}
               className="anim-fade-up flex items-center gap-2.5 px-3 py-2"
-              style={{ animationDelay: `${40 + i * 20}ms`, borderColor: "var(--border)" }}
+              style={{
+                animationDelay: `${40 + i * 20}ms`,
+                borderColor: "var(--border)",
+                background: gov
+                  ? `color-mix(in srgb, ${shade} 20%, transparent)`
+                  : undefined,
+              }}
             >
               <PartyLogo party={p} />
               <span className="min-w-0 flex-1 truncate text-xs font-medium leading-tight">
                 {p.name}
               </span>
+              {value > 0 && (
+                <input
+                  type="checkbox"
+                  checked={!!gov}
+                  onChange={() => toggleGovern(p.id)}
+                  aria-label={t.governsAria}
+                  title={t.governsAria}
+                  className="h-4 w-4 shrink-0 cursor-pointer"
+                  style={{ accentColor: shade || "var(--accent)" }}
+                />
+              )}
               <div className="flex shrink-0 items-center gap-1">
                 <button
                   onClick={() => setParty(p.id, value - 1)}

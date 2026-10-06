@@ -6,6 +6,7 @@ import {
   MAJORITY_SEATS,
   axisValue,
   textOn,
+  governmentShade,
 } from "@/lib/parties";
 
 describe("parties", () => {
@@ -39,5 +40,21 @@ describe("parties", () => {
 
   it("maioría absoluta = metade máis un", () => {
     expect(MAJORITY_SEATS).toBe(TOTAL_SEATS / 2 + 1);
+  });
+
+  it("governmentShade asigna tonalidades de verde distintas por rango", () => {
+    const first = governmentShade(0, 2);
+    const second = governmentShade(1, 2);
+    expect(first).toMatch(/^hsl\(145, 60%, \d+%\)$/);
+    expect(second).not.toBe(first);
+  });
+
+  it("governmentShade aclara a un paso fixo e limita a claridade", () => {
+    // Con 2 socios o segundo só aclara un paso suave.
+    expect(governmentShade(1, 2)).toBe("hsl(145, 60%, 34%)");
+    expect(governmentShade(0, 5)).toBe("hsl(145, 60%, 28%)");
+    expect(governmentShade(4, 5)).toBe("hsl(145, 60%, 52%)");
+    // Máis aló do quinto socio non aclara máis.
+    expect(governmentShade(8, 9)).toBe(governmentShade(4, 5));
   });
 });
