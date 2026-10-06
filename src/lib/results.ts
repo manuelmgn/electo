@@ -28,7 +28,7 @@ export type ElectionGovernment = Record<string, Record<string, boolean>>;
 
 export const ELECTION_GOVERNMENT: ElectionGovernment = {
   "2023": { psoe: true, s: true },
-  "2019 I": { psoe: true },
+  "2019 I": {  },
   "2019 II": { psoe: true, podemos: true },
   "2016": { pp: true },
 };

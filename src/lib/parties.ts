@@ -108,10 +108,10 @@ export function allyShade(): string {
 // amarelento, amarelo, laranxa) ata o vermello moi por debaixo.
 export function governmentSumColor(sum: number): string {
   if (sum >= MAJORITY_SEATS) return "#16a34a";
-  if (sum >= 170) return "#65a30d";
-  if (sum >= 150) return "#84cc16";
-  if (sum >= 130) return "#ca8a04";
-  if (sum >= 110) return "#ea580c";
+  if (sum >= 170) return "#94a30d";
+  if (sum >= 160) return "#d2d616";
+  if (sum >= 145) return "#ca8a04";
+  if (sum >= 130) return "#ea580c";
   return "#dc2626";
 }
 
