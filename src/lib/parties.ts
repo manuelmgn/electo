@@ -71,6 +71,7 @@ export const PARTIES: Party[] = [
   { id: "gb",      name: "Geroa Bai",                                        order: 8, short: "GB",    color: "#D43527", logo: "gb.png",    axis: 0, runs: false, seats: 0,   emoji: "🍒" },
   { id: "upl",     name: "Unión del Pueblo Leonés",                          order: 8, short: "UPL",   color: "#B71966", logo: "upl.png",    axis: 0, runs: true, seats: 0,   emoji: "🦁" },
   { id: "salf",    name: "Se Acabó La Fiesta",                               order: 8, short: "SALF",  color: "#785B46", logo: "salf.png",    axis: 0, runs: true, seats: 0,   emoji: "🐿️" },
+  { id: "cpm",    name: "Coalición por Melilla",                             order: 8, short: "CPM",  color: "#247F1E", logo: "cpm.png",    axis: -1, runs: true, seats: 0,   emoji: "🤝" },
   { id: "vv",      name: "Varios",                                           order: 9, short: "VV",    color: "#6e6e6e", logo: "",     axis: 0, runs: true, seats: 0,   emoji: "⚪" },
 ];
 
