@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, textOn } from "@/lib/parties";
+import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS } from "@/lib/parties";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
 import Hemicycle from "./Hemicycle";
+import PartyLogo from "./PartyLogo";
 
 type Seats = Record<string, number>;
 
@@ -246,12 +247,7 @@ export default function Editor({
               className="anim-fade-up flex items-center gap-2.5 px-3 py-2"
               style={{ animationDelay: `${40 + i * 20}ms`, borderColor: "var(--border)" }}
             >
-              <span
-                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[9px] font-extrabold"
-                style={{ background: p.color, color: textOn(p.color) }}
-              >
-                {p.short}
-              </span>
+              <PartyLogo party={p} />
               <span className="min-w-0 flex-1 truncate text-xs font-medium leading-tight">
                 {p.name}
               </span>

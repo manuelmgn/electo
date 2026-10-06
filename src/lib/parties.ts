@@ -8,8 +8,8 @@
 // - short:   siglas que se amosan na interface.
 // - color:   cor en hexadecimal (3 ou 6 díxitos).
 // - logo:    nome do ficheiro do logo dentro de /public/logos/
-//            (de momento non se cargan; cando subas os logos a
-//            esa carpeta, o nome xa estará correcto).
+//            (se o ficheiro non existe, móstrase o chip de cor
+//            coas siglas no seu lugar).
 // - seats:   escaños que o partido ten actualmente (ou tiña nas
 //            últimas eleccións). Só se usa para ORDENAR a lista
 //            de partidos no editor principal (de maior a menor).
@@ -35,9 +35,9 @@ export const TOTAL_SEATS = 350;
 
 export const PARTIES: Party[] = [
   { id: "pp",      name: "Partido Popular",                                  short: "PP",    color: "#0B5FA5", logo: "pp.png",      seats: 137, axis: 2 },
-  { id: "psoe",    name: "Partido Socialista Obrero Español",                short: "PSOE",  color: "#E30613", logo: "psoe.png",    seats: 121, axis: -2 },
+  { id: "psoe",    name: "Partido Socialista Obrero Español",                short: "PSOE",  color: "#E30613", logo: "psoe.png",    seats: 121, axis: -1 },
   { id: "vox",     name: "Vox",                                              short: "Vox",   color: "#5AC035", logo: "vox.png",     seats: 33,  axis: 3 },
-  { id: "fe",      name: "Frente Amplio",                                    short: "FE",    color: "#EC407A", logo: "fa.png",      seats: 27,   axis: -3 },
+  { id: "fe",      name: "Frente Amplio",                                    short: "FE",    color: "#EC407A", logo: "fa.png",      seats: 27,   axis: -2 },
   { id: "jxc",     name: "Junts per Catalunya",                              short: "JxC",   color: "#00C1B1", logo: "jxc.png",     seats: 7,   axis: 1 },
   { id: "erc",     name: "Esquerra Republicana de Catalunya",                short: "ERC",   color: "#F9B233", logo: "erc.png",     seats: 7,   axis: -1 },
   { id: "ehb",     name: "EH Bildu",                                         short: "EHB",   color: "#0BCFB5", logo: "ehb.jpg",     seats: 6,   axis: -2 },
@@ -48,7 +48,7 @@ export const PARTIES: Party[] = [
   { id: "cc",      name: "Coalición Canaria",                                short: "CC",    color: "#FFCE00", logo: "cc.png",      seats: 1,   axis: 0 },
   { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     short: "PACMA", color: "#00FF7F", logo: "pacma.jpg",   seats: 0,   axis: 0 },
   { id: "nc",      name: "Nueva Canarias",                                   short: "NC",    color: "#86BD42", logo: "nc.png",      seats: 0,   axis: 0 },
-  { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",      seats: 0,   axis: -3 },
+  { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",      seats: 0,   axis:  },
   { id: "cup",     name: "Candidaturas d'Unitat Popular",                    short: "CUP",   color: "#FFEE00", logo: "cup.png",     seats: 0,   axis: -3 },
   { id: "vv",      name: "Varios",                                           short: "VV",    color: "#6e6e6e", logo: "ac.png",      seats: 0,   axis: 0 },
 ];
