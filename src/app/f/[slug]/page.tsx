@@ -16,7 +16,7 @@ export function generateMetadata({ params }: Params): Promise<Metadata> {
     return {
       title,
       description,
-      openGraph: { title, description, images: ["/electo-social.png"] },
+      openGraph: { title, description },
       twitter: { card: "summary", title, description },
     };
   });
