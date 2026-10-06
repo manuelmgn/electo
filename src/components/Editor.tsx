@@ -3,8 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, allyShade, governmentShade, governmentSumColor } from "@/lib/parties";
-import { ELECTION_RESULTS, ELECTION_GOVERNMENT, ELECTION_ALLIES } from "@/lib/results";
-import { FORECASTS } from "@/lib/forecasts";
+import { ELECTION_VIEWS, FORECAST_VIEWS } from "@/lib/views";
 import { encodeShare, decodeShare, buildShareLines } from "@/lib/share";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
@@ -101,8 +100,6 @@ export default function Editor({
   const [shareNotice, setShareNotice] = useState(false); // aviso de ligazón copiada
   const [local, setLocal] = useState<LocalPrediction[]>([]);
   const [localId, setLocalId] = useState<number | null>(null);
-  const [view, setView] = useState<string | null>(null); // elemento en vista só lectura
-  const [viewType, setViewType] = useState<"election" | "forecast">("election");
   const toastTimer = useRef<number | null>(null);
   const shareTimer = useRef<number | null>(null);
 
@@ -138,101 +135,22 @@ export default function Editor({
   const exact = total === TOTAL_SEATS;
   const diff = TOTAL_SEATS - total;
 
-  // Eleccións con datos para a vista de resultados (máis recente primeiro)
+  // Eleccións e pronósticos con vista de só lectura propia (máis
+  // recente primeiro). As vistas viven nas rutas /r/[slug] e /f/[slug].
   const elections = useMemo(
     () =>
-      Object.keys(ELECTION_RESULTS)
-        .filter((k) => Object.keys(ELECTION_RESULTS[k]).length > 0)
-        .sort()
-        .reverse(),
+      Object.values(ELECTION_VIEWS)
+        .sort((a, b) => b.key.localeCompare(a.key))
+        .map((v) => ({ slug: v.slug, key: v.key })),
     []
   );
-  const viewResults = view
-    ? (viewType === "forecast" ? FORECASTS[view]?.seats : ELECTION_RESULTS[view]) ??
-      null
-    : null;
-
-  // Pronósticos publicados con datos para a vista de só lectura
-  // (máis recente primeiro). Os con published: false quedan no
-  // código pero non se amosan.
   const forecasts = useMemo(
     () =>
-      Object.keys(FORECASTS)
-        .filter(
-          (k) =>
-            FORECASTS[k].published && Object.keys(FORECASTS[k].seats).length > 0
-        )
-        .sort()
-        .reverse(),
+      Object.values(FORECAST_VIEWS)
+        .sort((a, b) => b.key.localeCompare(a.key))
+        .map((v) => ({ slug: v.slug, key: v.key })),
     []
   );
-
-  // Partidos con escaños na elección vista, ordenados por escaños
-  const viewParties = useMemo(() => {
-    if (!viewResults) return [];
-    return PARTIES.map((p, i) => ({ p, i }))
-      .filter(({ p }) => (viewResults[p.id] ?? 0) > 0)
-      .sort(
-        (a, b) =>
-          (viewResults[b.p.id] ?? 0) - (viewResults[a.p.id] ?? 0) || a.i - b.i
-      )
-      .map(({ p }) => p);
-  }, [viewResults]);
-
-  // Mapas de goberno e aliados do elemento en vista (elección ou
-  // pronóstico, segundo viewType) para a GovBar.
-  const viewGovs = useMemo(
-    () =>
-      view
-        ? (viewType === "forecast"
-            ? FORECASTS[view]?.government
-            : ELECTION_GOVERNMENT[view]) ?? {}
-        : {},
-    [view, viewType]
-  );
-  const viewAllies = useMemo(
-    () =>
-      view
-        ? (viewType === "forecast"
-            ? FORECASTS[view]?.allies
-            : ELECTION_ALLIES[view]) ?? {}
-        : {},
-    [view, viewType]
-  );
-
-  // Partidos marcados como gobernantes na elección vista, ordenados por
-  // escaños (o maior leva a tonalidade de verde máis intensa).
-  const viewGovRanks = useMemo(() => {
-    if (!viewResults) return {};
-    const ids = PARTIES.filter((p) => viewGovs[p.id])
-      .sort((a, b) => (viewResults[b.id] ?? 0) - (viewResults[a.id] ?? 0))
-      .map((p) => p.id);
-    return Object.fromEntries(
-      ids.map((id, i) => [id, { rank: i, total: ids.length }])
-    );
-  }, [viewGovs, viewResults]);
-
-  // Suma de escaños de goberno + aliados na elección vista.
-  const viewGovTotal = useMemo(
-    () =>
-      PARTIES.reduce(
-        (acc, p) =>
-          acc +
-          (viewGovs[p.id] || viewAllies[p.id] ? (viewResults?.[p.id] ?? 0) : 0),
-        0
-      ),
-    [viewGovs, viewAllies, viewResults]
-  );
-
-  // Cor do partido gobernante con máis escaños da elección vista, para
-  // a leyenda da barra (igual que topGovColor no editor).
-  const viewTopGovColor = useMemo(() => {
-    if (!viewResults) return governmentShade(0, 1);
-    const top = PARTIES.filter(
-      (p) => viewGovs[p.id] && (viewResults[p.id] ?? 0) > 0
-    ).sort((a, b) => (viewResults[b.id] ?? 0) - (viewResults[a.id] ?? 0))[0];
-    return top?.color ?? governmentShade(0, 1);
-  }, [viewGovs, viewResults]);
 
   // Partidos marcados como gobernantes no editor, ordenados polos
   // escaños actuais (o maior leva a tonalidade de verde máis intensa).
