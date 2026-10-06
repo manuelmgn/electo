@@ -70,7 +70,7 @@ export const PARTIES: Party[] = [
   { id: "prc",     name: "Partido Regionalista Cántabro",                    order: 7, short: "PRC",   color: "#BFCD16", logo: "prc.png",    axis: 0, runs: true, seats: 0,   emoji: "🍐" },
   { id: "gb",      name: "Geroa Bai",                                        order: 8, short: "GB",   color: "#D43527", logo: "gb.png",    axis: 0, runs: false, seats: 0,   emoji: "🍒" },
   { id: "upl",     name: "Unión del Pueblo Leonés",                          order: 8, short: "UPL",   color: "#B71966", logo: "upl.png",    axis: 0, runs: false, seats: 0,   emoji: "🍒" },
-  { id: "vv",      name: "Varios",                                           order: 9, short: "VV",    color: "#6e6e6e", logo: "vv.png",     axis: 0, runs: true, seats: 0,   emoji: "⚪" },
+  { id: "vv",      name: "Varios",                                           order: 9, short: "VV",    color: "#6e6e6e", logo: "",     axis: 0, runs: true, seats: 0,   emoji: "⚪" },
 ];
 
 // Partidos ordenados polos escaños por defecto (campo seats,
