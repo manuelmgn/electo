@@ -68,10 +68,10 @@ describe("buildShareLines", () => {
   it("lista os 4 máis votados cos seus emojis e escaños", () => {
     const seats = { pp: 130, psoe: 120, vox: 30, fa: 25, pnv: 5 };
     expect(buildShareLines(seats, {}, {}, parties)).toEqual([
-      "- 💧 PP - 130",
-      "- 🌹 PSOE - 120",
-      "- 🥦 Vox - 30",
-      "- 🌸 FA - 25",
+      "💧 PP   - 130",
+      "🌹 PSOE - 120",
+      "🥦 Vox  - 30 ",
+      "🌸 FA   - 25 ",
     ]);
   });
 
@@ -80,10 +80,10 @@ describe("buildShareLines", () => {
     expect(
       buildShareLines(seats, { pp: true, vox: true }, { psoe: true }, parties)
     ).toEqual([
-      "- 💧 PP - 130 - 🏛️",
-      "- 🌹 PSOE - 120 - 🤝",
-      "- 🥦 Vox - 30 - 🏛️",
-      "- 🌸 FA - 25",
+      "💧 PP   - 130 - 🏛️",
+      "🌹 PSOE - 120 - 🤝",
+      "🥦 Vox  - 30  - 🏛️",
+      "🌸 FA   - 25 ",
     ]);
   });
 
@@ -91,15 +91,15 @@ describe("buildShareLines", () => {
     const seats = { pp: 130, psoe: 120, vox: 30, fa: 25, pnv: 5 };
     const govLines = buildShareLines(seats, { pnv: true }, {}, parties);
     expect(govLines).toHaveLength(5);
-    expect(govLines[4]).toBe("- 🍇 PNV - 5 - 🏛️");
+    expect(govLines[4]).toBe("🍇 PNV  - 5   - 🏛️");
     const allyLines = buildShareLines(seats, {}, { pnv: true }, parties);
     expect(allyLines).toHaveLength(5);
-    expect(allyLines[4]).toBe("- 🍇 PNV - 5 - 🤝");
+    expect(allyLines[4]).toBe("🍇 PNV  - 5   - 🤝");
   });
 
   it("ignora partidos con 0 escaños", () => {
     expect(buildShareLines({ pp: 0, psoe: 121 }, {}, {}, parties)).toEqual([
-      "- 🌹 PSOE - 121",
+      "🌹 PSOE - 121",
     ]);
   });
 });

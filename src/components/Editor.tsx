@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, allyShade, governmentShade, governmentSumColor } from "@/lib/parties";
-import { ELECTION_RESULTS, ELECTION_GOVERNMENT } from "@/lib/results";
+import { ELECTION_RESULTS, ELECTION_GOVERNMENT, ELECTION_ALLIES } from "@/lib/results";
 import { encodeShare, decodeShare, buildShareLines } from "@/lib/share";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
-import GovBar from "./GovBar";
+import GovBar, { ALLY_HATCH } from "./GovBar";
 import Hemicycle from "./Hemicycle";
 import PartyLogo from "./PartyLogo";
 
@@ -171,6 +171,28 @@ export default function Editor({
     );
   }, [view, viewResults]);
 
+  // Mapas de goberno e aliados da elección vista (para a GovBar).
+  const viewGovs = useMemo(
+    () => (view ? ELECTION_GOVERNMENT[view] ?? {} : {}),
+    [view]
+  );
+  const viewAllies = useMemo(
+    () => (view ? ELECTION_ALLIES[view] ?? {} : {}),
+    [view]
+  );
+
+  // Suma de escaños de goberno + aliados na elección vista.
+  const viewGovTotal = useMemo(
+    () =>
+      PARTIES.reduce(
+        (acc, p) =>
+          acc +
+          (viewGovs[p.id] || viewAllies[p.id] ? (viewResults?.[p.id] ?? 0) : 0),
+        0
+      ),
+    [viewGovs, viewAllies, viewResults]
+  );
+
   // Partidos marcados como gobernantes no editor, ordenados polos
   // escaños actuais (o maior leva a tonalidade de verde máis intensa).
   const governmentRanks = useMemo(() => {
@@ -180,6 +202,14 @@ export default function Editor({
     return Object.fromEntries(
       ids.map((id, i) => [id, { rank: i, total: ids.length }])
     );
+  }, [governs, seats]);
+
+  // Cor do partido gobernante con máis escaños: mostra na leyenda da
+  // barra o "cor de partido" (goberno vai sen trama; aliados, con ela).
+  const topGovColor = useMemo(() => {
+    const top = PARTIES.filter((p) => governs[p.id] && (seats[p.id] ?? 0) > 0)
+      .sort((a, b) => (seats[b.id] ?? 0) - (seats[a.id] ?? 0))[0];
+    return top?.color ?? governmentShade(0, 1);
   }, [governs, seats]);
 
   // Marca un partido como goberno ou aliado (ou desmárcao co mesmo
@@ -332,6 +362,23 @@ export default function Editor({
             </div>
             <Hemicycle seats={viewResults} />
             <SeatBar seats={viewResults} height="h-3.5" majorityLabel={t.majorityInfo} />
+
+            {/* Suma de goberno + aliados daquela lexislatura, coa liña
+                da maioría. Só se amosa se hai algún partido marcado. */}
+            {viewGovTotal > 0 && (
+              <div className="space-y-2">
+                <span
+                  className="inline-flex rounded-full px-3 py-1 text-xs font-bold"
+                  style={{
+                    background: `color-mix(in srgb, ${governmentSumColor(viewGovTotal)} 15%, transparent)`,
+                    color: governmentSumColor(viewGovTotal),
+                  }}
+                >
+                  {t.government}: {viewGovTotal}
+                </span>
+                <GovBar seats={viewResults} governs={viewGovs} allies={viewAllies} />
+              </div>
+            )}
           </section>
 
           <section
@@ -340,7 +387,9 @@ export default function Editor({
           >
             {viewParties.map((p, i) => {
               const gov = viewGovRanks[p.id];
+              const ally = viewAllies[p.id];
               const shade = gov ? governmentShade(gov.rank, gov.total) : "";
+              const badgeColor = gov ? shade : allyShade();
               return (
               <div
                 key={p.id}
@@ -348,8 +397,8 @@ export default function Editor({
                 style={{
                   animationDelay: `${40 + i * 25}ms`,
                   borderColor: "var(--border)",
-                  background: gov
-                    ? `color-mix(in srgb, ${shade} 20%, transparent)`
+                  background: gov || ally
+                    ? `color-mix(in srgb, ${badgeColor} 20%, transparent)`
                     : undefined,
                 }}
               >
@@ -360,12 +409,12 @@ export default function Editor({
                 {/* Columna fixa para a etiqueta: resérvase o mesmo ancho
                     en todas as filas para que quede alineada. */}
                 <span className="flex w-16 shrink-0 justify-end">
-                  {gov && (
+                  {(gov || ally) && (
                     <span
                       className="w-full whitespace-nowrap rounded-full border px-1.5 py-px text-center text-[10px] font-bold uppercase leading-tight"
-                      style={{ borderColor: shade, color: shade }}
+                      style={{ borderColor: badgeColor, color: badgeColor }}
                     >
-                      {t.government}
+                      {gov ? t.government : t.ally}
                     </span>
                   )}
                 </span>
@@ -450,7 +499,7 @@ export default function Editor({
               <span
                 aria-hidden="true"
                 className="inline-block h-2.5 w-2.5 rounded-sm"
-                style={{ background: governmentShade(0, 1) }}
+                style={{ background: topGovColor }}
               />
               🏛️ {t.government}
             </span>
@@ -458,7 +507,7 @@ export default function Editor({
               <span
                 aria-hidden="true"
                 className="inline-block h-2.5 w-2.5 rounded-sm"
-                style={{ background: allyShade() }}
+                style={{ backgroundColor: topGovColor, backgroundImage: ALLY_HATCH }}
               />
               🤝 {t.ally}
             </span>
@@ -578,13 +627,6 @@ export default function Editor({
       {/* Gardar: o botón principal é o de compartir (vaí primeiro e
           destacado); gardar queda como secundario. */}
       <section className="card space-y-3 p-4">
-        <input
-          className="input"
-          placeholder={t.predictionTitlePlaceholder}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          aria-label={t.predictionTitle}
-        />
         <button
           onClick={share}
           disabled={!exact}
@@ -592,6 +634,13 @@ export default function Editor({
         >
           {t.share}
         </button>
+        <input
+          className="input"
+          placeholder={t.predictionTitlePlaceholder}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          aria-label={t.predictionTitle}
+        />
         {user ? (
           <button
             onClick={saveCloud}
