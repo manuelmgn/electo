@@ -18,13 +18,13 @@ export default async function Home({
   if (cargar && user && dbConfigured()) {
     const id = Number(cargar);
     if (Number.isInteger(id)) {
-      const { rows: preds } =
+      const preds =
         await sql`SELECT id, title FROM predictions WHERE id = ${id} AND user_id = ${user.id}`;
       if (preds.length > 0) {
-        const { rows: seats } =
+        const seatRows =
           await sql`SELECT party_id, seats FROM prediction_seats WHERE prediction_id = ${id}`;
         initialSeats = Object.fromEntries(
-          seats.map((r) => [r.party_id as string, r.seats as number])
+          seatRows.map((r) => [r.party_id as string, r.seats as number])
         );
         editingId = id;
         initialTitle = preds[0].title as string;

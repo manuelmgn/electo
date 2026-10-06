@@ -8,8 +8,8 @@
     "start": "next start"
   },
   "dependencies": {
-    "@vercel/postgres": "^0.10.0",
     "bcryptjs": "^2.4.3",
+    "postgres": "^3.4.5",
     "next": "^15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

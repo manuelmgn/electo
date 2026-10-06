@@ -26,7 +26,7 @@ export async function POST(req: Request) {
 
   try {
     const title = body.title?.trim() || "Predición";
-    const { rows } = await sql`
+    const rows = await sql`
       INSERT INTO predictions (user_id, title)
       VALUES (${user.id}, ${title})
       RETURNING id

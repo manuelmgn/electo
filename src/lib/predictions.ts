@@ -21,9 +21,10 @@ export function validateSeats(raw: unknown): SeatEntry[] | null {
 
 // Inserta todos os asentos nunha soa consulta.
 export async function insertSeats(predictionId: number, entries: SeatEntry[]) {
-  await sql.query(
-    `INSERT INTO prediction_seats (prediction_id, party_id, seats)
-     SELECT $1, unnest($2::text[]), unnest($3::int[])`,
-    [predictionId, entries.map((e) => e.partyId), entries.map((e) => e.seats)]
-  );
+  await sql`
+    INSERT INTO prediction_seats (prediction_id, party_id, seats)
+    SELECT ${predictionId},
+           unnest(${entries.map((e) => e.partyId)}::text[]),
+           unnest(${entries.map((e) => e.seats)}::int[])
+  `;
 }

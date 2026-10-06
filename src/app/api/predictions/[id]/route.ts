@@ -6,7 +6,7 @@ import { validateSeats, insertSeats } from "@/lib/predictions";
 type RouteCtx = { params: Promise<{ id: string }> };
 
 async function ownsPrediction(userId: number, id: number): Promise<boolean> {
-  const { rows } =
+  const rows =
     await sql`SELECT id FROM predictions WHERE id = ${id} AND user_id = ${userId}`;
   return rows.length > 0;
 }

@@ -8,7 +8,8 @@ tema claro/oscuro automático. Optimizada para móbil.
 ## Stack
 
 - **Next.js 15** (App Router, TypeScript)
-- **Vercel Postgres** (`@vercel/postgres`)
+- **Vercel Postgres / Neon** co driver `postgres` (postgres.js, JS puro
+  sen dependencias nativas)
 - **Tailwind CSS 4**
 - Sesións con cookie HTTP-only asinada con HMAC (sen dependencias de auth)
 

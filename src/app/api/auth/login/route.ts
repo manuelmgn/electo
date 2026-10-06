@@ -22,7 +22,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { rows } =
+    const rows =
       await sql`SELECT id, name, email, password_hash FROM users WHERE email = ${email}`;
     const user = rows[0];
     if (!user || !(await bcrypt.compare(password, user.password_hash))) {

@@ -10,7 +10,7 @@ export default async function PredictionsPage() {
   const user = await getSessionUser();
   if (!user) redirect("/login");
 
-  const { rows: preds } = await sql`
+  const preds = await sql`
     SELECT id, title, created_at FROM predictions
     WHERE user_id = ${user.id}
     ORDER BY created_at DESC
@@ -20,11 +20,11 @@ export default async function PredictionsPage() {
   const seatsByPred: Record<number, Record<string, number>> = {};
   if (ids.length > 0) {
     // Unha soa consulta para todos os asentos (evita N+1).
-    const { rows: seats } = await sql.query(
-      "SELECT prediction_id, party_id, seats FROM prediction_seats WHERE prediction_id = ANY($1)",
-      [ids]
-    );
-    for (const row of seats) {
+    const seatRows = await sql`
+      SELECT prediction_id, party_id, seats FROM prediction_seats
+      WHERE prediction_id = ANY(${ids})
+    `;
+    for (const row of seatRows) {
       const pid = row.prediction_id as number;
       (seatsByPred[pid] ??= {})[row.party_id as string] = row.seats as number;
     }

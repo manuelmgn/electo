@@ -61,8 +61,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const userId = parseSession(store.get(SESSION_COOKIE)?.value);
   if (!userId || !dbConfigured()) return null;
   try {
-    const { rows } =
-      await sql`SELECT id, name, email FROM users WHERE id = ${userId}`;
+    const rows = await sql`SELECT id, name, email FROM users WHERE id = ${userId}`;
     return (rows[0] as SessionUser) ?? null;
   } catch {
     return null;
