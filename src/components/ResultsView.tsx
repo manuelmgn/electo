@@ -10,6 +10,7 @@ import {
   governmentSumColor,
 } from "@/lib/parties";
 import { buildShareLines } from "@/lib/share";
+import { ELECTION_VIEWS, FORECAST_VIEWS } from "@/lib/views";
 import { useI18n } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
 import GovBar, { ALLY_HATCH } from "./GovBar";
@@ -217,15 +218,49 @@ export default function ResultsView({
         </button>
       </section>
 
-      {/* Aviso superior: ligazón copiada (desaparece só) */}
+      {/* Volver á edición */}
+      <Link href="/" className="btn btn-ghost block w-full text-center text-base">
+        {t.backToEdit}
+      </Link>
+
+      {/* Resultados de eleccións anteriores */}
+      <section className="space-y-2">
+        <h2 className="px-1 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+          {t.pastResults}
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {Object.values(ELECTION_VIEWS).map((e) => (
+            <Link key={e.slug} href={`/r/${e.slug}`} className="btn btn-ghost !py-1.5 text-sm">
+              {e.key}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Pronósticos precargados */}
+      <section className="space-y-2">
+        <h2 className="px-1 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+          {t.forecasts}
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {Object.values(FORECAST_VIEWS).map((f) => (
+            <Link key={f.slug} href={`/f/${f.slug}`} className="btn btn-ghost !py-1.5 text-sm">
+              {f.key}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* Aviso: ligazón copiada (desaparece só), centrado na ventana visible */}
       {shareNotice && (
-        <div
-          className="anim-toast fixed left-1/2 top-4 z-50 flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-xl"
-          style={{ background: "var(--copied)", color: "var(--bg)" }}
-          role="status"
-        >
-          <span aria-hidden="true">🔗</span>
-          {t.shareCopied}
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="anim-toast mx-4 max-w-[calc(100vw-2rem)] rounded-2xl px-7 py-3 text-center text-sm font-semibold shadow-xl"
+            style={{ background: "var(--copied)", color: "#ffffff" }}
+            role="status"
+          >
+            {t.shareCopied}
+          </div>
         </div>
       )}
     </div>
