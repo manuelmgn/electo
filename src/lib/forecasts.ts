@@ -50,7 +50,7 @@ export const FORECASTS: Record<string, Forecast> = {
       jxc: 2,
       bng: 2,
     },
-    government: {  },
+    government: { pp: true, vox: true },
     allies: {  },
   },
 };
