@@ -299,14 +299,18 @@ export default function Editor({
                 <span className="min-w-0 flex-1 truncate text-xs font-medium leading-tight">
                   {p.name}
                 </span>
-                {gov && (
-                  <span
-                    className="shrink-0 rounded-full border px-1.5 py-px text-[10px] font-bold uppercase leading-tight"
-                    style={{ borderColor: shade, color: shade }}
-                  >
-                    {t.government}
-                  </span>
-                )}
+                {/* Columna fixa para a etiqueta: resérvase o mesmo ancho
+                    en todas as filas para que quede alineada. */}
+                <span className="flex w-14 shrink-0 justify-end">
+                  {gov && (
+                    <span
+                      className="w-full rounded-full border px-1.5 py-px text-center text-[10px] font-bold uppercase leading-tight"
+                      style={{ borderColor: shade, color: shade }}
+                    >
+                      {t.government}
+                    </span>
+                  )}
+                </span>
                 <span className="w-12 shrink-0 text-right text-xs tabular-nums" style={{ color: "var(--muted)" }}>
                   {(((viewResults[p.id] ?? 0) / TOTAL_SEATS) * 100).toFixed(1)}%
                 </span>

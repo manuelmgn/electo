@@ -65,7 +65,7 @@ export const PARTIES: Party[] = [
   { id: "ac",      name: "Aliança Catalana",                                 order: 8, short: "AC",    color: "#114B80", logo: "ac.png",     axis: 2, runs: false, seats: 0,  emoji: "🔵" },
   { id: "cs",      name: "Ciudadanos",                                       order: 3, short: "CS",    color: "#EF5E2C", logo: "cs.jpeg",    axis: 2, runs: false, seats: 0,  emoji: "🍊" },
   { id: "te",      name: "Teruel Existe",                                    order: 8, short: "TE",    color: "#027F51", logo: "te.png",     axis: 0, runs: false, seats: 0,  emoji: "🍗" },
-  { id: "com",     name: "Compromís",                                        order: 6, short: "C",     color: "#DB6E24", logo: "com.jpeg",   axis: -2, runs: false, seats: 0,  emoji: "🟠" },
+  { id: "com",     name: "Compromís",                                        order: 6, short: "C.",     color: "#DB6E24", logo: "com.jpeg",   axis: -2, runs: true, seats: 0,  emoji: "🟠" },
   { id: "mp",      name: "Más País",                                         order: 6, short: "MP",    color: "#6AD9C4", logo: "mp.png",     axis: -1, runs: false, seats: 0,  emoji: "🌽" },
   { id: "prc",     name: "Partido Regionalista Cántabro",                    order: 7, short: "PRC",   color: "#BFCD16", logo: "prc.png",    axis: 0, runs: true, seats: 0,   emoji: "🍐" },
   { id: "gb",      name: "Geroa Bai",                                        order: 8, short: "GB",   color: "#D43527", logo: "gb.png",    axis: 0, runs: false, seats: 0,   emoji: "🍒" },
