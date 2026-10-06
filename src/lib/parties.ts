@@ -5,7 +5,7 @@
 // - id:      identificador único e estable (NON o cambies se xa
 //            hai predicicións gardadas na base de datos).
 // - name:    nome oficial do partido.
-// - short:   siglas que se amosan na interface.
+// - order: 1, short:   siglas que se amosan na interface.
 // - color:   cor en hexadecimal (3 ou 6 díxitos).
 // - logo:    nome do ficheiro do logo dentro de /public/logos/
 //            (se o ficheiro non existe, móstrase o chip de cor
@@ -26,6 +26,7 @@
 export type Party = {
   id: string;
   name: string;
+  order: number;
   short: string;
   color: string;
   logo: string;
@@ -43,33 +44,33 @@ export const TOTAL_SEATS = 350;
 export const MAJORITY_SEATS = TOTAL_SEATS / 2 + 1;
 
 export const PARTIES: Party[] = [
-  { id: "pp",      name: "Partido Popular",                                  short: "PP",    color: "#0B5FA5", logo: "pp.png",     axis: 2, runs: true, seats: 137, emoji: "💧" },
-  { id: "psoe",    name: "Partido Socialista Obrero Español",                short: "PSOE",  color: "#E30613", logo: "psoe.png",   axis: -1, runs: true, seats: 121, emoji: "🌹" },
-  { id: "vox",     name: "Vox",                                              short: "Vox",   color: "#5AC035", logo: "vox.png",    axis: 3, runs: true, seats: 33,  emoji: "🥦" },
-  { id: "fe",      name: "Frente Amplio",                                    short: "FE",    color: "#EC407A", logo: "fa.png",     axis: -2, runs: true, seats: 27,  emoji: "" },
-  { id: "jxc",     name: "Junts per Catalunya",                              short: "JxC",   color: "#00C1B1", logo: "jxc.png",    axis: 1, runs: true, seats: 7,   emoji: "🥑" },
-  { id: "erc",     name: "Esquerra Republicana de Catalunya",                short: "ERC",   color: "#F9B233", logo: "erc.jpg",    axis: -2, runs: true, seats: 7,   emoji: "🍋" },
-  { id: "ehb",     name: "EH Bildu",                                         short: "EHB",   color: "#0BCFB5", logo: "ehb.jpg",    axis: -2, runs: true, seats: 6,   emoji: "🍃" },
-  { id: "pnv",     name: "Partido Nacionalista Vasco",                       short: "PNV",   color: "#0E6E4E", logo: "pnv.png",    axis: 1, runs: true, seats: 5,   emoji: "🍇" },
-  { id: "podemos", name: "Podemos",                                          short: "P.",    color: "#7D3C98", logo: "podemos.png",axis: -3, runs: true, seats: 4,   emoji: "🍆" },
-  { id: "bng",     name: "Bloque Nacionalista Galego",                       short: "BNG",   color: "#7FC4E8", logo: "bng.png",    axis: -3, runs: true, seats: 1,   emoji: "🧀" },
-  { id: "upn",     name: "Unión del Pueblo Navarro",                         short: "UPN",   color: "#3A5FBD", logo: "upn.jpg",    axis: 2, runs: true, seats: 1,   emoji: "🥔" },
-  { id: "cc",      name: "Coalición Canaria",                                short: "CC",    color: "#FFCE00", logo: "cc.png",     axis: 1, runs: true, seats: 1,   emoji: "🍌" },
-  { id: "nc",      name: "Nueva Canarias",                                   short: "NC",    color: "#86BD42", logo: "nc.png",     axis: -1, runs: true, seats: 0,   emoji: "🟢" },
-  { id: "cup",     name: "Candidaturas d'Unitat Popular",                    short: "CUP",   color: "#FFEE00", logo: "cup.jpeg",   axis: -3, runs: true, seats: 0,   emoji: "🍍" },
-  { id: "aa",      name: "Adelante Andalucía",                               short: "AA",    color: "#24C87E", logo: "aa.jpeg",    axis: -3, runs: true, seats: 0,   emoji: "🥗" },
-  { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     short: "PACMA", color: "#00FF7F", logo: "pacma.jpg",  axis: 0, runs: true, seats: 0,   emoji: "🕊️" },
-  { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",     axis: 2, runs: true, seats: 0,   emoji: "⚫" },
-  { id: "s",       name: "Sumar",                                            short: "S",     color: "#EC407A", logo: "s.png",      axis: -2, runs: false, seats: 0,  emoji: "🟣" },
-  { id: "ac",      name: "Aliança Catalana",                                 short: "AC",    color: "#114B80", logo: "ac.png",     axis: 2, runs: false, seats: 0,  emoji: "🔵" },
-  { id: "cs",      name: "Ciudadanos",                                       short: "CS",    color: "#EF5E2C", logo: "cs.jpeg",    axis: 2, runs: false, seats: 0,  emoji: "🍊" },
-  { id: "te",      name: "Teruel Existe",                                    short: "TE",    color: "#027F51", logo: "te.png",     axis: 0, runs: false, seats: 0,  emoji: "🍗" },
-  { id: "com",     name: "Compromís",                                        short: "C",     color: "#DB6E24", logo: "com.jpeg",   axis: -2, runs: false, seats: 0,  emoji: "🟠" },
-  { id: "mp",      name: "Más País",                                         short: "MP",    color: "#6AD9C4", logo: "mp.png",     axis: -1, runs: false, seats: 0,  emoji: "🌽" },
-  { id: "prc",     name: "Partido Regionalista Cántabro",                    short: "PRC",   color: "#BFCD16", logo: "prc.png",    axis: 0, runs: true, seats: 0,   emoji: "🍐" },
-  { id: "gb",     name: "Geroa Bai",                                         short: "GB",   color: "#D43527", logo: "gb.png",    axis: 0, runs: false, seats: 0,   emoji: "🍒" },
-  { id: "upl",     name: "Unión del Pueblo Leonés",                         short: "UPL",   color: "#B71966", logo: "upl.png",    axis: 0, runs: false, seats: 0,   emoji: "🍒" },
-  { id: "vv",      name: "Varios",                                           short: "VV",    color: "#6e6e6e", logo: "vv.png",     axis: 0, runs: true, seats: 0,   emoji: "⚪" },
+  { id: "pp",      name: "Partido Popular",                                  order: 1, short: "PP",    color: "#0B5FA5", logo: "pp.png",     axis: 2, runs: true, seats: 137, emoji: "💧" },
+  { id: "psoe",    name: "Partido Socialista Obrero Español",                order: 2, short: "PSOE",  color: "#E30613", logo: "psoe.png",   axis: -1, runs: true, seats: 121, emoji: "🌹" },
+  { id: "vox",     name: "Vox",                                              order: 3, short: "Vox",   color: "#5AC035", logo: "vox.png",    axis: 3, runs: true, seats: 33,  emoji: "🥦" },
+  { id: "fa",      name: "Frente Amplio",                                    order: 4, short: "FA",    color: "#EC407A", logo: "fa.png",     axis: -2, runs: true, seats: 27,  emoji: "" },
+  { id: "jxc",     name: "Junts per Catalunya",                              order: 5, short: "JxC",   color: "#00C1B1", logo: "jxc.png",    axis: 1, runs: true, seats: 7,   emoji: "🥑" },
+  { id: "erc",     name: "Esquerra Republicana de Catalunya",                order: 5, short: "ERC",   color: "#F9B233", logo: "erc.jpg",    axis: -2, runs: true, seats: 7,   emoji: "🍋" },
+  { id: "ehb",     name: "EH Bildu",                                         order: 5, short: "EHB",   color: "#0BCFB5", logo: "ehb.jpg",    axis: -2, runs: true, seats: 6,   emoji: "🍃" },
+  { id: "pnv",     name: "Partido Nacionalista Vasco",                       order: 5, short: "PNV",   color: "#0E6E4E", logo: "pnv.png",    axis: 1, runs: true, seats: 5,   emoji: "🍇" },
+  { id: "podemos", name: "Podemos",                                          order: 4, short: "P.",    color: "#7D3C98", logo: "podemos.png",axis: -3, runs: true, seats: 4,   emoji: "🍆" },
+  { id: "bng",     name: "Bloque Nacionalista Galego",                       order: 6, short: "BNG",   color: "#7FC4E8", logo: "bng.png",    axis: -3, runs: true, seats: 1,   emoji: "🧀" },
+  { id: "upn",     name: "Unión del Pueblo Navarro",                         order: 6, short: "UPN",   color: "#3A5FBD", logo: "upn.jpg",    axis: 2, runs: true, seats: 1,   emoji: "🥔" },
+  { id: "cc",      name: "Coalición Canaria",                                order: 6, short: "CC",    color: "#FFCE00", logo: "cc.png",     axis: 1, runs: true, seats: 1,   emoji: "🍌" },
+  { id: "nc",      name: "Nueva Canarias",                                   order: 6, short: "NC",    color: "#86BD42", logo: "nc.png",     axis: -1, runs: true, seats: 0,   emoji: "🟢" },
+  { id: "cup",     name: "Candidaturas d'Unitat Popular",                    order: 7, short: "CUP",   color: "#FFEE00", logo: "cup.jpeg",   axis: -3, runs: true, seats: 0,   emoji: "🍍" },
+  { id: "aa",      name: "Adelante Andalucía",                               order: 8, short: "AA",    color: "#24C87E", logo: "aa.jpeg",    axis: -3, runs: true, seats: 0,   emoji: "🥗" },
+  { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     order: 8, short: "PACMA", color: "#00FF7F", logo: "pacma.jpg",  axis: 0, runs: true, seats: 0,   emoji: "🕊️" },
+  { id: "fo",      name: "Frente Obrero",                                    order: 8, short: "FO",    color: "#111111", logo: "fo.png",     axis: 2, runs: true, seats: 0,   emoji: "⚫" },
+  { id: "s",       name: "Sumar",                                            order: 3, short: "S",     color: "#EC407A", logo: "s.png",      axis: -2, runs: false, seats: 0,  emoji: "🟣" },
+  { id: "ac",      name: "Aliança Catalana",                                 order: 8, short: "AC",    color: "#114B80", logo: "ac.png",     axis: 2, runs: false, seats: 0,  emoji: "🔵" },
+  { id: "cs",      name: "Ciudadanos",                                       order: 3, short: "CS",    color: "#EF5E2C", logo: "cs.jpeg",    axis: 2, runs: false, seats: 0,  emoji: "🍊" },
+  { id: "te",      name: "Teruel Existe",                                    order: 8, short: "TE",    color: "#027F51", logo: "te.png",     axis: 0, runs: false, seats: 0,  emoji: "🍗" },
+  { id: "com",     name: "Compromís",                                        order: 6, short: "C",     color: "#DB6E24", logo: "com.jpeg",   axis: -2, runs: false, seats: 0,  emoji: "🟠" },
+  { id: "mp",      name: "Más País",                                         order: 6, short: "MP",    color: "#6AD9C4", logo: "mp.png",     axis: -1, runs: false, seats: 0,  emoji: "🌽" },
+  { id: "prc",     name: "Partido Regionalista Cántabro",                    order: 7, short: "PRC",   color: "#BFCD16", logo: "prc.png",    axis: 0, runs: true, seats: 0,   emoji: "🍐" },
+  { id: "gb",      name: "Geroa Bai",                                        order: 8, short: "GB",   color: "#D43527", logo: "gb.png",    axis: 0, runs: false, seats: 0,   emoji: "🍒" },
+  { id: "upl",     name: "Unión del Pueblo Leonés",                          order: 8, short: "UPL",   color: "#B71966", logo: "upl.png",    axis: 0, runs: false, seats: 0,   emoji: "🍒" },
+  { id: "vv",      name: "Varios",                                           order: 9, short: "VV",    color: "#6e6e6e", logo: "vv.png",     axis: 0, runs: true, seats: 0,   emoji: "⚪" },
 ];
 
 // Partidos ordenados polos escaños por defecto (campo seats,
@@ -88,11 +89,10 @@ export function axisValue(party: Party): number {
 
 // Tonalidade de verde para un partido que goberna. O rank 0 (partido
 // con máis escaños entre os que gobernan) leva o verde máis intenso e
-// os seguintes van quedando máis claros, repartindo o rango en función
-// de cantos partidos entran no goberno (total).
+// cada partido adicional acláraese un paso fixo, ata un máximo propio
+// dun quinto socio (co 5º chegaría á tonalidade máis clara).
 export function governmentShade(rank: number, total: number): string {
-  const denom = Math.max(total - 1, 1);
-  const light = Math.round(28 + (Math.min(rank, denom) / denom) * 48);
+  const light = Math.min(28 + Math.max(rank, 0) * 12, 76);
   return `hsl(145, 60%, ${light}%)`;
 }
 
