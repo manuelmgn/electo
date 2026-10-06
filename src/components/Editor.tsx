@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { PARTIES, TOTAL_SEATS, textOn } from "@/lib/parties";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, textOn } from "@/lib/parties";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
 import Hemicycle from "./Hemicycle";
@@ -76,11 +76,15 @@ export default function Editor({
   initialTitle?: string;
 }) {
   const { t, lang } = useI18n();
-  const [seats, setSeats] = useState<Seats>(initialSeats ?? emptySeats());
+  const [seats, setSeats] = useState<Seats>(() =>
+    initialSeats ? { ...emptySeats(), ...initialSeats } : emptySeats()
+  );
   const [title, setTitle] = useState(initialTitle ?? "");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [local, setLocal] = useState<LocalPrediction[]>([]);
+  const [localId, setLocalId] = useState<number | null>(null);
+  const toastTimer = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -105,8 +109,9 @@ export default function Editor({
     }));
 
   const notify = (msg: string) => {
+    if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
     setToast(msg);
-    window.setTimeout(() => setToast(null), 2600);
+    toastTimer.current = window.setTimeout(() => setToast(null), 2600);
   };
 
   const persistLocal = (list: LocalPrediction[]) => {
@@ -115,15 +120,24 @@ export default function Editor({
   };
 
   const saveLocal = () => {
-    const entry: LocalPrediction = {
-      id: Date.now(),
-      title:
-        title.trim() ||
-        `Predición ${new Date().toLocaleDateString(lang === "gl" ? "gl-ES" : "es-ES")}`,
-      seats,
-      createdAt: new Date().toISOString(),
-    };
-    persistLocal([entry, ...local]);
+    const entryTitle =
+      title.trim() ||
+      `Predición ${new Date().toLocaleDateString(lang === "gl" ? "gl-ES" : "es-ES")}`;
+    if (localId !== null) {
+      // Actualiza a predición local cargada en vez de crear un duplicado.
+      persistLocal(
+        local.map((p) => (p.id === localId ? { ...p, title: entryTitle, seats } : p))
+      );
+    } else {
+      const entry: LocalPrediction = {
+        id: Date.now(),
+        title: entryTitle,
+        seats,
+        createdAt: new Date().toISOString(),
+      };
+      setLocalId(entry.id);
+      persistLocal([entry, ...local]);
+    }
     notify(t.saved);
   };
 
@@ -153,11 +167,13 @@ export default function Editor({
   const loadLocal = (entry: LocalPrediction) => {
     setSeats({ ...emptySeats(), ...entry.seats });
     setTitle(entry.title);
+    setLocalId(entry.id);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const deleteLocal = (id: number) => {
     if (!window.confirm(t.confirmDelete)) return;
+    if (id === localId) setLocalId(null);
     persistLocal(local.filter((p) => p.id !== id));
   };
 
@@ -196,9 +212,10 @@ export default function Editor({
         </div>
       </section>
 
-      {/* Partidos: lista compacta con input numérico */}
+      {/* Partidos: lista compacta con input numérico, ordenada por
+          escaños actuais (PARTIES_BY_SEATS) */}
       <section className="card divide-y overflow-hidden" style={{ borderColor: "var(--border)" }}>
-        {PARTIES.map((p, i) => {
+        {PARTIES_BY_SEATS.map((p, i) => {
           const value = seats[p.id] ?? 0;
           const maxForParty = TOTAL_SEATS - (total - value);
           return (
@@ -282,7 +299,7 @@ export default function Editor({
       </section>
 
       {/* Predicicións locais */}
-      {!user && local.length > 0 && (
+      {local.length > 0 && (
         <section className="space-y-2">
           <h2 className="px-1 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
             {t.onThisDevice}

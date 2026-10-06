@@ -71,7 +71,7 @@ export default function Header({ user }: { user: { name: string } | null }) {
             className="flex overflow-hidden rounded-full text-xs font-bold"
             style={{ background: "var(--surface-2)" }}
             role="group"
-            aria-label={t.language ?? "Idioma"}
+            aria-label={t.language}
           >
             {(["gl", "es"] as Lang[]).map((l) => (
               <button
@@ -93,7 +93,7 @@ export default function Header({ user }: { user: { name: string } | null }) {
             onClick={cycleTheme}
             className="flex h-8 w-8 items-center justify-center rounded-full text-sm"
             style={{ background: "var(--surface-2)" }}
-            aria-label={t.theme ?? "Tema"}
+            aria-label={t.theme}
             title={theme}
           >
             {themeIcons[theme]}
@@ -120,6 +120,9 @@ export default function Header({ user }: { user: { name: string } | null }) {
       </div>
 
       {user && menuOpen && (
+        <>
+          {/* Backdrop: pecha o menú ao clicar fóra */}
+          <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(false)} />
         <div
           className="anim-pop absolute right-3 top-14 z-30 w-48 overflow-hidden py-1 shadow-xl"
           style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "0.75rem" }}
@@ -142,6 +145,7 @@ export default function Header({ user }: { user: { name: string } | null }) {
             {t.logout}
           </button>
         </div>
+        </>
       )}
     </header>
   );

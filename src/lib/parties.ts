@@ -10,6 +10,10 @@
 // - logo:    nome do ficheiro do logo dentro de /public/logos/
 //            (de momento non se cargan; cando subas os logos a
 //            esa carpeta, o nome xa estará correcto).
+// - seats:   escaños que o partido ten actualmente (ou tiña nas
+//            últimas eleccións). Só se usa para ORDENAR a lista
+//            de partidos no editor principal (de maior a menor).
+//            NON afecta ao hemiciclo nin á barra.
 // - axis:    posición no eixo esquerda-dereita, enteiro entre
 //            -3 (esquerda) e 3 (dereita). Determina a posición
 //            do partido no hemiciclo e na barra: a maior valor,
@@ -23,30 +27,38 @@ export type Party = {
   short: string;
   color: string;
   logo: string;
+  seats: number;
   axis: number;
 };
 
 export const TOTAL_SEATS = 350;
 
 export const PARTIES: Party[] = [
-  { id: "cup",     name: "Candidaturas d'Unitat Popular",                    short: "CUP",   color: "#FFEE00", logo: "cup.png",     axis: -3 },
-  { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",      axis: 2 },
-  { id: "fe",      name: "Frente Amplio",                                    short: "FE",    color: "#EC407A", logo: "fe.png",      axis: -2 },
-  { id: "bng",     name: "Bloque Nacionalista Galego",                       short: "BNG",   color: "#7FC4E8", logo: "bng.png",     axis: -3 },
-  { id: "ehb",     name: "EH Bildu",                                         short: "EHB",   color: "#0BCFB5", logo: "ehb.png",     axis: -3 },
-  { id: "podemos", name: "Podemos",                                          short: "P.",    color: "#7D3C98", logo: "podemos.png", axis: -3 },
-  { id: "psoe",    name: "Partido Socialista Obrero Español",                short: "PSOE",  color: "#E30613", logo: "psoe.png",    axis: -1 },
-  { id: "erc",     name: "Esquerra Republicana de Catalunya",                short: "ERC",   color: "#F9B233", logo: "erc.png",     axis: -2 },
-  { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     short: "PACMA", color: "#00FF7F", logo: "pacma.png",   axis: 0 },
-  { id: "cc",      name: "Coalición Canaria",                                short: "CC",    color: "#FFCE00", logo: "cc.png",      axis: 1 },
-  { id: "nc",      name: "Nueva Canarias",                                   short: "NC",    color: "#86BD42", logo: "nc.png",      axis: -1 },
-  { id: "jxc",     name: "Junts per Catalunya",                              short: "JxC",   color: "#00C1B1", logo: "jxc.png",     axis: 2 },
-  { id: "pnv",     name: "Partido Nacionalista Vasco",                       short: "PNV",   color: "#0E6E4E", logo: "pnv.png",     axis: 1 },
-  { id: "upn",     name: "Unión del Pueblo Navarro",                         short: "UPN",   color: "#3A5FBD", logo: "upn.png",     axis: 2 },
-  { id: "pp",      name: "Partido Popular",                                  short: "PP",    color: "#0B5FA5", logo: "pp.png",      axis: 2 },
-  { id: "vox",     name: "Vox",                                              short: "Vox",   color: "#5AC035", logo: "vox.png",     axis: 3 },
-  { id: "ac",      name: "Aliança Catalana",                                 short: "AC",    color: "#134C81", logo: "ac.png",      axis: 0 },
+  { id: "cup",     name: "Candidaturas d'Unitat Popular",                    short: "CUP",   color: "#FFEE00", logo: "cup.png",     seats: 0,   axis: -3 },
+  { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",      seats: 0,   axis: -3 },
+  { id: "fe",      name: "Frente Amplio",                                    short: "FE",    color: "#EC407A", logo: "fe.png",      seats: 0,   axis: -3 },
+  { id: "bng",     name: "Bloque Nacionalista Galego",                       short: "BNG",   color: "#7FC4E8", logo: "bng.png",     seats: 1,   axis: -2 },
+  { id: "ehb",     name: "EH Bildu",                                         short: "EHB",   color: "#0BCFB5", logo: "ehb.png",     seats: 6,   axis: -2 },
+  { id: "podemos", name: "Podemos",                                          short: "P.",    color: "#7D3C98", logo: "podemos.png", seats: 5,   axis: -2 },
+  { id: "psoe",    name: "Partido Socialista Obrero Español",                short: "PSOE",  color: "#E30613", logo: "psoe.png",    seats: 120, axis: -2 },
+  { id: "erc",     name: "Esquerra Republicana de Catalunya",                short: "ERC",   color: "#F9B233", logo: "erc.png",     seats: 7,   axis: -1 },
+  { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     short: "PACMA", color: "#00FF7F", logo: "pacma.png",   seats: 0,   axis: 0 },
+  { id: "cc",      name: "Coalición Canaria",                                short: "CC",    color: "#FFCE00", logo: "cc.png",      seats: 1,   axis: 0 },
+  { id: "nc",      name: "Nueva Canarias",                                   short: "NC",    color: "#86BD42", logo: "nc.png",      seats: 0,   axis: 0 },
+  { id: "jxc",     name: "Junts per Catalunya",                              short: "JxC",   color: "#00C1B1", logo: "jxc.png",     seats: 7,   axis: 1 },
+  { id: "pnv",     name: "Partido Nacionalista Vasco",                       short: "PNV",   color: "#0E6E4E", logo: "pnv.png",     seats: 5,   axis: 1 },
+  { id: "upn",     name: "Unión del Pueblo Navarro",                         short: "UPN",   color: "#3A5FBD", logo: "upn.png",     seats: 1,   axis: 1 },
+  { id: "pp",      name: "Partido Popular",                                  short: "PP",    color: "#0B5FA5", logo: "pp.png",      seats: 136, axis: 2 },
+  { id: "vox",     name: "Vox",                                              short: "Vox",   color: "#5AC035", logo: "vox.png",     seats: 33,  axis: 3 },
+  { id: "ac",      name: "Aliança Catalana",                                 short: "AC",    color: "#134C81", logo: "ac.png",      seats: 0,   axis: 3 },
 ];
+
+// Partidos ordenados por escaños actuais (descendente; os empates
+// manteñen a orde da táboa). Úsase para o listado do editor.
+export const PARTIES_BY_SEATS: Party[] = [...PARTIES]
+  .map((p, i) => ({ p, i }))
+  .sort((a, b) => b.p.seats - a.p.seats || a.i - b.i)
+  .map(({ p }) => p);
 
 // Valor de eixo normalizado: enteiro entre -3 e 3 (por se o dato
 // da táboa fose incorrecto, nunca rompe o debuxo).

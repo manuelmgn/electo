@@ -21,16 +21,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
 
-  const { rows } =
-    await sql`SELECT id, name, email, password_hash FROM users WHERE email = ${email}`;
-  const user = rows[0];
-  if (!user || !(await bcrypt.compare(password, user.password_hash))) {
-    return NextResponse.json({ message: "bad-credentials" }, { status: 401 });
-  }
+  try {
+    const { rows } =
+      await sql`SELECT id, name, email, password_hash FROM users WHERE email = ${email}`;
+    const user = rows[0];
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      return NextResponse.json({ message: "bad-credentials" }, { status: 401 });
+    }
 
-  const res = NextResponse.json({
-    user: { id: user.id, name: user.name, email: user.email },
-  });
-  setSessionCookie(res, user.id as number);
-  return res;
+    const res = NextResponse.json({
+      user: { id: user.id, name: user.name, email: user.email },
+    });
+    setSessionCookie(res, user.id as number);
+    return res;
+  } catch {
+    return NextResponse.json({ message: "errorGeneric" }, { status: 500 });
+  }
 }

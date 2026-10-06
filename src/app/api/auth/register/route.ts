@@ -26,19 +26,23 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "short-password" }, { status: 400 });
   }
 
-  const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
-  if (existing.rows.length > 0) {
-    return NextResponse.json({ message: "email-used" }, { status: 409 });
+  try {
+    const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
+    if (existing.rows.length > 0) {
+      return NextResponse.json({ message: "email-used" }, { status: 409 });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+    const { rows } = await sql`
+      INSERT INTO users (name, email, password_hash)
+      VALUES (${name}, ${email}, ${passwordHash})
+      RETURNING id, name, email
+    `;
+
+    const res = NextResponse.json({ user: rows[0] });
+    setSessionCookie(res, rows[0].id as number);
+    return res;
+  } catch {
+    return NextResponse.json({ message: "errorGeneric" }, { status: 500 });
   }
-
-  const passwordHash = await bcrypt.hash(password, 10);
-  const { rows } = await sql`
-    INSERT INTO users (name, email, password_hash)
-    VALUES (${name}, ${email}, ${passwordHash})
-    RETURNING id, name, email
-  `;
-
-  const res = NextResponse.json({ user: rows[0] });
-  setSessionCookie(res, rows[0].id as number);
-  return res;
 }

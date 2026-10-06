@@ -8,9 +8,10 @@ export default function SeatBar({
   height?: string;
 }) {
   // Orde esquerda → dereita polo eixo; os empates mantén a orde da lista.
-  const withSeats = PARTIES.filter((p) => (seats[p.id] ?? 0) > 0).sort(
-    (a, b) => axisValue(a) - axisValue(b) || PARTIES.indexOf(a) - PARTIES.indexOf(b)
-  );
+  const withSeats = PARTIES.map((p, i) => ({ p, i }))
+    .filter(({ p }) => (seats[p.id] ?? 0) > 0)
+    .sort((a, b) => axisValue(a.p) - axisValue(b.p) || a.i - b.i)
+    .map(({ p }) => p);
 
   return (
     <div

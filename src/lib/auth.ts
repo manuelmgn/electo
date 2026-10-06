@@ -21,10 +21,18 @@ export function parseSession(token?: string | null): number | null {
   const parts = token.split(".");
   if (parts.length !== 3) return null;
   const [userId, ts, sig] = parts;
+
+  // Expiración no servidor, ademais do Max-Age da cookie.
+  const issuedAt = Number(ts);
+  if (!Number.isFinite(issuedAt) || Date.now() - issuedAt > SESSION_DAYS * 86_400_000) {
+    return null;
+  }
+
   const expected = sign(`${userId}.${ts}`);
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;
+
   const id = Number(userId);
   return Number.isInteger(id) && id > 0 ? id : null;
 }
@@ -46,10 +54,12 @@ export function clearSessionCookie(res: Response) {
 export type SessionUser = { id: number; name: string; email: string };
 
 export async function getSessionUser(): Promise<SessionUser | null> {
-  if (!dbConfigured()) return null;
+  // cookies() vai primeiro: opta por render dinámico. Se se devolvésese
+  // null antes, a páxina podería quedar prerenderizada co estado
+  // "sen sesión" (p. ex. no build, cando aínda non hai POSTGRES_URL).
   const store = await cookies();
   const userId = parseSession(store.get(SESSION_COOKIE)?.value);
-  if (!userId) return null;
+  if (!userId || !dbConfigured()) return null;
   try {
     const { rows } =
       await sql`SELECT id, name, email FROM users WHERE id = ${userId}`;

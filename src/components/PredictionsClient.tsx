@@ -6,7 +6,13 @@ import { useState } from "react";
 import { PARTIES, textOn } from "@/lib/parties";
 import { useI18n } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
-import type { PredictionDto } from "@/app/predicions/page";
+
+export type PredictionDto = {
+  id: number;
+  title: string;
+  created_at: string;
+  seats: Record<string, number>;
+};
 
 export default function PredictionsClient({
   predictions,
