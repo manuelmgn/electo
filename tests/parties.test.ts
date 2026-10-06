@@ -7,6 +7,7 @@ import {
   axisValue,
   textOn,
   governmentShade,
+  governmentSumColor,
 } from "@/lib/parties";
 
 describe("parties", () => {
@@ -56,5 +57,14 @@ describe("parties", () => {
     expect(governmentShade(4, 5)).toBe("hsl(145, 60%, 52%)");
     // Máis aló do quinto socio non aclara máis.
     expect(governmentShade(8, 9)).toBe(governmentShade(4, 5));
+  });
+
+  it("governmentSumColor colorea por rangos de escaños", () => {
+    expect(governmentSumColor(200)).toBe(governmentSumColor(176));
+    expect(governmentSumColor(175)).not.toBe(governmentSumColor(176));
+    expect(governmentSumColor(170)).not.toBe(governmentSumColor(169));
+    expect(governmentSumColor(150)).not.toBe(governmentSumColor(149));
+    expect(governmentSumColor(130)).not.toBe(governmentSumColor(129));
+    expect(governmentSumColor(110)).not.toBe(governmentSumColor(109));
   });
 });

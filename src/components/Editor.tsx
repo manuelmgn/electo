@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, governmentShade } from "@/lib/parties";
+import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, governmentShade, governmentSumColor } from "@/lib/parties";
 import { ELECTION_RESULTS, ELECTION_GOVERNMENT } from "@/lib/results";
+import { encodeShare, decodeShare } from "@/lib/share";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
 import Hemicycle from "./Hemicycle";
@@ -94,10 +95,12 @@ export default function Editor({
   const [title, setTitle] = useState(initialTitle ?? "");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [shareNotice, setShareNotice] = useState(false); // aviso de ligazón copiada
   const [local, setLocal] = useState<LocalPrediction[]>([]);
   const [localId, setLocalId] = useState<number | null>(null);
   const [view, setView] = useState<string | null>(null); // elección en vista só lectura
   const toastTimer = useRef<number | null>(null);
+  const shareTimer = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -106,6 +109,21 @@ export default function Editor({
     } catch {
       setLocal([]);
     }
+  }, []);
+
+  // Ligazón de compartición: se a URL trae código no hash (#p=...),
+  // cárganse eses resultados no editor e límpase o hash da URL.
+  useEffect(() => {
+    const m = window.location.hash.match(/(?:^#|#|&)p=([A-Za-z0-9_-]+)/);
+    if (!m) return;
+    const shared = decodeShare(m[1]);
+    if (shared) {
+      // Sobre cero: o código omitiu os partidos con 0 escaños.
+      setSeats({ ...emptySeats(), ...shared.seats });
+      setGoverns(shared.governs);
+      setLocalId(null);
+    }
+    window.history.replaceState(null, "", window.location.pathname + window.location.search);
   }, []);
 
   const total = useMemo(
@@ -163,6 +181,16 @@ export default function Editor({
 
   const toggleGovern = (id: string) =>
     setGoverns((g) => ({ ...g, [id]: !g[id] }));
+
+  // Suma de escaños dos partidos marcados como gobernantes e cor do
+  // indicador segundo os rangos establecidos.
+  const govTotal = useMemo(
+    () =>
+      PARTIES.reduce((acc, p) => acc + (governs[p.id] ? (seats[p.id] ?? 0) : 0), 0),
+    [governs, seats]
+  );
+  const govMarked = Object.values(governs).some(Boolean);
+  const govColor = governmentSumColor(govTotal);
 
   const openView = (key: string) => {
     setView(key);
@@ -252,6 +280,21 @@ export default function Editor({
     persistLocal(local.filter((p) => p.id !== id));
   };
 
+  // Copia no portapapeis unha ligazón co estado actual codificado no
+  // hash. A ligazón garda os resultados por si mesma. (Integración co
+  // menú de compartir do navegador/sistema: pendente.)
+  const share = async () => {
+    const url = `${window.location.origin}${window.location.pathname}#p=${encodeShare(seats, governs)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      if (shareTimer.current !== null) window.clearTimeout(shareTimer.current);
+      setShareNotice(true);
+      shareTimer.current = window.setTimeout(() => setShareNotice(false), 3200);
+    } catch {
+      notify(t.shareError);
+    }
+  };
+
   return (
     <div className="anim-fade-up space-y-4 px-4 py-4">
       {viewResults ? (
@@ -330,6 +373,26 @@ export default function Editor({
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
+            {govMarked ? (
+              /* Indicador do goberno: suma dos partidos marcados, coloreada
+                 por rangos. O estado de Restan/Sobran queda ao lado. */
+              <span
+                className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold"
+                style={{
+                  background: `color-mix(in srgb, ${govColor} 15%, transparent)`,
+                  color: govColor,
+                }}
+              >
+                {t.government}: {govTotal}
+                {!exact && (
+                  <span style={{ color: "var(--muted)" }}>
+                    {total > TOTAL_SEATS
+                      ? `${t.over} ${-diff}`
+                      : `${t.remaining} ${diff}`}
+                  </span>
+                )}
+              </span>
+            ) : (
             <span
               className={`rounded-full px-3 py-1 text-xs font-bold ${
                 exact ? "" : total > TOTAL_SEATS ? "anim-pulse-danger" : ""
@@ -347,6 +410,7 @@ export default function Editor({
                   ? `${t.over} ${-diff}`
                   : `${t.remaining} ${diff}`}
             </span>
+            )}
             <div className="flex items-center gap-2">
               {!exact && total > 0 && (
                 <span className="text-xs font-medium" style={{ color: "var(--danger)" }}>
@@ -392,15 +456,21 @@ export default function Editor({
                 {p.name}
               </span>
               {value > 0 && (
-                <input
-                  type="checkbox"
-                  checked={!!gov}
-                  onChange={() => toggleGovern(p.id)}
-                  aria-label={t.governsAria}
-                  title={t.governsAria}
-                  className="h-4 w-4 shrink-0 cursor-pointer"
-                  style={{ accentColor: shade || "var(--accent)" }}
-                />
+                <>
+                  {/* Pantallas estreitas: emoji. Futuro: palabra "Goberno" en pantallas amplas. */}
+                  <span aria-hidden="true" title={t.governsAria} className="shrink-0 text-sm leading-none">
+                    🏛️
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={!!gov}
+                    onChange={() => toggleGovern(p.id)}
+                    aria-label={t.governsAria}
+                    title={t.governsAria}
+                    className="h-4 w-4 shrink-0 cursor-pointer"
+                    style={{ accentColor: shade || "var(--accent)" }}
+                  />
+                </>
               )}
               <div className="flex shrink-0 items-center gap-1">
                 <button
@@ -465,6 +535,13 @@ export default function Editor({
             </p>
           </>
         )}
+        <button
+          onClick={share}
+          disabled={!exact}
+          className="btn btn-ghost w-full text-base"
+        >
+          {t.share}
+        </button>
       </section>
 
       {/* Predicicións locais */}
@@ -519,6 +596,20 @@ export default function Editor({
             ))}
           </div>
         </section>
+      )}
+
+      {/* Aviso superior: ligazón copiada (desaparece só) */}
+      {shareNotice && (
+        <div
+          className="anim-toast fixed left-1/2 top-4 z-50 flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-xl"
+          style={{ background: "var(--ok)", color: "var(--bg)" }}
+          role="status"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+          {t.shareCopied}
+        </div>
       )}
 
       {/* Toast */}

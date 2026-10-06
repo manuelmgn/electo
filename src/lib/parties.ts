@@ -63,7 +63,7 @@ export const PARTIES: Party[] = [
   { id: "fo",      name: "Frente Obrero",                                    order: 8, short: "FO",    color: "#111111", logo: "fo.png",     axis: 2, runs: true, seats: 0,   emoji: "⚫" },
   { id: "s",       name: "Sumar",                                            order: 3, short: "S",     color: "#EC407A", logo: "s.png",      axis: -2, runs: false, seats: 0,  emoji: "🟣" },
   { id: "ac",      name: "Aliança Catalana",                                 order: 8, short: "AC",    color: "#114B80", logo: "ac.png",     axis: 2, runs: false, seats: 0,  emoji: "🔵" },
-  { id: "cs",      name: "Ciudadanos",                                       order: 3, short: "CS",    color: "#EF5E2C", logo: "cs.jpeg",    axis: 2, runs: false, seats: 0,  emoji: "🍊" },
+  { id: "cs",      name: "Ciudadanos",                                       order: 3, short: "CS",    color: "#EF5E2C", logo: "cs.jpeg",    axis: 1, runs: false, seats: 0,  emoji: "🍊" },
   { id: "te",      name: "Teruel Existe",                                    order: 8, short: "TE",    color: "#027F51", logo: "te.png",     axis: 0, runs: false, seats: 0,  emoji: "🍗" },
   { id: "com",     name: "Compromís",                                        order: 6, short: "C.",     color: "#DB6E24", logo: "com.jpeg",   axis: -2, runs: true, seats: 0,  emoji: "🟠" },
   { id: "mp",      name: "Más País",                                         order: 6, short: "MP",    color: "#6AD9C4", logo: "mp.png",     axis: -1, runs: false, seats: 0,  emoji: "🌽" },
@@ -94,6 +94,18 @@ export function axisValue(party: Party): number {
 export function governmentShade(rank: number, total: number): string {
   const light = Math.min(28 + Math.max(rank, 0) * 6, 52);
   return `hsl(145, 60%, ${light}%)`;
+}
+
+// Cor do indicador da suma de escaños do goberno: verde forte cando
+// alcanza a maioría absoluta e vai degradando (verde claro, verde
+// amarelento, amarelo, laranxa) ata o vermello moi por debaixo.
+export function governmentSumColor(sum: number): string {
+  if (sum >= MAJORITY_SEATS) return "#16a34a";
+  if (sum >= 170) return "#65a30d";
+  if (sum >= 150) return "#84cc16";
+  if (sum >= 130) return "#ca8a04";
+  if (sum >= 110) return "#ea580c";
+  return "#dc2626";
 }
 
 // Cor de texto lexible sobre un fondo de cor dada (branco ou case negro).
