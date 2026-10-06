@@ -638,16 +638,15 @@ export default function Editor({
           }}
           role="status"
         >
-          <span aria-hidden="true">{shareNotice === "ok" ? "🔗" : "⚠️"}</span>
           {shareNotice === "ok" ? t.shareCopied : t.shareCopiedOffline}
         </div>
       )}
 
-      {/* Toast */}
+      {/* Toast: erros en granate, texto branco */}
       {toast && (
         <div
           className="anim-toast fixed bottom-6 left-1/2 z-50 rounded-full px-5 py-2.5 text-sm font-semibold shadow-xl"
-          style={{ background: "var(--text)", color: "var(--bg)" }}
+          style={{ background: "var(--error)", color: "#ffffff" }}
           role="status"
         >
           {toast}

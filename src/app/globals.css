@@ -16,6 +16,7 @@
   --ok: #128a46;
   --warn: #c2410c;
   --copied: #0f766e;
+  --error: #7f1d1d;
   color-scheme: light;
 }
 
@@ -31,7 +32,8 @@
   --danger: #ff6b5e;
   --ok: #3ecf7a;
   --warn: #fb923c;
-  --copied: #2dd4bf;
+  --copied: #115e59;
+  --error: #991b1b;
   color-scheme: dark;
 }
 
@@ -48,7 +50,8 @@
     --danger: #ff6b5e;
     --ok: #3ecf7a;
     --warn: #fb923c;
-    --copied: #2dd4bf;
+    --copied: #115e59;
+    --error: #991b1b;
     color-scheme: dark;
   }
 }
