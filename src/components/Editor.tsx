@@ -494,14 +494,15 @@ export default function Editor({
             >
               <PartyLogo party={p} />
               <span className="min-w-0 flex-1 truncate text-xs font-medium leading-tight">
-                {p.name}
+                <span className="sm:hidden">{p.short}</span>
+                <span className="hidden sm:inline">{p.name}</span>
               </span>
               {value > 0 && (
                 /* Dous botóns pegados (control segmentado): goberno ou
                    aliado, mutuamente excluíntes. En pantallas estreitas
-                   amósanse só os emojis. */
+                   amósanse só os emojis, máis grandes. */
                 <div
-                  className="flex shrink-0 overflow-hidden rounded-lg border text-[11px] font-bold leading-none"
+                  className="flex shrink-0 overflow-hidden rounded-lg border text-base font-bold leading-none sm:text-[11px]"
                   style={{ borderColor: "var(--border)" }}
                 >
                   <button
@@ -509,7 +510,7 @@ export default function Editor({
                     aria-pressed={!!gov}
                     aria-label={t.government}
                     title={t.government}
-                    className={`px-1.5 py-1 transition-opacity ${
+                    className={`px-2.5 py-2 transition-opacity sm:px-1.5 sm:py-1 ${
                       gov ? "" : "opacity-45 hover:opacity-80"
                     }`}
                     style={
@@ -528,7 +529,7 @@ export default function Editor({
                     aria-pressed={!!ally}
                     aria-label={t.ally}
                     title={t.ally}
-                    className={`border-l px-1.5 py-1 transition-opacity ${
+                    className={`border-l px-2.5 py-2 transition-opacity sm:px-1.5 sm:py-1 ${
                       ally ? "" : "opacity-45 hover:opacity-80"
                     }`}
                     style={{

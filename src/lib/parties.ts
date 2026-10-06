@@ -61,7 +61,7 @@ export const PARTIES: Party[] = [
   { id: "aa",      name: "Adelante Andalucía",                               order: 8, short: "AA",    color: "#24C87E", logo: "aa.jpeg",    axis: -3, runs: true, seats: 0,   emoji: "🥗" },
   { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     order: 8, short: "PACMA", color: "#00FF7F", logo: "pacma.jpg",  axis: 0, runs: true, seats: 0,   emoji: "🕊️" },
   { id: "fo",      name: "Frente Obrero",                                    order: 8, short: "FO",    color: "#111111", logo: "fo.png",     axis: 2, runs: true, seats: 0,   emoji: "⚫" },
-  { id: "s",       name: "Sumar",                                            order: 3, short: "S",     color: "#EC407A", logo: "s.png",      axis: -2, runs: false, seats: 0,  emoji: "🎀"},
+  { id: "s",       name: "Sumar",                                            order: 3, short: "S.",     color: "#EC407A", logo: "s.png",      axis: -2, runs: false, seats: 0,  emoji: "🎀"},
   { id: "ac",      name: "Aliança Catalana",                                 order: 8, short: "AC",    color: "#114B80", logo: "ac.png",     axis: 2, runs: false, seats: 0,  emoji: "🔵" },
   { id: "cs",      name: "Ciudadanos",                                       order: 3, short: "CS",    color: "#EF5E2C", logo: "cs.jpeg",    axis: 1, runs: false, seats: 0,  emoji: "🍊" },
   { id: "te",      name: "Teruel Existe",                                    order: 8, short: "TE",    color: "#027F51", logo: "te.png",     axis: 0, runs: false, seats: 0,  emoji: "🍗" },
