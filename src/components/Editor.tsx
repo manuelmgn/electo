@@ -22,6 +22,12 @@ function emptySeats(): Seats {
   return Object.fromEntries(PARTIES.map((p) => [p.id, 0]));
 }
 
+// Estado inicial por defecto: os escaños actuais de cada partido
+// (campo `seats` da táboa). O botón "Limpar" pon todo a 0.
+function currentSeats(): Seats {
+  return Object.fromEntries(PARTIES.map((p) => [p.id, p.seats]));
+}
+
 // Input numérico editable a man: mantén o texto mentres hai foco e
 // só propaga valores enteiros válidos (limitados ao máximo posible).
 function SeatInput({
@@ -77,7 +83,7 @@ export default function Editor({
 }) {
   const { t, lang } = useI18n();
   const [seats, setSeats] = useState<Seats>(() =>
-    initialSeats ? { ...emptySeats(), ...initialSeats } : emptySeats()
+    initialSeats ? { ...currentSeats(), ...initialSeats } : currentSeats()
   );
   const [title, setTitle] = useState(initialTitle ?? "");
   const [saving, setSaving] = useState(false);
@@ -107,6 +113,13 @@ export default function Editor({
       ...s,
       [id]: Math.max(0, Math.min(Math.round(value), TOTAL_SEATS)),
     }));
+
+  // Pon todo a 0. Tamén desvincula a predición local cargada para que
+  // o seguinte gardado cree unha nova en vez de sobrescribila con ceros.
+  const clearAll = () => {
+    setSeats(emptySeats());
+    setLocalId(null);
+  };
 
   const notify = (msg: string) => {
     if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
@@ -202,11 +215,20 @@ export default function Editor({
                   ? `${t.over} ${-diff}`
                   : `${t.remaining} ${diff}`}
             </span>
-            {!exact && total > 0 && (
-              <span className="text-xs font-medium" style={{ color: "var(--danger)" }}>
-                {t.invalidSum}
-              </span>
-            )}
+            <div className="flex items-center gap-2">
+              {!exact && total > 0 && (
+                <span className="text-xs font-medium" style={{ color: "var(--danger)" }}>
+                  {t.invalidSum}
+                </span>
+              )}
+              <button
+                onClick={clearAll}
+                disabled={total === 0}
+                className="btn btn-ghost !px-3 !py-1 text-xs"
+              >
+                {t.clear}
+              </button>
+            </div>
           </div>
           <SeatBar seats={seats} height="h-3.5" />
         </div>

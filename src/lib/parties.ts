@@ -34,22 +34,22 @@ export type Party = {
 export const TOTAL_SEATS = 350;
 
 export const PARTIES: Party[] = [
-  { id: "cup",     name: "Candidaturas d'Unitat Popular",                    short: "CUP",   color: "#FFEE00", logo: "cup.png",     seats: 0,   axis: -3 },
+  { id: "cup",     name: "Candidaturas d'Unitat Popular",                    short: "CUP",   color: "#FFEE00", logo: "cup.png",     seats: 2,   axis: -3 },
   { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",      seats: 0,   axis: -3 },
-  { id: "fe",      name: "Frente Amplio",                                    short: "FE",    color: "#EC407A", logo: "fe.png",      seats: 0,   axis: -3 },
+  { id: "fe",      name: "Frente Amplio",                                    short: "FE",    color: "#EC407A", logo: "fe.png",      seats: 38,   axis: -3 },
   { id: "bng",     name: "Bloque Nacionalista Galego",                       short: "BNG",   color: "#7FC4E8", logo: "bng.png",     seats: 1,   axis: -2 },
-  { id: "ehb",     name: "EH Bildu",                                         short: "EHB",   color: "#0BCFB5", logo: "ehb.png",     seats: 6,   axis: -2 },
+  { id: "ehb",     name: "EH Bildu",                                         short: "EHB",   color: "#0BCFB5", logo: "ehb.png",     seats: 5,   axis: -2 },
   { id: "podemos", name: "Podemos",                                          short: "P.",    color: "#7D3C98", logo: "podemos.png", seats: 5,   axis: -2 },
   { id: "psoe",    name: "Partido Socialista Obrero Español",                short: "PSOE",  color: "#E30613", logo: "psoe.png",    seats: 120, axis: -2 },
-  { id: "erc",     name: "Esquerra Republicana de Catalunya",                short: "ERC",   color: "#F9B233", logo: "erc.png",     seats: 7,   axis: -1 },
+  { id: "erc",     name: "Esquerra Republicana de Catalunya",                short: "ERC",   color: "#F9B233", logo: "erc.png",     seats: 13,   axis: -1 },
   { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     short: "PACMA", color: "#00FF7F", logo: "pacma.png",   seats: 0,   axis: 0 },
   { id: "cc",      name: "Coalición Canaria",                                short: "CC",    color: "#FFCE00", logo: "cc.png",      seats: 1,   axis: 0 },
   { id: "nc",      name: "Nueva Canarias",                                   short: "NC",    color: "#86BD42", logo: "nc.png",      seats: 0,   axis: 0 },
-  { id: "jxc",     name: "Junts per Catalunya",                              short: "JxC",   color: "#00C1B1", logo: "jxc.png",     seats: 7,   axis: 1 },
-  { id: "pnv",     name: "Partido Nacionalista Vasco",                       short: "PNV",   color: "#0E6E4E", logo: "pnv.png",     seats: 5,   axis: 1 },
-  { id: "upn",     name: "Unión del Pueblo Navarro",                         short: "UPN",   color: "#3A5FBD", logo: "upn.png",     seats: 1,   axis: 1 },
-  { id: "pp",      name: "Partido Popular",                                  short: "PP",    color: "#0B5FA5", logo: "pp.png",      seats: 136, axis: 2 },
-  { id: "vox",     name: "Vox",                                              short: "Vox",   color: "#5AC035", logo: "vox.png",     seats: 33,  axis: 3 },
+  { id: "jxc",     name: "Junts per Catalunya",                              short: "JxC",   color: "#00C1B1", logo: "jxc.png",     seats: 8,   axis: 1 },
+  { id: "pnv",     name: "Partido Nacionalista Vasco",                       short: "PNV",   color: "#0E6E4E", logo: "pnv.png",     seats: 6,   axis: 1 },
+  { id: "upn",     name: "Unión del Pueblo Navarro",                         short: "UPN",   color: "#3A5FBD", logo: "upn.png",     seats: 2,   axis: 1 },
+  { id: "pp",      name: "Partido Popular",                                  short: "PP",    color: "#0B5FA5", logo: "pp.png",      seats: 89, axis: 2 },
+  { id: "vox",     name: "Vox",                                              short: "Vox",   color: "#5AC035", logo: "vox.png",     seats: 52,  axis: 3 },
   { id: "ac",      name: "Aliança Catalana",                                 short: "AC",    color: "#134C81", logo: "ac.png",      seats: 0,   axis: 3 },
 ];
 
