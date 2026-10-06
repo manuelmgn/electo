@@ -344,10 +344,10 @@ export default function Editor({
                 </span>
                 {/* Columna fixa para a etiqueta: resérvase o mesmo ancho
                     en todas as filas para que quede alineada. */}
-                <span className="flex w-14 shrink-0 justify-end">
+                <span className="flex w-16 shrink-0 justify-end">
                   {gov && (
                     <span
-                      className="w-full rounded-full border px-1.5 py-px text-center text-[10px] font-bold uppercase leading-tight"
+                      className="w-full whitespace-nowrap rounded-full border px-1.5 py-px text-center text-[10px] font-bold uppercase leading-tight"
                       style={{ borderColor: shade, color: shade }}
                     >
                       {t.government}
