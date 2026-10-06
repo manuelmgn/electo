@@ -627,29 +627,37 @@ export default function Editor({
         </section>
       )}
 
-      {/* Aviso superior: ligazón copiada (desaparece só). Verdoso azulado
-          se se gardou na nube; laranxa se foi o fallback de hash. */}
+      {/* Aviso: ligazón copiada (desaparece só), centrado na ventana visible.
+          Verdoso azulado se se gardou na nube; laranxa se foi o fallback de hash. */}
       {shareNotice && (
-        <div
-          className="anim-toast fixed left-1/2 top-4 z-50 flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-xl"
-          style={{
-            background: shareNotice === "ok" ? "var(--copied)" : "var(--warn)",
-            color: "var(--bg)",
-          }}
-          role="status"
-        >
-          {shareNotice === "ok" ? t.shareCopied : t.shareCopiedOffline}
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="anim-toast mx-4 max-w-[calc(100vw-2rem)] rounded-2xl px-7 py-3 text-center text-sm font-semibold shadow-xl"
+            style={{
+              background:
+                shareNotice === "ok" ? "var(--copied)" : "var(--warn)",
+              color: "#ffffff",
+            }}
+            role="status"
+          >
+            {shareNotice === "ok" ? t.shareCopied : t.shareCopiedOffline}
+          </div>
         </div>
       )}
 
-      {/* Toast: erros en granate, texto branco */}
+      {/* Toast: erros en granate, texto branco, abaixo á vista */}
       {toast && (
         <div
-          className="anim-toast fixed bottom-6 left-1/2 z-50 rounded-full px-5 py-2.5 text-sm font-semibold shadow-xl"
-          style={{ background: "var(--error)", color: "#ffffff" }}
-          role="status"
+          className="fixed bottom-6 left-1/2 z-50"
+          style={{ transform: "translateX(-50%)" }}
         >
-          {toast}
+          <div
+            className="anim-toast mx-4 max-w-[calc(100vw-2rem)] rounded-2xl px-7 py-3 text-center text-sm font-semibold shadow-xl"
+            style={{ background: "var(--error)", color: "#ffffff" }}
+            role="status"
+          >
+            {toast}
+          </div>
         </div>
       )}
     </div>
