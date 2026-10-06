@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS } from "@/lib/parties";
+import { ELECTION_RESULTS } from "@/lib/results";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
 import Hemicycle from "./Hemicycle";
@@ -23,11 +24,14 @@ function emptySeats(): Seats {
   return Object.fromEntries(PARTIES.map((p) => [p.id, 0]));
 }
 
-// Estado inicial por defecto: os escaños actuais de cada partido
-// (campo `seats` da táboa). Os partidos desactivados (runs: false)
-// arrincan a 0. O botón "Limpar" pon todo a 0.
-function currentSeats(): Seats {
-  return Object.fromEntries(PARTIES.map((p) => [p.id, p.runs ? p.seats : 0]));
+// Valores por defecto do editor: os resultados de 2023 (que son
+// totalmente modificables), limitados aos partidos que se presentan
+// (runs: true). O botón "Limpar" pon todo a 0.
+const DEFAULT_RESULTS = ELECTION_RESULTS["2023"] ?? {};
+function defaultSeats(): Seats {
+  return Object.fromEntries(
+    PARTIES.map((p) => [p.id, p.runs ? (DEFAULT_RESULTS[p.id] ?? 0) : 0])
+  );
 }
 
 // Input numérico editable a man: mantén o texto mentres hai foco e
@@ -85,13 +89,14 @@ export default function Editor({
 }) {
   const { t, lang } = useI18n();
   const [seats, setSeats] = useState<Seats>(() =>
-    initialSeats ? { ...currentSeats(), ...initialSeats } : currentSeats()
+    initialSeats ? { ...defaultSeats(), ...initialSeats } : defaultSeats()
   );
   const [title, setTitle] = useState(initialTitle ?? "");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [local, setLocal] = useState<LocalPrediction[]>([]);
   const [localId, setLocalId] = useState<number | null>(null);
+  const [view, setView] = useState<string | null>(null); // elección en vista só lectura
   const toastTimer = useRef<number | null>(null);
 
   useEffect(() => {
@@ -109,6 +114,33 @@ export default function Editor({
   );
   const exact = total === TOTAL_SEATS;
   const diff = TOTAL_SEATS - total;
+
+  // Eleccións con datos para a vista de resultados (máis recente primeiro)
+  const elections = useMemo(
+    () =>
+      Object.keys(ELECTION_RESULTS)
+        .filter((k) => Object.keys(ELECTION_RESULTS[k]).length > 0)
+        .sort()
+        .reverse(),
+    []
+  );
+  const viewResults = view ? (ELECTION_RESULTS[view] ?? null) : null;
+  // Partidos con escaños na elección vista, ordenados por escaños
+  const viewParties = useMemo(() => {
+    if (!viewResults) return [];
+    return PARTIES.map((p, i) => ({ p, i }))
+      .filter(({ p }) => (viewResults[p.id] ?? 0) > 0)
+      .sort(
+        (a, b) =>
+          (viewResults[b.p.id] ?? 0) - (viewResults[a.p.id] ?? 0) || a.i - b.i
+      )
+      .map(({ p }) => p);
+  }, [viewResults]);
+
+  const openView = (key: string) => {
+    setView(key);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const setParty = (id: string, value: number) =>
     setSeats((s) => ({
@@ -180,7 +212,7 @@ export default function Editor({
   };
 
   const loadLocal = (entry: LocalPrediction) => {
-    setSeats({ ...emptySeats(), ...entry.seats });
+    setSeats({ ...defaultSeats(), ...entry.seats });
     setTitle(entry.title);
     setLocalId(entry.id);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -194,6 +226,54 @@ export default function Editor({
 
   return (
     <div className="anim-fade-up space-y-4 px-4 py-4">
+      {viewResults ? (
+        <>
+          {/* Vista de resultados: SÓ LECTURA */}
+          <section className="card hero-card space-y-3 p-4">
+            <div className="flex items-center justify-between">
+              <h2
+                className="text-sm font-bold uppercase tracking-wide"
+                style={{ color: "var(--muted)" }}
+              >
+                {view}
+              </h2>
+              <button
+                onClick={() => setView(null)}
+                className="btn btn-ghost !px-3 !py-1 text-xs"
+              >
+                {t.backToEdit}
+              </button>
+            </div>
+            <Hemicycle seats={viewResults} />
+            <SeatBar seats={viewResults} height="h-3.5" majorityLabel={t.majorityInfo} />
+          </section>
+
+          <section
+            className="card divide-y overflow-hidden"
+            style={{ borderColor: "var(--border)" }}
+          >
+            {viewParties.map((p, i) => (
+              <div
+                key={p.id}
+                className="anim-fade-up flex items-center gap-2.5 px-3 py-2"
+                style={{ animationDelay: `${40 + i * 25}ms`, borderColor: "var(--border)" }}
+              >
+                <PartyLogo party={p} />
+                <span className="min-w-0 flex-1 truncate text-xs font-medium leading-tight">
+                  {p.name}
+                </span>
+                <span className="shrink-0 text-xs tabular-nums" style={{ color: "var(--muted)" }}>
+                  {(((viewResults[p.id] ?? 0) / TOTAL_SEATS) * 100).toFixed(1)}%
+                </span>
+                <span className="w-10 shrink-0 text-right text-lg font-extrabold tabular-nums">
+                  {viewResults[p.id] ?? 0}
+                </span>
+              </div>
+            ))}
+          </section>
+        </>
+      ) : (
+        <>
       {/* Hemiciclo + estado */}
       <section className="card hero-card space-y-3 overflow-hidden p-4">
         <Hemicycle seats={seats} />
@@ -347,6 +427,28 @@ export default function Editor({
               </div>
             </div>
           ))}
+        </section>
+      )}
+        </>
+      )}
+
+      {/* Resultados de eleccións anteriores */}
+      {elections.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="px-1 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+            {t.pastResults}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {elections.map((e) => (
+              <button
+                key={e}
+                onClick={() => openView(e)}
+                className="btn btn-ghost !py-1.5 text-sm"
+              >
+                {e}
+              </button>
+            ))}
+          </div>
         </section>
       )}
 
