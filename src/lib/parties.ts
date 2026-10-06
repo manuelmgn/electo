@@ -44,14 +44,14 @@ export const PARTIES: Party[] = [
   { id: "pnv",     name: "Partido Nacionalista Vasco",                       short: "PNV",   color: "#0E6E4E", logo: "pnv.png",     seats: 5,   axis: 1 },
   { id: "podemos", name: "Podemos",                                          short: "P.",    color: "#7D3C98", logo: "podemos.png", seats: 4,   axis: -3 },
   { id: "bng",     name: "Bloque Nacionalista Galego",                       short: "BNG",   color: "#7FC4E8", logo: "bng.png",     seats: 1,   axis: -2 },
-  { id: "upn",     name: "Unión del Pueblo Navarro",                         short: "UPN",   color: "#3A5FBD", logo: "upn.png",     seats: 1,   axis: 2 },
+  { id: "upn",     name: "Unión del Pueblo Navarro",                         short: "UPN",   color: "#3A5FBD", logo: "upn.jpg",     seats: 1,   axis: 2 },
   { id: "cc",      name: "Coalición Canaria",                                short: "CC",    color: "#FFCE00", logo: "cc.png",      seats: 1,   axis: 1 },
   { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     short: "PACMA", color: "#00FF7F", logo: "pacma.jpg",   seats: 0,   axis: 0 },
   { id: "nc",      name: "Nueva Canarias",                                   short: "NC",    color: "#86BD42", logo: "nc.png",      seats: 0,   axis: -1 },
   { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",      seats: 0,   axis: 2 },
   { id: "cup",     name: "Candidaturas d'Unitat Popular",                    short: "CUP",   color: "#FFEE00", logo: "cup.png",     seats: 0,   axis: -3 },
   { id: "ac",      name: "Aliança Catalana",                                 short: "AC",   color: "#114B80", logo: "ac.png",     seats: 0,   axis: 2 },
-  { id: "vv",      name: "Varios",                                           short: "VV",    color: "#6e6e6e", logo: "ac.png",      seats: 0,   axis: 0 },
+  { id: "vv",      name: "Varios",                                           short: "VV",    color: "#6e6e6e", logo: "vv.png",      seats: 0,   axis: 0 },
 ];
 
 // Partidos ordenados por escaños actuais (descendente; os empates
