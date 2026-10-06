@@ -50,7 +50,7 @@ export const PARTIES: Party[] = [
   { id: "fa",      name: "Frente Amplio",                                    order: 4, short: "FA",    color: "#EC407A", logo: "fa.png",     axis: -2, runs: true, seats: 26,  emoji: "🌸" },
   { id: "jxc",     name: "Junts per Catalunya",                              order: 5, short: "JxC",   color: "#00C1B1", logo: "jxc.png",    axis: 1, runs: true, seats: 7,   emoji: "🥑" },
   { id: "erc",     name: "Esquerra Republicana de Catalunya",                order: 5, short: "ERC",   color: "#F9B233", logo: "erc.jpg",    axis: -2, runs: true, seats: 7,   emoji: "🍋" },
-  { id: "ehb",     name: "EH Bildu",                                         order: 5, short: "EHB",   color: "#0BCFB5", logo: "ehb.jpg",    axis: -2, runs: true, seats: 6,   emoji: "🍃" },
+  { id: "ehb",     name: "EH Bildu",                                         order: 5, short: "EHB",   color: "#0BCFB5", logo: "ehb.jpg",    axis: -3, runs: true, seats: 6,   emoji: "🍃" },
   { id: "pnv",     name: "Partido Nacionalista Vasco",                       order: 5, short: "PNV",   color: "#0E6E4E", logo: "pnv.png",    axis: 1, runs: true, seats: 5,   emoji: "🍇" },
   { id: "podemos", name: "Podemos",                                          order: 4, short: "P.",    color: "#7D3C98", logo: "podemos.png",axis: -3, runs: true, seats: 4,   emoji: "🍆" },
   { id: "bng",     name: "Bloque Nacionalista Galego",                       order: 6, short: "BNG",   color: "#7FC4E8", logo: "bng.png",    axis: -3, runs: true, seats: 1,   emoji: "🧀" },
