@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, governmentShade, governmentSumColor } from "@/lib/parties";
 import { ELECTION_RESULTS, ELECTION_GOVERNMENT } from "@/lib/results";
-import { encodeShare, decodeShare } from "@/lib/share";
+import { encodeShare, decodeShare, buildShareLines } from "@/lib/share";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
 import Hemicycle from "./Hemicycle";
@@ -280,13 +280,15 @@ export default function Editor({
     persistLocal(local.filter((p) => p.id !== id));
   };
 
-  // Copia no portapapeis unha ligazón co estado actual codificado no
-  // hash. A ligazón garda os resultados por si mesma. (Integración co
-  // menú de compartir do navegador/sistema: pendente.)
+  // Copia no portapapeis un texto co prognóstico (top partidos + 🏛️
+  // goberno) e a ligazón co estado codificado no hash, que garda os
+  // resultados por si mesma. (Integración co menú de compartir do
+  // navegador/sistema: pendente.)
   const share = async () => {
     const url = `${window.location.origin}${window.location.pathname}#p=${encodeShare(seats, governs)}`;
+    const text = `${t.shareTextTitle}\n\n${buildShareLines(seats, governs, PARTIES).join("\n")}\n\n${url}`;
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(text);
       if (shareTimer.current !== null) window.clearTimeout(shareTimer.current);
       setShareNotice(true);
       shareTimer.current = window.setTimeout(() => setShareNotice(false), 3200);

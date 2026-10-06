@@ -43,3 +43,21 @@ export function decodeShare(code: string): SharedPrediction | null {
   }
   return null;
 }
+
+// Líneas de texto para copiar ao portapapeis cos 4 partidos con máis
+// escaños máis os marcados para gobernar (aínda que non estean entre
+// eses 4). Cada liña: "- {emoji} {SIGLAS} - {escaños} - 🏛️" (o 🏛️ só
+// se o partido está marcado como goberno).
+export function buildShareLines(
+  seats: Record<string, number>,
+  governs: Record<string, boolean>,
+  parties: { id: string; short: string; emoji: string }[]
+): string[] {
+  const ranked = parties
+    .map((p) => ({ ...p, n: seats[p.id] ?? 0, gov: !!governs[p.id] }))
+    .filter((p) => p.n > 0)
+    .sort((a, b) => b.n - a.n);
+  return ranked
+    .filter((p, i) => i < 4 || p.gov)
+    .map((p) => `- ${p.emoji} ${p.short} - ${p.n}${p.gov ? " - 🏛️" : ""}`);
+}

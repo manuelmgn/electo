@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { decodeShare, encodeShare } from "@/lib/share";
+import { buildShareLines, decodeShare, encodeShare } from "@/lib/share";
 
 describe("share", () => {
   it("codifica e descodifica sen perder datos", () => {
@@ -25,5 +25,48 @@ describe("share", () => {
     expect(decodeShare("")).toBeNull();
     expect(decodeShare("!!!")).toBeNull();
     expect(decodeShare("aGVsbG8")).toBeNull(); // JSON válido sen campo seats
+  });
+});
+
+describe("buildShareLines", () => {
+  const parties = [
+    { id: "pp", short: "PP", emoji: "💧" },
+    { id: "psoe", short: "PSOE", emoji: "🌹" },
+    { id: "vox", short: "Vox", emoji: "🥦" },
+    { id: "fa", short: "FA", emoji: "🌸" },
+    { id: "pnv", short: "PNV", emoji: "🍇" },
+  ];
+
+  it("lista os 4 máis votados cos seus emojis e escaños", () => {
+    const seats = { pp: 130, psoe: 120, vox: 30, fa: 25, pnv: 5 };
+    expect(buildShareLines(seats, {}, parties)).toEqual([
+      "- 💧 PP - 130",
+      "- 🌹 PSOE - 120",
+      "- 🥦 Vox - 30",
+      "- 🌸 FA - 25",
+    ]);
+  });
+
+  it("engade 🏛️ aos partidos marcados para gobernar", () => {
+    const seats = { pp: 130, psoe: 120, vox: 30, fa: 25 };
+    expect(buildShareLines(seats, { pp: true, vox: true }, parties)).toEqual([
+      "- 💧 PP - 130 - 🏛️",
+      "- 🌹 PSOE - 120",
+      "- 🥦 Vox - 30 - 🏛️",
+      "- 🌸 FA - 25",
+    ]);
+  });
+
+  it("inclúe un gobernante aínda que non estea no top 4", () => {
+    const seats = { pp: 130, psoe: 120, vox: 30, fa: 25, pnv: 5 };
+    const lines = buildShareLines(seats, { pnv: true }, parties);
+    expect(lines).toHaveLength(5);
+    expect(lines[4]).toBe("- 🍇 PNV - 5 - 🏛️");
+  });
+
+  it("ignora partidos con 0 escaños", () => {
+    expect(buildShareLines({ pp: 0, psoe: 121 }, {}, parties)).toEqual([
+      "- 🌹 PSOE - 121",
+    ]);
   });
 });
