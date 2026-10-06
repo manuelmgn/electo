@@ -34,8 +34,8 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className="min-h-screen antialiased">
+        <Header user={user ? { name: user.name } : null} />
         <div className="mx-auto max-w-xl">
-          <Header user={user ? { name: user.name } : null} />
           <main className="pb-10">{children}</main>
         </div>
       </body>
