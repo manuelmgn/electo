@@ -230,7 +230,7 @@ export default function Editor({
               </button>
             </div>
           </div>
-          <SeatBar seats={seats} height="h-3.5" />
+          <SeatBar seats={seats} height="h-3.5" majorityLabel={t.majorityInfo} />
         </div>
       </section>
 

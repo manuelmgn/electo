@@ -68,7 +68,7 @@ export default function PredictionsClient({
               </span>
             </div>
 
-            <SeatBar seats={pred.seats} height="h-4" />
+            <SeatBar seats={pred.seats} height="h-4" majorityLabel={t.majorityInfo} />
 
             <div className="flex flex-wrap gap-1.5">
               {top.map((p) => (

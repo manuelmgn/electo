@@ -1,11 +1,17 @@
 import { PARTIES, TOTAL_SEATS, axisValue } from "@/lib/parties";
 
+// Fronteira exacta entre os asentos 175 e 176 (inicio da maioría
+// absoluta), a mesma posición que a liña do hemiciclo.
+const MAJORITY_BOUNDARY_PCT = (175 / TOTAL_SEATS) * 100; // = 50%
+
 export default function SeatBar({
   seats,
   height = "h-4",
+  majorityLabel = "176",
 }: {
   seats: Record<string, number>;
   height?: string;
+  majorityLabel?: string;
 }) {
   // Orde esquerda → dereita polo eixo; os empates mantén a orde da lista.
   const withSeats = PARTIES.map((p, i) => ({ p, i }))
@@ -15,7 +21,7 @@ export default function SeatBar({
 
   return (
     <div
-      className={`flex w-full overflow-hidden rounded-full ${height}`}
+      className={`relative flex w-full overflow-hidden rounded-full ${height}`}
       style={{ background: "var(--surface-2)" }}
       role="img"
       aria-label="Distribución de escaños"
@@ -35,6 +41,18 @@ export default function SeatBar({
           }}
         />
       ))}
+      {/* Liña da maioría absoluta: fronteira asento 175/176 */}
+      <div
+        className="absolute top-0 h-full"
+        style={{
+          left: `${MAJORITY_BOUNDARY_PCT}%`,
+          width: 2,
+          transform: "translateX(-50%)",
+          background: "currentColor",
+          opacity: 0.45,
+        }}
+        title={majorityLabel}
+      />
     </div>
   );
 }
