@@ -52,7 +52,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return {
     title,
     description,
-    openGraph: { title, description, images: ["/logo.png"] },
+    openGraph: { title, description, images: ["/electo-social.png"] },
     twitter: { card: "summary", title, description },
   };
 }

@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "Electo 26 · Predicións eleccións xerais 2026",
   description:
     "Crea e comparte as túas predicicións de escaños para as eleccións xerais de España 2026.",
+  openGraph: {
+    images: ["/electo-social.png"],
+  },
   icons: {
     icon: "/logo.png",
     apple: "/logo.png",
