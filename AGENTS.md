@@ -60,6 +60,8 @@ src/
   lib/
     parties.ts          # TÁBOA ÚNICA DE PARTIDOS (ver abaixo)
     results.ts          # resultados de eleccións anteriores (só lectura)
+    forecasts.ts        # pronósticos precargados; campo `published`
+                        # (true/false) decide se se amosan publicamente
     hemicycle.ts        # xeneración xeométrica dos asentos do hemiciclo
     predictions.ts      # validación do reparto (súa exacta = 350) + SQL
     share.ts            # codificación/compartición por ligazón (base64url)

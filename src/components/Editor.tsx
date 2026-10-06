@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, allyShade, governmentShade, governmentSumColor } from "@/lib/parties";
 import { ELECTION_RESULTS, ELECTION_GOVERNMENT, ELECTION_ALLIES } from "@/lib/results";
+import { FORECASTS } from "@/lib/forecasts";
 import { encodeShare, decodeShare, buildShareLines } from "@/lib/share";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
@@ -100,7 +101,8 @@ export default function Editor({
   const [shareNotice, setShareNotice] = useState(false); // aviso de ligazón copiada
   const [local, setLocal] = useState<LocalPrediction[]>([]);
   const [localId, setLocalId] = useState<number | null>(null);
-  const [view, setView] = useState<string | null>(null); // elección en vista só lectura
+  const [view, setView] = useState<string | null>(null); // elemento en vista só lectura
+  const [viewType, setViewType] = useState<"election" | "forecast">("election");
   const toastTimer = useRef<number | null>(null);
   const shareTimer = useRef<number | null>(null);
 
@@ -145,7 +147,26 @@ export default function Editor({
         .reverse(),
     []
   );
-  const viewResults = view ? (ELECTION_RESULTS[view] ?? null) : null;
+  const viewResults = view
+    ? (viewType === "forecast" ? FORECASTS[view]?.seats : ELECTION_RESULTS[view]) ??
+      null
+    : null;
+
+  // Pronósticos publicados con datos para a vista de só lectura
+  // (máis recente primeiro). Os con published: false quedan no
+  // código pero non se amosan.
+  const forecasts = useMemo(
+    () =>
+      Object.keys(FORECASTS)
+        .filter(
+          (k) =>
+            FORECASTS[k].published && Object.keys(FORECASTS[k].seats).length > 0
+        )
+        .sort()
+        .reverse(),
+    []
+  );
+
   // Partidos con escaños na elección vista, ordenados por escaños
   const viewParties = useMemo(() => {
     if (!viewResults) return [];
@@ -158,28 +179,38 @@ export default function Editor({
       .map(({ p }) => p);
   }, [viewResults]);
 
+  // Mapas de goberno e aliados do elemento en vista (elección ou
+  // pronóstico, segundo viewType) para a GovBar.
+  const viewGovs = useMemo(
+    () =>
+      view
+        ? (viewType === "forecast"
+            ? FORECASTS[view]?.government
+            : ELECTION_GOVERNMENT[view]) ?? {}
+        : {},
+    [view, viewType]
+  );
+  const viewAllies = useMemo(
+    () =>
+      view
+        ? (viewType === "forecast"
+            ? FORECASTS[view]?.allies
+            : ELECTION_ALLIES[view]) ?? {}
+        : {},
+    [view, viewType]
+  );
+
   // Partidos marcados como gobernantes na elección vista, ordenados por
   // escaños (o maior leva a tonalidade de verde máis intensa).
   const viewGovRanks = useMemo(() => {
-    if (!view || !viewResults) return {};
-    const gov = ELECTION_GOVERNMENT[view] ?? {};
-    const ids = PARTIES.filter((p) => gov[p.id])
+    if (!viewResults) return {};
+    const ids = PARTIES.filter((p) => viewGovs[p.id])
       .sort((a, b) => (viewResults[b.id] ?? 0) - (viewResults[a.id] ?? 0))
       .map((p) => p.id);
     return Object.fromEntries(
       ids.map((id, i) => [id, { rank: i, total: ids.length }])
     );
-  }, [view, viewResults]);
-
-  // Mapas de goberno e aliados da elección vista (para a GovBar).
-  const viewGovs = useMemo(
-    () => (view ? ELECTION_GOVERNMENT[view] ?? {} : {}),
-    [view]
-  );
-  const viewAllies = useMemo(
-    () => (view ? ELECTION_ALLIES[view] ?? {} : {}),
-    [view]
-  );
+  }, [viewGovs, viewResults]);
 
   // Suma de escaños de goberno + aliados na elección vista.
   const viewGovTotal = useMemo(
@@ -244,8 +275,9 @@ export default function Editor({
   );
   const govColor = governmentSumColor(govTotal);
 
-  const openView = (key: string) => {
+  const openView = (key: string, type: "election" | "forecast") => {
     setView(key);
+    setViewType(type);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -747,10 +779,30 @@ export default function Editor({
             {elections.map((e) => (
               <button
                 key={e}
-                onClick={() => openView(e)}
+                onClick={() => openView(e, "election")}
                 className="btn btn-ghost !py-1.5 text-sm"
               >
                 {e}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Pronósticos precargados (só os marcados como publicados) */}
+      {forecasts.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="px-1 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+            {t.forecasts}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {forecasts.map((f) => (
+              <button
+                key={f}
+                onClick={() => openView(f, "forecast")}
+                className="btn btn-ghost !py-1.5 text-sm"
+              >
+                {f}
               </button>
             ))}
           </div>
