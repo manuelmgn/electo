@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS } from "@/lib/parties";
-import { ELECTION_RESULTS } from "@/lib/results";
+import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, governmentShade } from "@/lib/parties";
+import { ELECTION_RESULTS, ELECTION_GOVERNMENT } from "@/lib/results";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
 import Hemicycle from "./Hemicycle";
@@ -90,6 +90,7 @@ export default function Editor({
   const [seats, setSeats] = useState<Seats>(() =>
     initialSeats ? { ...defaultSeats(), ...initialSeats } : defaultSeats()
   );
+  const [governs, setGoverns] = useState<Record<string, boolean>>({});
   const [title, setTitle] = useState(initialTitle ?? "");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -136,6 +137,33 @@ export default function Editor({
       .map(({ p }) => p);
   }, [viewResults]);
 
+  // Partidos marcados como gobernantes na elección vista, ordenados por
+  // escaños (o maior leva a tonalidade de verde máis intensa).
+  const viewGovRanks = useMemo(() => {
+    if (!view || !viewResults) return {};
+    const gov = ELECTION_GOVERNMENT[view] ?? {};
+    const ids = PARTIES.filter((p) => gov[p.id])
+      .sort((a, b) => (viewResults[b.id] ?? 0) - (viewResults[a.id] ?? 0))
+      .map((p) => p.id);
+    return Object.fromEntries(
+      ids.map((id, i) => [id, { rank: i, total: ids.length }])
+    );
+  }, [view, viewResults]);
+
+  // Partidos marcados como gobernantes no editor, ordenados polos
+  // escaños actuais (o maior leva a tonalidade de verde máis intensa).
+  const governmentRanks = useMemo(() => {
+    const ids = PARTIES_BY_SEATS.filter((p) => governs[p.id])
+      .sort((a, b) => (seats[b.id] ?? 0) - (seats[a.id] ?? 0))
+      .map((p) => p.id);
+    return Object.fromEntries(
+      ids.map((id, i) => [id, { rank: i, total: ids.length }])
+    );
+  }, [governs, seats]);
+
+  const toggleGovern = (id: string) =>
+    setGoverns((g) => ({ ...g, [id]: !g[id] }));
+
   const openView = (key: string) => {
     setView(key);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -151,6 +179,7 @@ export default function Editor({
   // o seguinte gardado cree unha nova en vez de sobrescribila con ceros.
   const clearAll = () => {
     setSeats(emptySeats());
+    setGoverns({});
     setLocalId(null);
   };
 
@@ -251,16 +280,33 @@ export default function Editor({
             className="card divide-y overflow-hidden"
             style={{ borderColor: "var(--border)" }}
           >
-            {viewParties.map((p, i) => (
+            {viewParties.map((p, i) => {
+              const gov = viewGovRanks[p.id];
+              const shade = gov ? governmentShade(gov.rank, gov.total) : "";
+              return (
               <div
                 key={p.id}
                 className="anim-fade-up flex items-center gap-2.5 px-3 py-2"
-                style={{ animationDelay: `${40 + i * 25}ms`, borderColor: "var(--border)" }}
+                style={{
+                  animationDelay: `${40 + i * 25}ms`,
+                  borderColor: "var(--border)",
+                  background: gov
+                    ? `color-mix(in srgb, ${shade} 20%, transparent)`
+                    : undefined,
+                }}
               >
                 <PartyLogo party={p} />
                 <span className="min-w-0 flex-1 truncate text-xs font-medium leading-tight">
                   {p.name}
                 </span>
+                {gov && (
+                  <span
+                    className="shrink-0 rounded-full border px-1.5 py-px text-[10px] font-bold uppercase leading-tight"
+                    style={{ borderColor: shade, color: shade }}
+                  >
+                    {t.government}
+                  </span>
+                )}
                 <span className="shrink-0 text-xs tabular-nums" style={{ color: "var(--muted)" }}>
                   {(((viewResults[p.id] ?? 0) / TOTAL_SEATS) * 100).toFixed(1)}%
                 </span>
@@ -268,7 +314,8 @@ export default function Editor({
                   {viewResults[p.id] ?? 0}
                 </span>
               </div>
-            ))}
+              );
+            })}
           </section>
         </>
       ) : (

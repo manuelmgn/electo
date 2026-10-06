@@ -82,6 +82,16 @@ export function axisValue(party: Party): number {
   return Math.max(-3, Math.min(3, Math.round(party.axis || 0)));
 }
 
+// Tonalidade de verde para un partido que goberna. O rank 0 (partido
+// con máis escaños entre os que gobernan) leva o verde máis intenso e
+// os seguintes van quedando máis claros, repartindo o rango en función
+// de cantos partidos entran no goberno (total).
+export function governmentShade(rank: number, total: number): string {
+  const denom = Math.max(total - 1, 1);
+  const light = Math.round(28 + (Math.min(rank, denom) / denom) * 48);
+  return `hsl(145, 60%, ${light}%)`;
+}
+
 // Cor de texto lexible sobre un fondo de cor dada (branco ou case negro).
 export function textOn(color: string): string {
   const hex = color.replace("#", "");

@@ -20,6 +20,19 @@
 
 export type ElectionResults = Record<string, Record<string, number>>;
 
+// Goberno de cada elección: para cada elección (clave, a mesma que en
+// ELECTION_RESULTS), un mapa de id de partido → true se formou parte
+// do goberno ou false (ou ausente) se non. Úsase para iluminar en verde
+// os partidos gobernantes nas vistas de resultados anteriores.
+export type ElectionGovernment = Record<string, Record<string, boolean>>;
+
+export const ELECTION_GOVERNMENT: ElectionGovernment = {
+  "2023": { psoe: true, s: true },
+  "2019 I": { psoe: true },
+  "2019 II": { psoe: true, podemos: true },
+  "2016": { pp: true },
+};
+
 export const ELECTION_RESULTS: ElectionResults = {
   "2023": {
     pp: 137,
