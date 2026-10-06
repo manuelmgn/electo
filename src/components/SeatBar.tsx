@@ -1,13 +1,13 @@
-import { PARTIES, TOTAL_SEATS, axisValue } from "@/lib/parties";
+import { PARTIES, TOTAL_SEATS, MAJORITY_SEATS, axisValue } from "@/lib/parties";
 
 // Fronteira exacta entre os asentos 175 e 176 (inicio da maioría
 // absoluta), a mesma posición que a liña do hemiciclo.
-const MAJORITY_BOUNDARY_PCT = (175 / TOTAL_SEATS) * 100; // = 50%
+const MAJORITY_BOUNDARY_PCT = ((MAJORITY_SEATS - 1) / TOTAL_SEATS) * 100; // = 50%
 
 export default function SeatBar({
   seats,
   height = "h-4",
-  majorityLabel = "176",
+  majorityLabel = String(MAJORITY_SEATS),
 }: {
   seats: Record<string, number>;
   height?: string;

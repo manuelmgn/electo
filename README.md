@@ -17,11 +17,13 @@ tema claro/oscuro automático. Optimizada para móbil.
 
 | Ruta | Descrición |
 |---|---|
-| `/` | Editor de escaños + gardado |
+| `/` | Editor de escaños + vistas de resultados anteriores |
 | `/login`, `/rexistro` | Acceso e rexistro |
 | `/predicions` | Listado das predicicións gardadas na nube |
-| `src/lib/parties.ts` | **Táboa única de partidos** (siglas, cor, logo) |
+| `src/lib/parties.ts` | **Táboa única de partidos** (siglas, cor, logo, axis, runs, seats) |
+| `src/lib/results.ts` | **Resultados de eleccións anteriores** (só lectura) |
 | `src/lib/dictionaries.ts` | Textos en galego e castelán |
+| `tests/` | Testes unitarios (Vitest) |
 | `scripts/schema.sql` | Esquema da base de datos |
 
 ## Partidos
@@ -29,11 +31,16 @@ tema claro/oscuro automático. Optimizada para móbil.
 Para engadir, quitar ou modificar partidos edita **`src/lib/parties.ts`**:
 é a única táboa que necesitas tocar. Cada partido ten `id` (non o cambies se
 hai predicicións gardadas), `name`, `short` (siglas), `color`, `logo`
-(nome do ficheiro dentro de `/public/logos/`; cando subas os logos a esa
-carpeta, a app xa os ten referenciados) e `axis`: a súa posición no eixo
-esquerda-dereita, un **enteiro entre -3 e 3**. O `axis` decide onde se
-senta o partido no hemiciclo e na barra: canto maior, máis á dereita;
-se dous empatan, mántense na orde da lista.
+(nome do ficheiro dentro de `/public/logos/`; se non existe, móstranse as
+siglas), `axis` (posición no eixo esquerda-dereita, **enteiro entre -3 e 3**;
+decide a posición no hemiciclo e na barra: canto maior, máis á dereita),
+`runs` (`true` se se presenta; os `false` non aparecen na vista editable
+pero si nas vistas de resultados se teñen datos) e `seats` (escaños que se
+amosan por defecto ao cargar a app, totalmente modificables; tamén ordena
+a lista do editor).
+
+Os resultados de eleccións anteriores (vistas só lectura que se cargan dende
+o fondo da páxina principal) edítanse en **`src/lib/results.ts`**.
 
 ## Desenvolvemento local
 
@@ -66,3 +73,5 @@ cadea de conexión "local" do dashboard) e un `SESSION_SECRET`
   `localStorage` do dispositivo.
 - Para engadir máis idiomas, engade o dicionario en
   `src/lib/dictionaries.ts` e o código en `src/lib/i18n.ts`.
+- Tests: `npm test` (Vitest, lóxica pura: hemiciclo, sesións,
+  validación de asentos e táboas).

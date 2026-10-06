@@ -315,8 +315,8 @@ export default function Editor({
         </div>
       </section>
 
-      {/* Partidos: lista compacta con input numérico, ordenada por
-          escaños actuais (PARTIES_BY_SEATS). Os desactivados
+      {/* Partidos: lista compacta con input numérico, ordenada polos
+          escaños por defecto (PARTIES_BY_SEATS). Os desactivados
           (runs: false) non se amosan. */}
       <section className="card divide-y overflow-hidden" style={{ borderColor: "var(--border)" }}>
         {PARTIES_BY_SEATS.filter((p) => p.runs).map((p, i) => {

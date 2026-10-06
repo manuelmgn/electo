@@ -10,13 +10,12 @@
 //   pero non na vista editable.
 // - Para engadir outra elección, copia un bloque e cambia a clave
 //   (por exemplo "2016").
-// - Os bloquéíños baleiros (coma "2019" debaixo) non se amosan na
-//   app ata que lle engadas algún partido.
+// - Os bloques baleiros non se amosan na app ata que lle engadas
+//   algún partido.
 //
-// IMPORTANTE: a vista editable da app arrinca cos valores de "2023"
-// como predeterminados (só os partidos con runs: true), que son
-// totalmente modificables. É dicir: non é unha vista fixa de 2023,
-// son valores por defecto.
+// NOTA: a vista editable da app NON usa esta táboa; os valores por
+// defecto do editor veñen do campo `seats` de parties.ts. Esta táboa
+// alimenta só as vistas de resultados anteriores (só lectura).
 // ============================================================
 
 export type ElectionResults = Record<string, Record<string, number>>;
@@ -42,8 +41,8 @@ export const ELECTION_RESULTS: ElectionResults = {
     ac: 0,
     vv: 0,
   },
-  "2019": {  
-    pp: 89,
+  "2016": {  
+    pp: 137,
     psoe: 120,
     vox: 52,
     cs: 10,
