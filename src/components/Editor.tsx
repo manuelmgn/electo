@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, governmentShade, governmentSumColor } from "@/lib/parties";
+import { PARTIES, PARTIES_BY_SEATS, TOTAL_SEATS, allyShade, governmentShade, governmentSumColor } from "@/lib/parties";
 import { ELECTION_RESULTS, ELECTION_GOVERNMENT } from "@/lib/results";
 import { encodeShare, decodeShare, buildShareLines } from "@/lib/share";
 import { useI18n, errorMessage } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
+import GovBar from "./GovBar";
 import Hemicycle from "./Hemicycle";
 import PartyLogo from "./PartyLogo";
 
@@ -92,6 +93,7 @@ export default function Editor({
     initialSeats ? { ...defaultSeats(), ...initialSeats } : defaultSeats()
   );
   const [governs, setGoverns] = useState<Record<string, boolean>>({});
+  const [allies, setAllies] = useState<Record<string, boolean>>({});
   const [title, setTitle] = useState(initialTitle ?? "");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -121,6 +123,7 @@ export default function Editor({
       // Sobre cero: o código omitiu os partidos con 0 escaños.
       setSeats({ ...emptySeats(), ...shared.seats });
       setGoverns(shared.governs);
+      setAllies(shared.allies);
       setLocalId(null);
     }
     window.history.replaceState(null, "", window.location.pathname + window.location.search);
@@ -179,17 +182,26 @@ export default function Editor({
     );
   }, [governs, seats]);
 
-  const toggleGovern = (id: string) =>
-    setGoverns((g) => ({ ...g, [id]: !g[id] }));
+  // Marca un partido como goberno ou aliado (ou desmárcao co mesmo
+  // clic). Os dous roles son mutuamente excluíntes.
+  const setRole = (id: string, role: "gov" | "ally") => {
+    const current = governs[id] ? "gov" : allies[id] ? "ally" : null;
+    const next = current === role ? null : role;
+    setGoverns((g) => ({ ...g, [id]: next === "gov" }));
+    setAllies((a) => ({ ...a, [id]: next === "ally" }));
+  };
 
-  // Suma de escaños dos partidos marcados como gobernantes e cor do
-  // indicador segundo os rangos establecidos.
+  // Suma de escaños dos partidos marcados como gobernantes ou aliados
+  // e cor do indicador segundo os rangos establecidos.
   const govTotal = useMemo(
     () =>
-      PARTIES.reduce((acc, p) => acc + (governs[p.id] ? (seats[p.id] ?? 0) : 0), 0),
-    [governs, seats]
+      PARTIES.reduce(
+        (acc, p) =>
+          acc + (governs[p.id] || allies[p.id] ? (seats[p.id] ?? 0) : 0),
+        0
+      ),
+    [governs, allies, seats]
   );
-  const govMarked = Object.values(governs).some(Boolean);
   const govColor = governmentSumColor(govTotal);
 
   const openView = (key: string) => {
@@ -208,6 +220,7 @@ export default function Editor({
   const clearAll = () => {
     setSeats(emptySeats());
     setGoverns({});
+    setAllies({});
     setLocalId(null);
   };
 
@@ -281,12 +294,12 @@ export default function Editor({
   };
 
   // Copia no portapapeis un texto co prognóstico (top partidos + 🏛️
-  // goberno) e a ligazón co estado codificado no hash, que garda os
-  // resultados por si mesma. (Integración co menú de compartir do
-  // navegador/sistema: pendente.)
+  // goberno + 🤝 aliados) e a ligazón co estado codificado no hash, que
+  // garda os resultados por si mesma. (Integración co menú de compartir
+  // do navegador/sistema: pendente.)
   const share = async () => {
-    const url = `${window.location.origin}${window.location.pathname}#p=${encodeShare(seats, governs)}`;
-    const text = `${t.shareTextTitle}\n\n${buildShareLines(seats, governs, PARTIES).join("\n")}\n\n${url}`;
+    const url = `${window.location.origin}${window.location.pathname}#p=${encodeShare(seats, governs, allies)}`;
+    const text = `${t.shareTextTitle}\n\n${buildShareLines(seats, governs, allies, PARTIES).join("\n")}\n\n${url}`;
     try {
       await navigator.clipboard.writeText(text);
       if (shareTimer.current !== null) window.clearTimeout(shareTimer.current);
@@ -373,63 +386,85 @@ export default function Editor({
       <section className="card hero-card space-y-3 overflow-hidden p-4">
         <Hemicycle seats={seats} />
 
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            {govMarked ? (
-              /* Indicador do goberno: suma dos partidos marcados, coloreada
-                 por rangos. O estado de Restan/Sobran queda ao lado. */
-              <span
-                className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold"
-                style={{
-                  background: `color-mix(in srgb, ${govColor} 15%, transparent)`,
-                  color: govColor,
-                }}
-              >
-                {t.government}: {govTotal}
-                {!exact && (
-                  <span style={{ color: "var(--muted)" }}>
-                    {total > TOTAL_SEATS
-                      ? `${t.over} ${-diff}`
-                      : `${t.remaining} ${diff}`}
-                  </span>
-                )}
+        <div className="flex items-center justify-between">
+          <span
+            className={`rounded-full px-3 py-1 text-xs font-bold ${
+              exact ? "" : total > TOTAL_SEATS ? "anim-pulse-danger" : ""
+            }`}
+            style={{
+              background: exact
+                ? "color-mix(in srgb, var(--ok) 15%, transparent)"
+                : "color-mix(in srgb, var(--danger) 12%, transparent)",
+              color: exact ? "var(--ok)" : "var(--danger)",
+            }}
+          >
+            {exact
+              ? t.majorityInfo
+              : total > TOTAL_SEATS
+                ? `${t.over} ${-diff}`
+                : `${t.remaining} ${diff}`}
+          </span>
+          <div className="flex items-center gap-2">
+            {!exact && total > 0 && (
+              <span className="text-xs font-medium" style={{ color: "var(--danger)" }}>
+                {t.invalidSum}
               </span>
-            ) : (
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-bold ${
-                exact ? "" : total > TOTAL_SEATS ? "anim-pulse-danger" : ""
-              }`}
-              style={{
-                background: exact
-                  ? "color-mix(in srgb, var(--ok) 15%, transparent)"
-                  : "color-mix(in srgb, var(--danger) 12%, transparent)",
-                color: exact ? "var(--ok)" : "var(--danger)",
-              }}
+            )}
+            <button
+              onClick={clearAll}
+              disabled={total === 0}
+              className="btn btn-ghost !px-3 !py-1 text-xs"
             >
-              {exact
-                ? t.majorityInfo
-                : total > TOTAL_SEATS
+              {t.clear}
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Barra da suma de goberno: os partidos marcados van sumando
+          segmentos (goberno primeiro, despois aliados) ata a liña da
+          maioría. A leyenda vai arriba á dereita. */}
+      <section className="card space-y-2 p-4">
+        <div className="flex items-center justify-between gap-2">
+          <span
+            className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold"
+            style={{
+              background: `color-mix(in srgb, ${govColor} 15%, transparent)`,
+              color: govColor,
+            }}
+          >
+            {t.government}: {govTotal}
+            {!exact && (
+              <span style={{ color: "var(--muted)" }}>
+                {total > TOTAL_SEATS
                   ? `${t.over} ${-diff}`
                   : `${t.remaining} ${diff}`}
-            </span>
+              </span>
             )}
-            <div className="flex items-center gap-2">
-              {!exact && total > 0 && (
-                <span className="text-xs font-medium" style={{ color: "var(--danger)" }}>
-                  {t.invalidSum}
-                </span>
-              )}
-              <button
-                onClick={clearAll}
-                disabled={total === 0}
-                className="btn btn-ghost !px-3 !py-1 text-xs"
-              >
-                {t.clear}
-              </button>
-            </div>
+          </span>
+          <div
+            className="flex shrink-0 items-center gap-3 text-[11px] font-semibold"
+            style={{ color: "var(--muted)" }}
+          >
+            <span className="flex items-center gap-1">
+              <span
+                aria-hidden="true"
+                className="inline-block h-2.5 w-2.5 rounded-sm"
+                style={{ background: governmentShade(0, 1) }}
+              />
+              🏛️ {t.government}
+            </span>
+            <span className="flex items-center gap-1">
+              <span
+                aria-hidden="true"
+                className="inline-block h-2.5 w-2.5 rounded-sm"
+                style={{ background: allyShade() }}
+              />
+              🤝 {t.ally}
+            </span>
           </div>
-          <SeatBar seats={seats} height="h-3.5" majorityLabel={t.majorityInfo} />
         </div>
+        <GovBar seats={seats} governs={governs} allies={allies} />
       </section>
 
       {/* Partidos: lista compacta con input numérico, ordenada polos
@@ -441,6 +476,8 @@ export default function Editor({
           const maxForParty = TOTAL_SEATS - (total - value);
           const gov = governmentRanks[p.id];
           const shade = gov ? governmentShade(gov.rank, gov.total) : "";
+          const ally = !gov && allies[p.id];
+          const aShade = allyShade();
           return (
             <div
               key={p.id}
@@ -450,7 +487,9 @@ export default function Editor({
                 borderColor: "var(--border)",
                 background: gov
                   ? `color-mix(in srgb, ${shade} 20%, transparent)`
-                  : undefined,
+                  : ally
+                    ? `color-mix(in srgb, ${aShade} 18%, transparent)`
+                    : undefined,
               }}
             >
               <PartyLogo party={p} />
@@ -458,21 +497,53 @@ export default function Editor({
                 {p.name}
               </span>
               {value > 0 && (
-                <>
-                  {/* Pantallas estreitas: emoji. Futuro: palabra "Goberno" en pantallas amplas. */}
-                  <span aria-hidden="true" title={t.governsAria} className="shrink-0 text-sm leading-none">
-                    🏛️
-                  </span>
-                  <input
-                    type="checkbox"
-                    checked={!!gov}
-                    onChange={() => toggleGovern(p.id)}
-                    aria-label={t.governsAria}
-                    title={t.governsAria}
-                    className="h-4 w-4 shrink-0 cursor-pointer"
-                    style={{ accentColor: shade || "var(--accent)" }}
-                  />
-                </>
+                /* Dous botóns pegados (control segmentado): goberno ou
+                   aliado, mutuamente excluíntes. En pantallas estreitas
+                   amósanse só os emojis. */
+                <div
+                  className="flex shrink-0 overflow-hidden rounded-lg border text-[11px] font-bold leading-none"
+                  style={{ borderColor: "var(--border)" }}
+                >
+                  <button
+                    onClick={() => setRole(p.id, "gov")}
+                    aria-pressed={!!gov}
+                    aria-label={t.government}
+                    title={t.government}
+                    className={`px-1.5 py-1 transition-opacity ${
+                      gov ? "" : "opacity-45 hover:opacity-80"
+                    }`}
+                    style={
+                      gov
+                        ? {
+                            background: `color-mix(in srgb, ${shade} 85%, black)`,
+                            color: "#fff",
+                          }
+                        : undefined
+                    }
+                  >
+                    🏛️<span className="hidden sm:inline"> {t.government}</span>
+                  </button>
+                  <button
+                    onClick={() => setRole(p.id, "ally")}
+                    aria-pressed={!!ally}
+                    aria-label={t.ally}
+                    title={t.ally}
+                    className={`border-l px-1.5 py-1 transition-opacity ${
+                      ally ? "" : "opacity-45 hover:opacity-80"
+                    }`}
+                    style={{
+                      ...(ally
+                        ? {
+                            background: `color-mix(in srgb, ${aShade} 85%, black)`,
+                            color: "#fff",
+                          }
+                        : undefined),
+                      borderColor: "var(--border)",
+                    }}
+                  >
+                    🤝<span className="hidden sm:inline"> {t.ally}</span>
+                  </button>
+                </div>
               )}
               <div className="flex shrink-0 items-center gap-1">
                 <button

@@ -96,6 +96,12 @@ export function governmentShade(rank: number, total: number): string {
   return `hsl(145, 60%, ${light}%)`;
 }
 
+// Tonalidade ámbar para un partido marcado como aliado: máis neutra ca
+// o verde do goberno, para distinguir o apoio externo dos socios.
+export function allyShade(): string {
+  return "hsl(38, 65%, 52%)";
+}
+
 // Cor do indicador da suma de escaños do goberno: verde forte cando
 // alcanza a maioría absoluta e vai degradando (verde claro, verde
 // amarelento, amarelo, laranxa) ata o vermello moi por debaixo.

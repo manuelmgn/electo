@@ -10,18 +10,21 @@ export type SharedPrediction = {
   v: 1;
   seats: Record<string, number>;
   governs: Record<string, boolean>;
+  allies: Record<string, boolean>;
 };
 
 // Empaquetan os datos: omiten partidos con 0 escaños e checks a
 // false para acurtar a ligazón todo o posible.
 export function encodeShare(
   seats: Record<string, number>,
-  governs: Record<string, boolean>
+  governs: Record<string, boolean>,
+  allies: Record<string, boolean>
 ): string {
   const payload: SharedPrediction = {
     v: 1,
     seats: Object.fromEntries(Object.entries(seats).filter(([, n]) => n > 0)),
     governs: Object.fromEntries(Object.entries(governs).filter(([, b]) => b)),
+    allies: Object.fromEntries(Object.entries(allies).filter(([, b]) => b)),
   };
   return btoa(JSON.stringify(payload))
     .replace(/\+/g, "-")
@@ -36,7 +39,13 @@ export function decodeShare(code: string): SharedPrediction | null {
     const b64 = code.replace(/-/g, "+").replace(/_/g, "/");
     const data = JSON.parse(atob(b64));
     if (data && typeof data === "object" && typeof data.seats === "object") {
-      return { v: 1, seats: data.seats, governs: data.governs ?? {} };
+      return {
+        v: 1,
+        seats: data.seats,
+        governs: data.governs ?? {},
+        // Ligazóns antigas (sen aliados): quedan sen marca.
+        allies: data.allies ?? {},
+      };
     }
   } catch {
     // ligazón inválida: ignórase
@@ -45,19 +54,28 @@ export function decodeShare(code: string): SharedPrediction | null {
 }
 
 // Líneas de texto para copiar ao portapapeis cos 4 partidos con máis
-// escaños máis os marcados para gobernar (aínda que non estean entre
-// eses 4). Cada liña: "- {emoji} {SIGLAS} - {escaños} - 🏛️" (o 🏛️ só
-// se o partido está marcado como goberno).
+// escaños máis os marcados como goberno ou aliado (aínda que non estean
+// entre eses 4). Cada liña: "- {emoji} {SIGLAS} - {escaños} - 🏛️/🤝"
+// (a marca só aparece se o partido está marcado).
 export function buildShareLines(
   seats: Record<string, number>,
   governs: Record<string, boolean>,
+  allies: Record<string, boolean>,
   parties: { id: string; short: string; emoji: string }[]
 ): string[] {
   const ranked = parties
-    .map((p) => ({ ...p, n: seats[p.id] ?? 0, gov: !!governs[p.id] }))
+    .map((p) => ({
+      ...p,
+      n: seats[p.id] ?? 0,
+      gov: !!governs[p.id],
+      ally: !!allies[p.id],
+    }))
     .filter((p) => p.n > 0)
     .sort((a, b) => b.n - a.n);
   return ranked
-    .filter((p, i) => i < 4 || p.gov)
-    .map((p) => `- ${p.emoji} ${p.short} - ${p.n}${p.gov ? " - 🏛️" : ""}`);
+    .filter((p, i) => i < 4 || p.gov || p.ally)
+    .map(
+      (p) =>
+        `- ${p.emoji} ${p.short} - ${p.n}${p.gov ? " - 🏛️" : ""}${p.ally ? " - 🤝" : ""}`
+    );
 }
