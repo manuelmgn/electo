@@ -36,7 +36,29 @@ export type Forecast = {
 };
 
 export const FORECASTS: Record<string, Forecast> = {
-  "2026-09 (CIS-Electomanía)": {
+  "26-10-04 (ElectoPanel)": {
+    published: true,
+    seats: {
+      pp: 129,
+      psoe: 106,
+      vox: 69,
+      s: 9,
+      erc: 8,
+      ehb: 7,
+      pnv: 6,
+      jxc: 4,
+      aa: 3,
+      podemos: 3,
+      com: 3,
+      bng: 2,
+      upn: 1,
+      cc: 0,
+      salf: 0,
+    },
+    government: { pp: true, vox: true },
+    allies: {  },
+  },
+  "26-09 (CIS-Electomanía)": {
     published: true,
     seats: {
       pp: 109,
@@ -56,7 +78,7 @@ export const FORECASTS: Record<string, Forecast> = {
     government: { pp: true, vox: true },
     allies: {  },
   },
-  "2026-09 (Celeste Tel)": {
+  "26-09 (Celeste Tel)": {
     published: true,
     seats: {
       pp: 147,
