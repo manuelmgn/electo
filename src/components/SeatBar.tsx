@@ -49,10 +49,10 @@ export default function SeatBar({
           left: `${MAJORITY_BOUNDARY_PCT}%`,
           top: -4,
           bottom: -4,
-          width: 3,
+          width: 2,
           transform: "translateX(-50%)",
           background: "var(--text)",
-          opacity: 0.7,
+          opacity: 0.45,
           borderRadius: 2,
         }}
         title={majorityLabel}
