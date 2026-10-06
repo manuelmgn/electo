@@ -61,6 +61,7 @@ export const PARTIES: Party[] = [
   { id: "ac",      name: "Aliança Catalana",                                 short: "AC",   color: "#114B80", logo: "ac.png",    axis: 2, runs: false, seats: 0 },
   { id: "cs",      name: "Ciudadanos",                                 short: "CS",   color: "#EF5E2C", logo: "cs.jpeg",    axis: 2, runs: false, seats: 0 },
   { id: "te",      name: "Teruel Existe",                                 short: "TE",   color: "#027F51", logo: "te.png",    axis: 2, runs: false, seats: 0 },
+  { id: "compromis",      name: "Compromís",                                 short: "C",   color: "#DB6E24", logo: "com.jpeg",    axis: 2, runs: false, seats: 0 },
   { id: "mp",      name: "Más País",                                 short: "MP",   color: "#6AD9C4", logo: "mp.png",    axis: 2, runs: false, seats: 0 },
   { id: "prc",      name: "Partido Regionalista Cántabro",                                 short: "PRC",   color: "#BFCD16", logo: "prc.png",    axis: 2, runs: true, seats: 0 },
   { id: "vv",      name: "Varios",                                           short: "VV",    color: "#6e6e6e", logo: "vv.png",     axis: 0, runs: true, seats: 0 },
