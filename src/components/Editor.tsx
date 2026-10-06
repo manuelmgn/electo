@@ -24,9 +24,10 @@ function emptySeats(): Seats {
 }
 
 // Estado inicial por defecto: os escaños actuais de cada partido
-// (campo `seats` da táboa). O botón "Limpar" pon todo a 0.
+// (campo `seats` da táboa). Os partidos desactivados (runs: false)
+// arrincan a 0. O botón "Limpar" pon todo a 0.
 function currentSeats(): Seats {
-  return Object.fromEntries(PARTIES.map((p) => [p.id, p.seats]));
+  return Object.fromEntries(PARTIES.map((p) => [p.id, p.runs ? p.seats : 0]));
 }
 
 // Input numérico editable a man: mantén o texto mentres hai foco e
@@ -236,9 +237,10 @@ export default function Editor({
       </section>
 
       {/* Partidos: lista compacta con input numérico, ordenada por
-          escaños actuais (PARTIES_BY_SEATS) */}
+          escaños actuais (PARTIES_BY_SEATS). Os desactivados
+          (runs: false) non se amosan. */}
       <section className="card divide-y overflow-hidden" style={{ borderColor: "var(--border)" }}>
-        {PARTIES_BY_SEATS.map((p, i) => {
+        {PARTIES_BY_SEATS.filter((p) => p.runs).map((p, i) => {
           const value = seats[p.id] ?? 0;
           const maxForParty = TOTAL_SEATS - (total - value);
           return (

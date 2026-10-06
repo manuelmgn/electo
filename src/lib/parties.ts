@@ -10,6 +10,8 @@
 // - logo:    nome do ficheiro do logo dentro de /public/logos/
 //            (se o ficheiro non existe, móstrase o chip de cor
 //            coas siglas no seu lugar).
+// - runs:    se o partido se presenta ás eleccións (true) ou non
+//            (false). Os desactivados non aparecen no editor.
 // - seats:   escaños que o partido ten actualmente (ou tiña nas
 //            últimas eleccións). Só se usa para ORDENAR a lista
 //            de partidos no editor principal (de maior a menor).
@@ -29,29 +31,30 @@ export type Party = {
   logo: string;
   seats: number;
   axis: number;
+  runs: boolean;
 };
 
 export const TOTAL_SEATS = 350;
 
 export const PARTIES: Party[] = [
-  { id: "pp",      name: "Partido Popular",                                  short: "PP",    color: "#0B5FA5", logo: "pp.png",      seats: 137, axis: 2 },
-  { id: "psoe",    name: "Partido Socialista Obrero Español",                short: "PSOE",  color: "#E30613", logo: "psoe.png",    seats: 121, axis: -1 },
-  { id: "vox",     name: "Vox",                                              short: "Vox",   color: "#5AC035", logo: "vox.png",     seats: 33,  axis: 3 },
-  { id: "fe",      name: "Frente Amplio",                                    short: "FE",    color: "#EC407A", logo: "fa.png",      seats: 27,   axis: -2 },
-  { id: "jxc",     name: "Junts per Catalunya",                              short: "JxC",   color: "#00C1B1", logo: "jxc.png",     seats: 7,   axis: 1 },
-  { id: "erc",     name: "Esquerra Republicana de Catalunya",                short: "ERC",   color: "#F9B233", logo: "erc.png",     seats: 7,   axis: -2 },
-  { id: "ehb",     name: "EH Bildu",                                         short: "EHB",   color: "#0BCFB5", logo: "ehb.jpg",     seats: 6,   axis: -2 },
-  { id: "pnv",     name: "Partido Nacionalista Vasco",                       short: "PNV",   color: "#0E6E4E", logo: "pnv.png",     seats: 5,   axis: 1 },
-  { id: "podemos", name: "Podemos",                                          short: "P.",    color: "#7D3C98", logo: "podemos.png", seats: 4,   axis: -3 },
-  { id: "bng",     name: "Bloque Nacionalista Galego",                       short: "BNG",   color: "#7FC4E8", logo: "bng.png",     seats: 1,   axis: -2 },
-  { id: "upn",     name: "Unión del Pueblo Navarro",                         short: "UPN",   color: "#3A5FBD", logo: "upn.jpg",     seats: 1,   axis: 2 },
-  { id: "cc",      name: "Coalición Canaria",                                short: "CC",    color: "#FFCE00", logo: "cc.png",      seats: 1,   axis: 1 },
-  { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     short: "PACMA", color: "#00FF7F", logo: "pacma.jpg",   seats: 0,   axis: 0 },
-  { id: "nc",      name: "Nueva Canarias",                                   short: "NC",    color: "#86BD42", logo: "nc.png",      seats: 0,   axis: -1 },
-  { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",      seats: 0,   axis: 2 },
-  { id: "cup",     name: "Candidaturas d'Unitat Popular",                    short: "CUP",   color: "#FFEE00", logo: "cup.png",     seats: 0,   axis: -3 },
-  { id: "ac",      name: "Aliança Catalana",                                 short: "AC",   color: "#114B80", logo: "ac.png",     seats: 0,   axis: 2 },
-  { id: "vv",      name: "Varios",                                           short: "VV",    color: "#6e6e6e", logo: "vv.png",      seats: 0,   axis: 0 },
+  { id: "pp",      name: "Partido Popular",                                  short: "PP",    color: "#0B5FA5", logo: "pp.png",      seats: 137, axis: 2, runs: true },
+  { id: "psoe",    name: "Partido Socialista Obrero Español",                short: "PSOE",  color: "#E30613", logo: "psoe.png",    seats: 121, axis: -1, runs: true },
+  { id: "vox",     name: "Vox",                                              short: "Vox",   color: "#5AC035", logo: "vox.png",     seats: 33,  axis: 3, runs: true },
+  { id: "fe",      name: "Frente Amplio",                                    short: "FE",    color: "#EC407A", logo: "fa.png",      seats: 27,   axis: -2, runs: true },
+  { id: "jxc",     name: "Junts per Catalunya",                              short: "JxC",   color: "#00C1B1", logo: "jxc.png",     seats: 7,   axis: 1, runs: true },
+  { id: "erc",     name: "Esquerra Republicana de Catalunya",                short: "ERC",   color: "#F9B233", logo: "erc.png",     seats: 7,   axis: -2, runs: true },
+  { id: "ehb",     name: "EH Bildu",                                         short: "EHB",   color: "#0BCFB5", logo: "ehb.jpg",     seats: 6,   axis: -2, runs: true },
+  { id: "pnv",     name: "Partido Nacionalista Vasco",                       short: "PNV",   color: "#0E6E4E", logo: "pnv.png",     seats: 5,   axis: 1, runs: true },
+  { id: "podemos", name: "Podemos",                                          short: "P.",    color: "#7D3C98", logo: "podemos.png", seats: 4,   axis: -3, runs: true },
+  { id: "bng",     name: "Bloque Nacionalista Galego",                       short: "BNG",   color: "#7FC4E8", logo: "bng.png",     seats: 1,   axis: -2, runs: true },
+  { id: "upn",     name: "Unión del Pueblo Navarro",                         short: "UPN",   color: "#3A5FBD", logo: "upn.jpg",     seats: 1,   axis: 2, runs: true },
+  { id: "cc",      name: "Coalición Canaria",                                short: "CC",    color: "#FFCE00", logo: "cc.png",      seats: 1,   axis: 1, runs: true },
+  { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     short: "PACMA", color: "#00FF7F", logo: "pacma.jpg",   seats: 0,   axis: 0, runs: true },
+  { id: "nc",      name: "Nueva Canarias",                                   short: "NC",    color: "#86BD42", logo: "nc.png",      seats: 0,   axis: -1, runs: true },
+  { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",      seats: 0,   axis: 2, runs: true },
+  { id: "cup",     name: "Candidaturas d'Unitat Popular",                    short: "CUP",   color: "#FFEE00", logo: "cup.png",     seats: 0,   axis: -3, runs: true },
+  { id: "ac",      name: "Aliança Catalana",                                 short: "AC",   color: "#114B80", logo: "ac.png",     seats: 0,   axis: 2, runs: true },
+  { id: "vv",      name: "Varios",                                           short: "VV",    color: "#6e6e6e", logo: "vv.png",      seats: 0,   axis: 0, runs: true },
 ];
 
 // Partidos ordenados por escaños actuais (descendente; os empates
