@@ -14,6 +14,8 @@
   --accent-contrast: #ffffff;
   --danger: #d92d20;
   --ok: #128a46;
+  --warn: #c2410c;
+  --copied: #0f766e;
   color-scheme: light;
 }
 
@@ -28,6 +30,8 @@
   --accent-contrast: #0b0e15;
   --danger: #ff6b5e;
   --ok: #3ecf7a;
+  --warn: #fb923c;
+  --copied: #2dd4bf;
   color-scheme: dark;
 }
 
@@ -43,6 +47,8 @@
     --accent-contrast: #0b0e15;
     --danger: #ff6b5e;
     --ok: #3ecf7a;
+    --warn: #fb923c;
+    --copied: #2dd4bf;
     color-scheme: dark;
   }
 }

@@ -46,8 +46,21 @@ export async function POST(req: Request) {
   const governs = sanitizeMarks(body.governs);
   const allies = sanitizeMarks(body.allies);
 
+  // Erros transitorios de conexión (pooler de Neon pechando conexións
+  // en frío, rede, etc.): o código comeza por 08 (connection exception),
+  // ou vén sen código pero con errno de rede (ECONNRESET, ETIMEDOUT...).
+  // Reinténtanse antes de render o erro ao cliente.
+  const isTransient = (err: unknown): boolean => {
+    const e = err as { code?: string; errno?: string };
+    if (typeof e?.code === "string") {
+      return e.code.startsWith("08") || e.code === "57P01" || e.code === "55P03";
+    }
+    return typeof e?.errno === "string";
+  };
+
   // Reintenta con código novo se o anterior colisiona (improbable, pero
-  // a clave primaria obriga a comprobalo).
+  // a clave primaria obriga a comprobalo) e reintenta tamén os erros
+  // transitorios de conexión, con pausa curta entre intentos.
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = generateShareCode();
     try {
@@ -63,6 +76,10 @@ export async function POST(req: Request) {
       `;
       return NextResponse.json({ code });
     } catch (err) {
+      if (isTransient(err) && attempt < 4) {
+        await new Promise((r) => setTimeout(r, 200));
+        continue;
+      }
       if (attempt === 4) {
         return NextResponse.json({ message: "errorGeneric" }, { status: 500 });
       }

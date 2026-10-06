@@ -97,7 +97,7 @@ export default function Editor({
   const [title, setTitle] = useState(initialTitle ?? "");
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [shareNotice, setShareNotice] = useState(false); // aviso de ligazón copiada
+  const [shareNotice, setShareNotice] = useState<"ok" | "warn" | null>(null); // aviso de ligazón copiada
   const [local, setLocal] = useState<LocalPrediction[]>([]);
   const [localId, setLocalId] = useState<number | null>(null);
   const toastTimer = useRef<number | null>(null);
@@ -284,6 +284,7 @@ export default function Editor({
   // co estado codificado no hash (#p=...), que se basta a si mesma.
   const share = async () => {
     let path = "";
+    let cloud = false;
     try {
       const res = await fetch("/api/share", {
         method: "POST",
@@ -292,7 +293,10 @@ export default function Editor({
       });
       if (res.ok) {
         const data = await res.json();
-        if (typeof data.code === "string") path = `/s/${data.code}`;
+        if (typeof data.code === "string") {
+          path = `/s/${data.code}`;
+          cloud = true;
+        }
       }
     } catch {
       // sen rede/BD: uso o fallback de abaixo
@@ -305,8 +309,8 @@ export default function Editor({
     try {
       await navigator.clipboard.writeText(text);
       if (shareTimer.current !== null) window.clearTimeout(shareTimer.current);
-      setShareNotice(true);
-      shareTimer.current = window.setTimeout(() => setShareNotice(false), 3200);
+      setShareNotice(cloud ? "ok" : "warn");
+      shareTimer.current = window.setTimeout(() => setShareNotice(null), 3200);
     } catch {
       notify(t.shareError);
     }
@@ -623,17 +627,19 @@ export default function Editor({
         </section>
       )}
 
-      {/* Aviso superior: ligazón copiada (desaparece só) */}
+      {/* Aviso superior: ligazón copiada (desaparece só). Verdoso azulado
+          se se gardou na nube; laranxa se foi o fallback de hash. */}
       {shareNotice && (
         <div
           className="anim-toast fixed left-1/2 top-4 z-50 flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold shadow-xl"
-          style={{ background: "var(--ok)", color: "var(--bg)" }}
+          style={{
+            background: shareNotice === "ok" ? "var(--copied)" : "var(--warn)",
+            color: "var(--bg)",
+          }}
           role="status"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M20 6 9 17l-5-5" />
-          </svg>
-          {t.shareCopied}
+          <span aria-hidden="true">{shareNotice === "ok" ? "🔗" : "⚠️"}</span>
+          {shareNotice === "ok" ? t.shareCopied : t.shareCopiedOffline}
         </div>
       )}
 
