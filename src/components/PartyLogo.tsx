@@ -28,7 +28,7 @@ export default function PartyLogo({
   return (
     <span
       className={`flex shrink-0 items-center justify-center overflow-hidden rounded-lg ${className}`}
-      style={{ background: party.color }}
+      style={{ background: "#EBEBEB" }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img

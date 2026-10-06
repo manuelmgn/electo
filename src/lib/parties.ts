@@ -46,11 +46,13 @@ export const PARTIES: Party[] = [
   { id: "bng",     name: "Bloque Nacionalista Galego",                       short: "BNG",   color: "#7FC4E8", logo: "bng.png",    axis: -2, runs: true },
   { id: "upn",     name: "Unión del Pueblo Navarro",                         short: "UPN",   color: "#3A5FBD", logo: "upn.jpg",    axis: 2, runs: true },
   { id: "cc",      name: "Coalición Canaria",                                short: "CC",    color: "#FFCE00", logo: "cc.png",     axis: 1, runs: true },
-  { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     short: "PACMA", color: "#00FF7F", logo: "pacma.jpg",  axis: 0, runs: true },
   { id: "nc",      name: "Nueva Canarias",                                   short: "NC",    color: "#86BD42", logo: "nc.png",     axis: -1, runs: true },
-  { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",     axis: 2, runs: true },
   { id: "cup",     name: "Candidaturas d'Unitat Popular",                    short: "CUP",   color: "#FFEE00", logo: "cup.png",    axis: -3, runs: true },
-  { id: "ac",      name: "Aliança Catalana",                                 short: "AC",   color: "#114B80", logo: "ac.png",    axis: 2, runs: true },
+  { id: "aa",      name: "Adelante Andalucía",                               short: "AA",   color: "#24C87E", logo: "aa.jpeg",    axis: -2, runs: true },
+  { id: "pacma",   name: "Partido Animalista Contra el Maltrato Animal",     short: "PACMA", color: "#00FF7F", logo: "pacma.jpg",  axis: 0, runs: true },
+  { id: "fo",      name: "Frente Obrero",                                    short: "FO",    color: "#111111", logo: "fo.png",     axis: 2, runs: true },
+  { id: "ac",      name: "Aliança Catalana",                                 short: "AC",   color: "#114B80", logo: "ac.png",    axis: 2, runs: false },
+  { id: "cs",      name: "Ciudadanos",                                 short: "CS",   color: "#EF5E2C", logo: "cs.jpeg",    axis: 2, runs: false },
   { id: "vv",      name: "Varios",                                           short: "VV",    color: "#6e6e6e", logo: "vv.png",     axis: 0, runs: true },
 ];
 
