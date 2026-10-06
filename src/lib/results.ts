@@ -42,8 +42,24 @@ export const ELECTION_RESULTS: ElectionResults = {
     ac: 0,
     vv: 0,
   },
-  "2019": {
-    // Enche aquí os escaños de 2019: id do partido → escaños.
-    // Exemplo: cs: 10,
+  "2019": {  
+    pp: 89,
+    psoe: 120,
+    vox: 52,
+    cs: 10,
+    jxc: 8,
+    erc: 13,
+    ehb: 5,
+    pnv: 6,
+    podemos: 35,
+    bng: 1,
+    upn: 2,
+    cc: 2,
+    te: 1,
+    prc: 1,
+    compromis: 1,
+    cup: 2,
+    mp: 2,
+    vv: 0,
   },
 };
