@@ -29,12 +29,18 @@ async function loadShared(code: string): Promise<SharedRow | null> {
   `;
   if (rows.length === 0) return null;
   const r = rows[0];
+  // Dependendo do tipo de columna que reporte o servidor, o driver pode
+  // devolver os JSONB coma obxecto xa parseado ou coma cadea JSON.
+  const asMarks = (v: unknown): Record<string, boolean> =>
+    (typeof v === "string" ? JSON.parse(v) : v) as Record<string, boolean>;
+  const asSeats = (v: unknown): Record<string, number> =>
+    (typeof v === "string" ? JSON.parse(v) : v) as Record<string, number>;
   return {
     code: r.code as string,
     title: r.title as string,
-    seats: r.seats as Record<string, number>,
-    governs: r.governs as Record<string, boolean>,
-    allies: r.allies as Record<string, boolean>,
+    seats: asSeats(r.seats),
+    governs: asMarks(r.governs),
+    allies: asMarks(r.allies),
   };
 }
 

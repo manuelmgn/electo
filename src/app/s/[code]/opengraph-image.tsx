@@ -26,7 +26,10 @@ export default async function Image({ params }: { params: Promise<{ code: string
     `;
     if (rows.length === 0) return fallback();
     const title = (rows[0].title as string) || "Predición compartida";
-    const seats = rows[0].seats as Record<string, number>;
+    const rawSeats = rows[0].seats;
+    const seats = (
+      typeof rawSeats === "string" ? JSON.parse(rawSeats) : rawSeats
+    ) as Record<string, number>;
     const summary = viewSummary(
       { slug: "", key: "", seats, government: {}, allies: {} },
       PARTIES
