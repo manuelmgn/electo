@@ -38,13 +38,16 @@ export default function ResultsView({
   const [shareNotice, setShareNotice] = useState(false);
   const shareTimer = useRef<number | null>(null);
 
-  // Partidos con escaños, ordenados por escaños
+  // Partidos con escaños, ordenados por escaños; en caso de empate,
+  // alfabeticamente polo nome.
   const viewParties = useMemo(
     () =>
-      PARTIES.map((p, i) => ({ p, i }))
+      PARTIES.map((p) => ({ p }))
         .filter(({ p }) => (seats[p.id] ?? 0) > 0)
         .sort(
-          (a, b) => (seats[b.p.id] ?? 0) - (seats[a.p.id] ?? 0) || a.i - b.i
+          (a, b) =>
+            (seats[b.p.id] ?? 0) - (seats[a.p.id] ?? 0) ||
+            a.p.name.localeCompare(b.p.name)
         )
         .map(({ p }) => p),
     [seats]

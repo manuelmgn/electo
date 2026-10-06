@@ -92,7 +92,7 @@ export function viewSummary(
   parties: { id: string; short: string }[]
 ): string {
   return Object.entries(view.seats)
-    .sort((a, b) => b[1] - a[1])
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, 3)
     .map(([id, n]) => {
       const short = parties.find((p) => p.id === id)?.short ?? id;
