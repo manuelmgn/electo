@@ -1,4 +1,7 @@
-import { PARTIES, TOTAL_SEATS, MAJORITY_SEATS, axisValue } from "@/lib/parties";
+"use client";
+
+import { PARTIES, TOTAL_SEATS, MAJORITY_SEATS, axisValue, type Party } from "@/lib/parties";
+import BarTooltip, { useBarHover } from "./BarTooltip";
 
 // Fronteira exacta entre os asentos 175 e 176 (inicio da maioría
 // absoluta), a mesma posición que a liña do hemiciclo.
@@ -13,11 +16,23 @@ export default function SeatBar({
   height?: string;
   majorityLabel?: string;
 }) {
+  const { activeId, enter, leave, tap } = useBarHover();
+
   // Orde esquerda → dereita polo eixo; os empates mantén a orde da lista.
-  const withSeats = PARTIES.map((p, i) => ({ p, i }))
-    .filter(({ p }) => (seats[p.id] ?? 0) > 0)
-    .sort((a, b) => axisValue(a.p) - axisValue(b.p) || a.i - b.i)
-    .map(({ p }) => p);
+  // Cada segmento leva tamén o seu centro en % para ancorar o tooltip.
+  const segments: { party: Party; count: number; centerPct: number }[] = [];
+  let acc = 0;
+  for (const { p, i } of PARTIES.map((p, i) => ({ p, i })).sort(
+    (a, b) => axisValue(a.p) - axisValue(b.p) || a.i - b.i
+  )) {
+    const count = seats[p.id] ?? 0;
+    if (count <= 0) continue;
+    const widthPct = (count / TOTAL_SEATS) * 100;
+    segments.push({ party: p, count, centerPct: acc + widthPct / 2 });
+    acc += widthPct;
+  }
+
+  const active = segments.find((s) => s.party.id === activeId) ?? null;
 
   return (
     <div className="relative" role="img" aria-label="Distribución de escaños">
@@ -25,21 +40,29 @@ export default function SeatBar({
         className={`flex w-full overflow-hidden rounded-full ${height}`}
         style={{ background: "var(--surface-2)" }}
       >
-        {withSeats.length === 0 && (
+        {segments.length === 0 && (
           <div className="h-full w-full" style={{ background: "var(--surface-2)" }} />
         )}
-        {withSeats.map((p) => (
-          <div
-            key={p.id}
-            title={`${p.short}: ${seats[p.id]}`}
-            className="h-full"
-            style={{
-              width: `${((seats[p.id] ?? 0) / TOTAL_SEATS) * 100}%`,
-              background: p.color,
-              transition: "width 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
-            }}
-          />
-        ))}
+        {segments.map((s) => {
+          const dimmed = active !== null && active.party.id !== s.party.id;
+          return (
+            <div
+              key={s.party.id}
+              className="h-full"
+              style={{
+                width: `${(s.count / TOTAL_SEATS) * 100}%`,
+                background: s.party.color,
+                opacity: dimmed ? 0.25 : 1,
+                cursor: "pointer",
+                transition:
+                  "width 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.15s ease",
+              }}
+              onPointerEnter={(e) => enter(s.party.id, e.pointerType)}
+              onPointerLeave={(e) => leave(s.party.id, e.pointerType)}
+              onPointerDown={(e) => tap(s.party.id, e.pointerType)}
+            />
+          );
+        })}
       </div>
       {/* Liña da maioría absoluta: fronteira asento 175/176. Sobresae da
           barra para que se vexa ben sobre calquera cor de partido. */}
@@ -57,6 +80,13 @@ export default function SeatBar({
         }}
         title={majorityLabel}
       />
+      {active && (
+        <BarTooltip
+          party={active.party}
+          count={active.count}
+          leftPct={active.centerPct}
+        />
+      )}
     </div>
   );
 }
