@@ -48,8 +48,8 @@ export type ElectionAllies = Record<string, Record<string, boolean>>;
 export const ELECTION_ALLIES: ElectionAllies = {
   "2023": { erc: true, jxc: true, ehb: true, pnv: true, bng: true, cc: true },
   "2019 I": {  },
-  "2019 II": { ehb: true, pnv: true },
-  "2016": { cs: true },
+  "2019 II": { pnv: true, mp: true, nc: true, com: true, te: true, bng: true },
+  "2016": { cs: true, cc:true },
 };
 
 export const ELECTION_RESULTS: ElectionResults = {
