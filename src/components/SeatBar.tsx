@@ -20,36 +20,40 @@ export default function SeatBar({
     .map(({ p }) => p);
 
   return (
-    <div
-      className={`relative flex w-full overflow-hidden rounded-full ${height}`}
-      style={{ background: "var(--surface-2)" }}
-      role="img"
-      aria-label="Distribución de escaños"
-    >
-      {withSeats.length === 0 && (
-        <div className="h-full w-full" style={{ background: "var(--surface-2)" }} />
-      )}
-      {withSeats.map((p) => (
-        <div
-          key={p.id}
-          title={`${p.short}: ${seats[p.id]}`}
-          className="h-full"
-          style={{
-            width: `${((seats[p.id] ?? 0) / TOTAL_SEATS) * 100}%`,
-            background: p.color,
-            transition: "width 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
-          }}
-        />
-      ))}
-      {/* Liña da maioría absoluta: fronteira asento 175/176 */}
+    <div className="relative" role="img" aria-label="Distribución de escaños">
       <div
-        className="absolute top-0 h-full"
+        className={`flex w-full overflow-hidden rounded-full ${height}`}
+        style={{ background: "var(--surface-2)" }}
+      >
+        {withSeats.length === 0 && (
+          <div className="h-full w-full" style={{ background: "var(--surface-2)" }} />
+        )}
+        {withSeats.map((p) => (
+          <div
+            key={p.id}
+            title={`${p.short}: ${seats[p.id]}`}
+            className="h-full"
+            style={{
+              width: `${((seats[p.id] ?? 0) / TOTAL_SEATS) * 100}%`,
+              background: p.color,
+              transition: "width 0.45s cubic-bezier(0.22, 1, 0.36, 1)",
+            }}
+          />
+        ))}
+      </div>
+      {/* Liña da maioría absoluta: fronteira asento 175/176. Sobresae da
+          barra para que se vexa ben sobre calquera cor de partido. */}
+      <div
+        className="absolute"
         style={{
           left: `${MAJORITY_BOUNDARY_PCT}%`,
-          width: 2,
+          top: -4,
+          bottom: -4,
+          width: 3,
           transform: "translateX(-50%)",
-          background: "currentColor",
-          opacity: 0.45,
+          background: "var(--text)",
+          opacity: 0.7,
+          borderRadius: 2,
         }}
         title={majorityLabel}
       />
