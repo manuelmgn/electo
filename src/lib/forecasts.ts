@@ -53,4 +53,16 @@ export const FORECASTS: Record<string, Forecast> = {
     government: { pp: true, vox: true },
     allies: {  },
   },
+  "2026-09 (Celeste Tel)": {
+    published: true,
+    seats: {
+      pp: 147,
+      psoe: 101,
+      vox: 62,
+      s: 6,
+      vv: 34,
+    },
+    government: { pp: true, vox: true },
+    allies: {  },
+  },
 };
