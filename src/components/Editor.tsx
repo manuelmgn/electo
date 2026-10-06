@@ -575,7 +575,8 @@ export default function Editor({
         })}
       </section>
 
-      {/* Gardar */}
+      {/* Gardar: o botón principal é o de compartir (vaí primeiro e
+          destacado); gardar queda como secundario. */}
       <section className="card space-y-3 p-4">
         <input
           className="input"
@@ -584,11 +585,18 @@ export default function Editor({
           onChange={(e) => setTitle(e.target.value)}
           aria-label={t.predictionTitle}
         />
+        <button
+          onClick={share}
+          disabled={!exact}
+          className="btn btn-primary w-full text-base"
+        >
+          {t.share}
+        </button>
         {user ? (
           <button
             onClick={saveCloud}
             disabled={!exact || saving}
-            className="btn btn-primary w-full text-base"
+            className="btn btn-ghost w-full text-base"
           >
             {saving ? t.saving : editingId ? t.update : t.save}
           </button>
@@ -597,7 +605,7 @@ export default function Editor({
             <button
               onClick={saveLocal}
               disabled={!exact}
-              className="btn btn-primary w-full text-base"
+              className="btn btn-ghost w-full text-base"
             >
               {t.guestSave}
             </button>
@@ -609,13 +617,6 @@ export default function Editor({
             </p>
           </>
         )}
-        <button
-          onClick={share}
-          disabled={!exact}
-          className="btn btn-ghost w-full text-base"
-        >
-          {t.share}
-        </button>
       </section>
 
       {/* Predicicións locais */}
