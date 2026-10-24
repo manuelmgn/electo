@@ -43,10 +43,24 @@ export default function Header({ user }: { user: { name: string } | null }) {
   };
 
   const logout = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
     setMenuOpen(false);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch {
+      // sen rede: pecha o menú igualmente e refresca o estado client-side
+    }
     router.refresh();
   };
+
+  // Esc pecha o menú de usuario (accesibilidade).
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [menuOpen]);
 
   return (
     <header className="anim-fade-up sticky top-0 z-20 border-b" style={{ background: "var(--bg)", borderColor: "var(--border)" }}>
@@ -113,6 +127,8 @@ export default function Header({ user }: { user: { name: string } | null }) {
               className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold sm:h-9 sm:w-9 lg:h-10 lg:w-10"
               style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}
               aria-label={t.hello}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
             >
               {user.name.charAt(0).toUpperCase()}
             </button>
@@ -131,6 +147,7 @@ export default function Header({ user }: { user: { name: string } | null }) {
             {/* Backdrop: pecha o menú ao clicar fóra */}
             <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(false)} />
             <div
+              role="menu"
               className="anim-pop absolute right-4 top-full z-30 mt-2 w-48 overflow-hidden py-1 shadow-xl sm:right-6 lg:right-12"
               style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "0.75rem" }}
             >

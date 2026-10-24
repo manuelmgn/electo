@@ -4,6 +4,10 @@ import { PARTIES, TOTAL_SEATS } from "./parties";
 
 export type SeatEntry = { partyId: string; seats: number };
 
+// Título por defecto dunha predición gardada sen título explícito
+// (o editor engade a data; as rutas API usan isto a secas).
+export const DEFAULT_PREDICTION_TITLE = "Predición";
+
 // Cliente SQL (global ou transacción de sql.begin) con tagged templates.
 type DbClient = postgres.Sql | postgres.TransactionSql;
 

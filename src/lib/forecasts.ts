@@ -56,7 +56,7 @@ export const FORECASTS: Record<string, Forecast> = {
       salf: 0,
     },
     government: { pp: true, vox: true },
-    allies: {  },
+    allies: {},
   },
   "26-09 (CIS-Electomanía)": {
     published: true,
@@ -76,7 +76,7 @@ export const FORECASTS: Record<string, Forecast> = {
       salf: 0,
     },
     government: { pp: true, vox: true },
-    allies: {  },
+    allies: {},
   },
   "26-09 (Celeste Tel)": {
     published: true,
@@ -88,6 +88,6 @@ export const FORECASTS: Record<string, Forecast> = {
       vv: 34,
     },
     government: { pp: true, vox: true },
-    allies: {  },
+    allies: {},
   },
 };

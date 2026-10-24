@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PARTIES, textOn } from "@/lib/parties";
-import { useI18n, formatDate } from "@/lib/i18n";
+import { useI18n, errorMessage, formatDate } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
 
 export type PredictionDto = {
@@ -22,13 +22,22 @@ export default function PredictionsClient({
   const { t, lang } = useI18n();
   const router = useRouter();
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const remove = async (id: number) => {
     if (!window.confirm(t.confirmDelete)) return;
     setDeleting(id);
+    setError(null);
     try {
       const res = await fetch(`/api/predictions/${id}`, { method: "DELETE" });
-      if (res.ok) router.refresh();
+      if (res.ok) {
+        router.refresh();
+      } else {
+        const data = await res.json().catch(() => null);
+        setError(errorMessage(t, data?.message));
+      }
+    } catch {
+      setError(t.errorGeneric);
     } finally {
       setDeleting(null);
     }
@@ -46,6 +55,19 @@ export default function PredictionsClient({
       {predictions.length === 0 && (
         <p className="card p-6 text-center text-sm" style={{ color: "var(--muted)" }}>
           {t.noPredictions}
+        </p>
+      )}
+
+      {error && (
+        <p
+          className="anim-pop rounded-lg px-3 py-2 text-sm font-medium"
+          style={{
+            color: "var(--danger)",
+            background: "color-mix(in srgb, var(--danger) 10%, transparent)",
+          }}
+          role="alert"
+        >
+          {error}
         </p>
       )}
 

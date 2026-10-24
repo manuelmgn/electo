@@ -111,6 +111,11 @@ export default function Editor({
   const [saving, setSaving] = useState(false);
   const [local, setLocal] = useState<LocalPrediction[]>([]);
   const [localId, setLocalId] = useState<number | null>(null);
+  // Id da predición na nube que se está a editar: o `editingId` vén
+  // do servidor (?cargar=) ou, despois do primeiro POST, o id devolto
+  // pola API. Así o segundo gardado actualiza (PUT) no canto de
+  // crear unha copia nova.
+  const [cloudId, setCloudId] = useState<number | null>(editingId ?? null);
   // Avisos temporais: erros (toast inferior) e aviso de copia
   // da ligazón ("ok" na nube / "warn" no fallback de hash).
   const toast = useTimedFlag<string>(2600);
@@ -188,8 +193,6 @@ export default function Editor({
     setLocalId(null);
   };
 
-  const notify = (msg: string) => toast.fire(msg);
-
   const persistLocal = (list: LocalPrediction[]) => {
     setLocal(list);
     localStorage.setItem("localPredictions", JSON.stringify(list));
@@ -214,27 +217,36 @@ export default function Editor({
       setLocalId(entry.id);
       persistLocal([entry, ...local]);
     }
-    notify(t.saved);
+    toast.fire(t.saved);
   };
 
   const saveCloud = async () => {
     setSaving(true);
     try {
-      const url = editingId ? `/api/predictions/${editingId}` : "/api/predictions";
-      const method = editingId ? "PUT" : "POST";
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, seats }),
-      });
+      const res = await fetch(
+        cloudId ? `/api/predictions/${cloudId}` : "/api/predictions",
+        {
+          method: cloudId ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title, seats }),
+        }
+      );
       if (res.ok) {
-        notify(t.saved);
+        // O primeiro gardado devolve o id: gárdase no estado para que
+        // os seguintes vaian como PUT e non se dupliquen predicións.
+        const data = (await res.json().catch(() => null)) as
+          | { id?: number }
+          | null;
+        if (!cloudId && data && typeof data.id === "number") {
+          setCloudId(data.id);
+        }
+        toast.fire(t.saved);
       } else {
         const data = await res.json().catch(() => null);
-        notify(errorMessage(t, data?.message));
+        toast.fire(errorMessage(t, data?.message));
       }
     } catch {
-      notify(t.errorGeneric);
+      toast.fire(t.errorGeneric);
     } finally {
       setSaving(false);
     }
@@ -286,7 +298,7 @@ export default function Editor({
       await navigator.clipboard.writeText(text);
       shareNotice.fire(cloud ? "ok" : "warn");
     } catch {
-      notify(t.shareError);
+      toast.fire(t.shareError);
     }
   };
 
@@ -480,7 +492,7 @@ export default function Editor({
             disabled={!exact || saving}
             className="btn btn-ghost w-full text-base"
           >
-            {saving ? t.saving : editingId ? t.update : t.save}
+            {saving ? t.saving : cloudId ? t.update : t.save}
           </button>
         ) : (
           <>

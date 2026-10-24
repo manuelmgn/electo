@@ -57,6 +57,6 @@ export function setSessionCookie(res: Response, userId: number) {
 export function clearSessionCookie(res: Response) {
   res.headers.append(
     "Set-Cookie",
-    `${SESSION_COOKIE}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`
+    `${SESSION_COOKIE}=; ${cookieBase(0)}`
   );
 }

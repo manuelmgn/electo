@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { requireDb, readJson } from "@/lib/api";
 import { getSessionUser } from "@/lib/auth";
-import { validateSeats, insertSeats } from "@/lib/predictions";
+import { validateSeats, insertSeats, DEFAULT_PREDICTION_TITLE } from "@/lib/predictions";
 
 type RouteCtx = { params: Promise<{ id: string }> };
 
@@ -48,7 +48,7 @@ export async function PUT(req: Request, ctx: RouteCtx) {
   }
 
   try {
-    const title = body.title?.trim().slice(0, 120) || "Predición";
+    const title = body.title?.trim().slice(0, 120) || DEFAULT_PREDICTION_TITLE;
     await sql.begin(async (tx) => {
       await tx`DELETE FROM prediction_seats WHERE prediction_id = ${predictionId}`;
       await insertSeats(predictionId, entries, tx);

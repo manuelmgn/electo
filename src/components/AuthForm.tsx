@@ -69,6 +69,9 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
             onChange={(e) => setEmail(e.target.value)}
             required
             autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
           />
         </label>
 

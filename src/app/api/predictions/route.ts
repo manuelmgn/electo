@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { requireDb, readJson } from "@/lib/api";
 import { getSessionUser } from "@/lib/auth";
-import { validateSeats, insertSeats } from "@/lib/predictions";
+import { validateSeats, insertSeats, DEFAULT_PREDICTION_TITLE } from "@/lib/predictions";
 
 // POST: garda unha predición nova (escaños + título) do usuario da
 // sesión. Predición e escaños insértanse nunha transacción: se os
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const title = body.title?.trim().slice(0, 120) || "Predición";
+    const title = body.title?.trim().slice(0, 120) || DEFAULT_PREDICTION_TITLE;
     const predictionId = await sql.begin(async (tx) => {
       const preds =
         await tx`INSERT INTO predictions (user_id, title) VALUES (${user.id}, ${title}) RETURNING id`;
