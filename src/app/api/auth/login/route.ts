@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { sql, dbConfigured } from "@/lib/db";
+import { sql } from "@/lib/db";
+import { requireDb, readJson } from "@/lib/api";
 import { setSessionCookie } from "@/lib/auth";
 
-export async function POST(req: Request) {
-  if (!dbConfigured()) {
-    return NextResponse.json({ message: "no-db" }, { status: 500 });
-  }
+// Hash real (de "electo26-dummy") usado cando non existe o usuario
+// que pediu login: cóstase o mesmo ca comparar un contrasinal real e
+// así non se filtra por tempo de resposta que un correo ten conta.
+const DUMMY_HASH = "$2a$10$taQ/M3k0yGxbisgFCDvcYOnfj4g4dwfYRPpuvHlZiqDUE7oAL1QSC";
 
-  let body: { email?: string; password?: string };
-  try {
-    body = await req.json();
-  } catch {
+export async function POST(req: Request) {
+  const dbError = requireDb();
+  if (dbError) return dbError;
+
+  const body = await readJson<{ email?: string; password?: string }>(req);
+  if (!body) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
 
@@ -25,7 +28,11 @@ export async function POST(req: Request) {
     const rows =
       await sql`SELECT id, name, email, password_hash FROM users WHERE email = ${email}`;
     const user = rows[0];
-    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+    const ok = await bcrypt.compare(
+      password,
+      (user?.password_hash as string) ?? DUMMY_HASH
+    );
+    if (!user || !ok) {
       return NextResponse.json({ message: "bad-credentials" }, { status: 401 });
     }
 

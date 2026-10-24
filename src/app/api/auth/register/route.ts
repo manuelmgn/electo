@@ -1,34 +1,39 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { sql, dbConfigured } from "@/lib/db";
+import { sql } from "@/lib/db";
+import { requireDb, readJson } from "@/lib/api";
 import { setSessionCookie } from "@/lib/auth";
 
+// Límites de lonxitude (acordados coas restricións de schema.sql).
+const MAX_NAME = 60;
+const MAX_EMAIL = 254;
+const MIN_PASSWORD = 6;
+
 export async function POST(req: Request) {
-  if (!dbConfigured()) {
-    console.error("[register] POSTGRES_URL non configurado");
-    return NextResponse.json({ message: "no-db" }, { status: 500 });
-  }
+  const dbError = requireDb();
+  if (dbError) return dbError;
 
-  let body: { name?: string; email?: string; password?: string };
-  try {
-    body = await req.json();
-  } catch {
+  const body = await readJson<{ name?: string; email?: string; password?: string }>(req);
+  if (!body) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
 
-  const name = body.name?.trim();
-  const email = body.email?.trim().toLowerCase();
-  const password = body.password;
+  const name = body.name?.trim() ?? "";
+  const email = body.email?.trim().toLowerCase() ?? "";
+  const password = body.password ?? "";
 
-  if (!name || !email || !email.includes("@") || !password) {
+  if (!name || !email.includes("@") || !password) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
-  if (password.length < 6) {
+  if (password.length < MIN_PASSWORD) {
     return NextResponse.json({ message: "short-password" }, { status: 400 });
   }
+  if (name.length > MAX_NAME || email.length > MAX_EMAIL) {
+    return NextResponse.json({ message: "invalid-data" }, { status: 400 });
+  }
 
   try {
-    const existing = await sql`SELECT id FROM users WHERE email = ${email}`;
+    const existing = await sql`SELECT 1 FROM users WHERE email = ${email}`;
     if (existing.length > 0) {
       return NextResponse.json({ message: "email-used" }, { status: 409 });
     }

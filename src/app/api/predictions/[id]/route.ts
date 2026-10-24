@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
-import { sql, dbConfigured } from "@/lib/db";
+import { sql } from "@/lib/db";
+import { requireDb, readJson } from "@/lib/api";
 import { getSessionUser } from "@/lib/auth";
 import { validateSeats, insertSeats } from "@/lib/predictions";
 
 type RouteCtx = { params: Promise<{ id: string }> };
 
+// Comproba que a predición existe e é do usuario da sesión.
 async function ownsPrediction(userId: number, id: number): Promise<boolean> {
   const rows =
     await sql`SELECT id FROM predictions WHERE id = ${id} AND user_id = ${userId}`;
@@ -18,10 +20,13 @@ async function parseOwnedId(ctx: RouteCtx, userId: number): Promise<number | nul
   return (await ownsPrediction(userId, predictionId)) ? predictionId : null;
 }
 
+// PUT: actualiza título e reparto dunha predición propia. Borrado e
+// reinserto de escaños + UPDATE do título van nunha transacción: si
+// algo falla pola metade, queda o estado anterior intacto.
 export async function PUT(req: Request, ctx: RouteCtx) {
-  if (!dbConfigured()) {
-    return NextResponse.json({ message: "no-db" }, { status: 500 });
-  }
+  const dbError = requireDb();
+  if (dbError) return dbError;
+
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ message: "need-login" }, { status: 401 });
@@ -32,10 +37,8 @@ export async function PUT(req: Request, ctx: RouteCtx) {
     return NextResponse.json({ message: "invalid-data" }, { status: 404 });
   }
 
-  let body: { title?: string; seats?: unknown };
-  try {
-    body = await req.json();
-  } catch {
+  const body = await readJson<{ title?: string; seats?: unknown }>(req);
+  if (!body) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
 
@@ -45,13 +48,15 @@ export async function PUT(req: Request, ctx: RouteCtx) {
   }
 
   try {
-    await sql`DELETE FROM prediction_seats WHERE prediction_id = ${predictionId}`;
-    await insertSeats(predictionId, entries);
-    const title = body.title?.trim() || "Predición";
-    await sql`
-      UPDATE predictions SET title = ${title}, updated_at = now()
-      WHERE id = ${predictionId}
-    `;
+    const title = body.title?.trim().slice(0, 120) || "Predición";
+    await sql.begin(async (tx) => {
+      await tx`DELETE FROM prediction_seats WHERE prediction_id = ${predictionId}`;
+      await insertSeats(predictionId, entries, tx);
+      await tx`
+        UPDATE predictions SET title = ${title}, updated_at = now()
+        WHERE id = ${predictionId}
+      `;
+    });
     return NextResponse.json({ id: predictionId });
   } catch {
     return NextResponse.json({ message: "errorGeneric" }, { status: 500 });
@@ -59,9 +64,9 @@ export async function PUT(req: Request, ctx: RouteCtx) {
 }
 
 export async function DELETE(_req: Request, ctx: RouteCtx) {
-  if (!dbConfigured()) {
-    return NextResponse.json({ message: "no-db" }, { status: 500 });
-  }
+  const dbError = requireDb();
+  if (dbError) return dbError;
+
   const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ message: "need-login" }, { status: 401 });

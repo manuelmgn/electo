@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildShareLines, decodeShare, encodeShare, generateShareCode } from "@/lib/share";
+import { buildShareLines, decodeShare, encodeShare, generateShareCode, isValidShareCode } from "@/lib/share";
 
 describe("share", () => {
   it("codifica e descodifica sen perder datos", () => {
@@ -53,6 +53,24 @@ describe("share", () => {
     expect(decodeShare("")).toBeNull();
     expect(decodeShare("!!!")).toBeNull();
     expect(decodeShare("aGVsbG8")).toBeNull(); // JSON válido sen campo seats
+  });
+
+  it("sanea ids descoñecidos, non enteiros e negativos", () => {
+    // {"pp":137,"fantasma":200,"vox":-1,"psoe":10.5,"bng":0}
+    const code = btoa(
+      JSON.stringify({
+        v: 1,
+        seats: { pp: 137, fantasma: 200, vox: -1, psoe: 10.5, bng: 0 },
+        governs: { pp: true, fantasma: true },
+        allies: { erc: "sí" },
+      })
+    );
+    expect(decodeShare(code)).toEqual({
+      v: 1,
+      seats: { pp: 137, bng: 0 },
+      governs: { pp: true },
+      allies: {},
+    });
   });
 });
 
@@ -108,6 +126,14 @@ describe("generateShareCode", () => {
   it("xera 20 caracteres alfanuméricos", () => {
     const code = generateShareCode();
     expect(code).toMatch(/^[A-Za-z0-9]{20}$/);
+    expect(isValidShareCode(code)).toBe(true);
+  });
+
+  it("isValidShareCode rexeita o que non encaixa", () => {
+    expect(isValidShareCode("")).toBe(false);
+    expect(isValidShareCode("curto")).toBe(false);
+    expect(isValidShareCode("a b".repeat(20))).toBe(false);
+    expect(isValidShareCode("A".repeat(20))).toBe(true);
   });
 
   it("é determinista cos bytes de entrada (probas reproducibles)", () => {

@@ -4,6 +4,7 @@ import {
   PARTIES,
   TOTAL_SEATS,
   MAJORITY_SEATS,
+  seatFraction,
   type Party,
 } from "@/lib/parties";
 import BarTooltip, { useBarHover } from "./BarTooltip";
@@ -55,7 +56,7 @@ export default function GovBar({
   let acc = 0;
   for (const p of ordered) {
     const count = seats[p.id] ?? 0;
-    const widthPct = (count / TOTAL_SEATS) * 100;
+    const widthPct = seatFraction(count);
     segments.push({ party: p, count, centerPct: acc + widthPct / 2 });
     acc += widthPct;
   }
@@ -74,7 +75,7 @@ export default function GovBar({
               key={s.party.id}
               className="h-full"
               style={{
-                width: `${(s.count / TOTAL_SEATS) * 100}%`,
+                width: `${seatFraction(s.count)}%`,
                 backgroundColor: s.party.color,
                 backgroundImage: governs[s.party.id] ? undefined : ALLY_HATCH,
                 opacity: dimmed ? 0.25 : 1,

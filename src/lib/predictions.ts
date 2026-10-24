@@ -1,10 +1,15 @@
-import { sql } from "@/lib/db";
-import { PARTIES, TOTAL_SEATS } from "@/lib/parties";
+import postgres from "postgres";
+import { sql } from "./db";
+import { PARTIES, TOTAL_SEATS } from "./parties";
 
 export type SeatEntry = { partyId: string; seats: number };
 
-// Valida o reparto: ids coñecidos, enteiros >= 0 e suma exactamente 350.
-// Devolve só os partidos con asentos (> 0), ou null se non é válido.
+// Cliente SQL (global ou transacción de sql.begin) con tagged templates.
+type DbClient = postgres.Sql | postgres.TransactionSql;
+
+// Valida o reparto: ids coñecidos, enteiros >= 0 e suma exactamente
+// 350. Devolve só os partidos con escaños (> 0), ou null se non é
+// válido. Úsase a cotío nas rutas (POST/PUT de predicións e compartir).
 export function validateSeats(raw: unknown): SeatEntry[] | null {
   if (typeof raw !== "object" || raw === null) return null;
   const validIds = new Set(PARTIES.map((p) => p.id));
@@ -19,9 +24,15 @@ export function validateSeats(raw: unknown): SeatEntry[] | null {
   return sum === TOTAL_SEATS ? entries : null;
 }
 
-// Inserta todos os asentos nunha soa consulta.
-export async function insertSeats(predictionId: number, entries: SeatEntry[]) {
-  await sql`
+// Inserta tódolos escaños nunha soa consulta (unnest sobre arrays
+// paralelos). Acepta o cliente SQL para executarse dentro dunha
+// transacción (sql.begin); por defecto usa o global.
+export async function insertSeats(
+  predictionId: number,
+  entries: SeatEntry[],
+  db: DbClient = sql
+) {
+  await db`
     INSERT INTO prediction_seats (prediction_id, party_id, seats)
     SELECT ${predictionId},
            unnest(${entries.map((e) => e.partyId)}::text[]),

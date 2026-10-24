@@ -15,6 +15,17 @@ export function errorMessage(t: Dict, key: unknown): string {
   return t.errorGeneric;
 }
 
+// Locale de data segundo o idioma activo ("gl-ES" | "es-ES"). Úsase
+// en tódalas datas expostas na interface.
+export function dateLocale(lang: Lang): string {
+  return lang === "gl" ? "gl-ES" : "es-ES";
+}
+
+// Data curta (28/05/2026) na idioma activo, para tarxetas e listaxes.
+export function formatDate(date: Date | string, lang: Lang): string {
+  return new Date(date).toLocaleDateString(dateLocale(lang));
+}
+
 export function useI18n() {
   const [lang, setLangState] = useState<Lang>("gl");
 

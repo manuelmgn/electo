@@ -3,7 +3,12 @@ import "./globals.css";
 import Header from "@/components/Header";
 import { getSessionUser } from "@/lib/auth";
 
+// URL canónica para as imaxes sociais (/s/, /r/, /f/). Pódese
+// sobrescribir con NEXT_PUBLIC_SITE_URL na despregadura.
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://electo.vercel.app"
+  ),
   title: "Electo 26 · Predicións eleccións xerais 2026",
   description:
     "Crea e comparte as túas predicicións de escaños para as eleccións xerais de España 2026.",

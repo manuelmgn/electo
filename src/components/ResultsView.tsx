@@ -1,21 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import {
   PARTIES,
-  TOTAL_SEATS,
   allyShade,
   governmentShade,
-  governmentSumColor,
+  seatPercent,
 } from "@/lib/parties";
 import { buildShareLines } from "@/lib/share";
-import { ELECTION_VIEWS, FORECAST_VIEWS } from "@/lib/views";
+import {
+  ELECTION_VIEWS,
+  FORECAST_VIEWS,
+  viewList,
+} from "@/lib/views";
 import { useI18n } from "@/lib/i18n";
+import { useTimedFlag } from "@/lib/useTimedFlag";
 import SeatBar from "./SeatBar";
-import GovBar, { ALLY_HATCH } from "./GovBar";
 import Hemicycle from "./Hemicycle";
 import PartyLogo from "./PartyLogo";
+import GovSumCard from "./GovSumCard";
+import { CenterToast } from "./Toast";
 
 type Seats = Record<string, number>;
 
@@ -36,21 +41,17 @@ export default function ResultsView({
   shareUrl: string;
 }) {
   const { t } = useI18n();
-  const [shareNotice, setShareNotice] = useState(false);
-  const shareTimer = useRef<number | null>(null);
+  const shareNotice = useTimedFlag<"ok">(3200);
 
   // Partidos con escaños, ordenados por escaños; en caso de empate,
   // alfabeticamente polo nome.
   const viewParties = useMemo(
     () =>
-      PARTIES.map((p) => ({ p }))
-        .filter(({ p }) => (seats[p.id] ?? 0) > 0)
-        .sort(
-          (a, b) =>
-            (seats[b.p.id] ?? 0) - (seats[a.p.id] ?? 0) ||
-            a.p.name.localeCompare(b.p.name)
-        )
-        .map(({ p }) => p),
+      PARTIES.filter((p) => (seats[p.id] ?? 0) > 0).sort(
+        (a, b) =>
+          (seats[b.id] ?? 0) - (seats[a.id] ?? 0) ||
+          a.name.localeCompare(b.name)
+      ),
     [seats]
   );
 
@@ -65,33 +66,16 @@ export default function ResultsView({
     );
   }, [government, seats]);
 
-  // Suma de escaños de goberno + aliados.
-  const viewGovTotal = useMemo(
-    () =>
-      PARTIES.reduce(
-        (acc, p) =>
-          acc + (government[p.id] || allies[p.id] ? (seats[p.id] ?? 0) : 0),
-        0
-      ),
-    [government, allies, seats]
-  );
-
-  // Cor do partido gobernante con máis escaños, para a leyenda da barra.
-  const viewTopGovColor = useMemo(() => {
-    const top = PARTIES.filter(
-      (p) => government[p.id] && (seats[p.id] ?? 0) > 0
-    ).sort((a, b) => (seats[b.id] ?? 0) - (seats[a.id] ?? 0))[0];
-    return top?.color ?? governmentShade(0, 1);
-  }, [government, seats]);
+  // Eleccións e pronósticos coas súas vistas (mesma orde que no editor).
+  const elections = useMemo(() => viewList(ELECTION_VIEWS), []);
+  const forecasts = useMemo(() => viewList(FORECAST_VIEWS), []);
 
   const share = async () => {
     const url = `${window.location.origin}${shareUrl}`;
     const text = `${title}\n\n${buildShareLines(seats, government, allies, PARTIES).join("\n")}\n\n${url}`;
     try {
       await navigator.clipboard.writeText(text);
-      if (shareTimer.current !== null) window.clearTimeout(shareTimer.current);
-      setShareNotice(true);
-      shareTimer.current = window.setTimeout(() => setShareNotice(false), 3200);
+      shareNotice.fire("ok");
     } catch {
       // sen permiso de portapapeis: non se amosa aviso
     }
@@ -115,49 +99,9 @@ export default function ResultsView({
         <SeatBar seats={seats} height="h-3.5" majorityLabel={t.majorityInfo} />
       </section>
 
-      {/* Suma de goberno + aliados: tarxeta coa fila de insignia + leyenda
-          e a barra debaixo, coa liña da maioría. Só se amosa se hai
-          algún partido marcado. */}
-      {viewGovTotal > 0 && (
-        <section className="card space-y-2 p-4">
-          <div className="flex items-center justify-between gap-2">
-            <span
-              className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold"
-              style={{
-                background: `color-mix(in srgb, ${governmentSumColor(viewGovTotal)} 15%, transparent)`,
-                color: governmentSumColor(viewGovTotal),
-              }}
-            >
-              {t.government}: {viewGovTotal}
-            </span>
-            <div
-              className="flex shrink-0 items-center gap-3 text-[11px] font-semibold"
-              style={{ color: "var(--muted)" }}
-            >
-              <span className="flex items-center gap-1">
-                <span
-                  aria-hidden="true"
-                  className="inline-block h-2.5 w-2.5 rounded-sm"
-                  style={{ background: viewTopGovColor }}
-                />
-                🏛️ {t.government}
-              </span>
-              <span className="flex items-center gap-1">
-                <span
-                  aria-hidden="true"
-                  className="inline-block h-2.5 w-2.5 rounded-sm"
-                  style={{
-                    backgroundColor: viewTopGovColor,
-                    backgroundImage: ALLY_HATCH,
-                  }}
-                />
-                🤝 {t.ally}
-              </span>
-            </div>
-          </div>
-          <GovBar seats={seats} governs={government} allies={allies} />
-        </section>
-      )}
+      {/* Suma de goberno + aliados: tarxeta coa insignia + leyenda e a
+          barra debaixo, coa liña da maioría (oculta se non hai marcas). */}
+      <GovSumCard seats={seats} governs={government} allies={allies} />
 
       <section
         className="card divide-y overflow-hidden"
@@ -201,7 +145,7 @@ export default function ResultsView({
                 className="w-12 shrink-0 text-right text-xs tabular-nums"
                 style={{ color: "var(--muted)" }}
               >
-                {(((seats[p.id] ?? 0) / TOTAL_SEATS) * 100).toFixed(1)}%
+                {seatPercent(seats[p.id] ?? 0)}
               </span>
               <span className="w-10 shrink-0 text-right text-lg font-extrabold tabular-nums">
                 {seats[p.id] ?? 0}
@@ -229,7 +173,7 @@ export default function ResultsView({
           {t.pastResults}
         </h2>
         <div className="flex flex-wrap gap-2">
-          {Object.values(ELECTION_VIEWS).map((e) => (
+          {elections.map((e) => (
             <Link key={e.slug} href={`/r/${e.slug}`} className="btn btn-ghost !py-1.5 text-sm">
               {e.key}
             </Link>
@@ -243,7 +187,7 @@ export default function ResultsView({
           {t.forecasts}
         </h2>
         <div className="flex flex-wrap gap-2">
-          {Object.values(FORECAST_VIEWS).map((f) => (
+          {forecasts.map((f) => (
             <Link key={f.slug} href={`/f/${f.slug}`} className="btn btn-ghost !py-1.5 text-sm">
               {f.key}
             </Link>
@@ -252,16 +196,8 @@ export default function ResultsView({
       </section>
 
       {/* Aviso: ligazón copiada (desaparece só), centrado na ventana visible */}
-      {shareNotice && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="anim-toast mx-4 max-w-[calc(100vw-2rem)] rounded-2xl px-7 py-3 text-center text-sm font-semibold shadow-xl"
-            style={{ background: "var(--copied)", color: "#ffffff" }}
-            role="status"
-          >
-            {t.shareCopied}
-          </div>
-        </div>
+      {shareNotice.value && (
+        <CenterToast background="var(--copied)">{t.shareCopied}</CenterToast>
       )}
     </div>
   );

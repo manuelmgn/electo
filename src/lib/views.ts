@@ -45,16 +45,19 @@ function buildViews(
   return Object.fromEntries(
     Object.keys(entries)
       .filter((k) => Object.keys(entries[k]).length > 0)
-      .map((k) => [
-        slugifyKey(k),
-        {
-          slug: slugifyKey(k),
-          key: k,
-          seats: entries[k],
-          government: governmentOf(k),
-          allies: alliesOf(k),
-        },
-      ])
+      .map((k) => {
+        const slug = slugifyKey(k);
+        return [
+          slug,
+          {
+            slug,
+            key: k,
+            seats: entries[k],
+            government: governmentOf(k),
+            allies: alliesOf(k),
+          },
+        ];
+      })
   );
 }
 
@@ -84,6 +87,17 @@ export function getForecastView(slug: string): ReadonlyView | null {
   return FORECAST_VIEWS[slug] ?? null;
 }
 
+// Listaxe compacta de vistas (slug + clave humana), ordenada pola
+// clave de máis recente a máis antiga. Úsana os botóns linkables do
+// editor e das vistas de só lectura (mesma orde en toda a app).
+export function viewList(
+  views: Record<string, ReadonlyView>
+): { slug: string; key: string }[] {
+  return Object.values(views)
+    .sort((a, b) => b.key.localeCompare(a.key))
+    .map((v) => ({ slug: v.slug, key: v.key }));
+}
+
 // Resumo dunha vista para a descrición dos metadatos: os 3 partidos
 // con máis escaños coas súas siglas ("PP 137 · PSOE 121 · Vox 33").
 // Necesita as siglas, así que recibe a táboa de partidos (parties.ts).
@@ -91,12 +105,10 @@ export function viewSummary(
   view: ReadonlyView,
   parties: { id: string; short: string }[]
 ): string {
+  const shortOf = new Map(parties.map((p) => [p.id, p.short]));
   return Object.entries(view.seats)
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, 3)
-    .map(([id, n]) => {
-      const short = parties.find((p) => p.id === id)?.short ?? id;
-      return `${short} ${n}`;
-    })
+    .map(([id, n]) => `${shortOf.get(id) ?? id} ${n}`)
     .join(" · ");
 }

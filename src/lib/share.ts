@@ -6,6 +6,8 @@
 // garda os resultados por si mesma, sen base de datos.
 // ============================================================
 
+import { PARTY_BY_ID } from "./parties";
+
 export type SharedPrediction = {
   v: 1;
   seats: Record<string, number>;
@@ -13,9 +15,17 @@ export type SharedPrediction = {
   allies: Record<string, boolean>;
 };
 
+// Comproba se o código ten o formato xerado pola API: 20 caracteres
+// alfanuméricos. Úsase nas rutas /s/<código> para non tocar a BD con
+// código mal formado.
+export function isValidShareCode(code: string): boolean {
+  return /^[A-Za-z0-9]{20}$/.test(code);
+}
+
 // Empaquetan os datos: omiten partidos con 0 escaños e checks a
 // false para acurtar a ligazón todo o posible.
-export function encodeShare(  seats: Record<string, number>,
+export function encodeShare(
+  seats: Record<string, number>,
   governs: Record<string, boolean>,
   allies: Record<string, boolean>
 ): string {
@@ -32,24 +42,43 @@ export function encodeShare(  seats: Record<string, number>,
 }
 
 // Devolve null se o código non é válido (liga malfeita, datos
-// cortados...), para non romper a app ao cargar.
+// cortados...), para non romper a app ao cargar. Sanea o payload:
+// só ids de partidos coñecidos, escaños enteiros >= 0 e marcas a
+// true, así tódolos consumidores poden fiar do resultado.
 export function decodeShare(code: string): SharedPrediction | null {
   try {
     const b64 = code.replace(/-/g, "+").replace(/_/g, "/");
     const data = JSON.parse(atob(b64));
-    if (data && typeof data === "object" && typeof data.seats === "object") {
-      return {
-        v: 1,
-        seats: data.seats,
-        governs: data.governs ?? {},
-        // Ligazóns antigas (sen aliados): quedan sen marca.
-        allies: data.allies ?? {},
-      };
+    if (!data || typeof data !== "object" || typeof data.seats !== "object" || data.seats === null) {
+      return null;
     }
+    const seats: Record<string, number> = {};
+    for (const [id, n] of Object.entries(data.seats as Record<string, unknown>)) {
+      if (!(id in PARTY_BY_ID)) continue;
+      if (!Number.isInteger(n) || (n as number) < 0) continue;
+      seats[id] = n as number;
+    }
+    // Ligazóns antigas (sen aliados): quedan sen marca.
+    return {
+      v: 1,
+      seats,
+      governs: sanitizeMarks(data.governs),
+      allies: sanitizeMarks(data.allies),
+    };
   } catch {
     // ligazón inválida: ignórase
   }
   return null;
+}
+
+// Deixa só as marcas (goberno/aliados) de partidos coñecidos a true.
+function sanitizeMarks(raw: unknown): Record<string, boolean> {
+  if (typeof raw !== "object" || raw === null) return {};
+  const out: Record<string, boolean> = {};
+  for (const [id, v] of Object.entries(raw as Record<string, unknown>)) {
+    if (id in PARTY_BY_ID && v === true) out[id] = true;
+  }
+  return out;
 }
 
 // Líneas de texto para copiar ao portapapeis cos 4 partidos con máis

@@ -1,15 +1,28 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { PARTIES, PARTIES_BY_SEATS, PARTIES_BY_ORDER, TOTAL_SEATS, allyShade, governmentShade, governmentSumColor } from "@/lib/parties";
-import { ELECTION_VIEWS, FORECAST_VIEWS } from "@/lib/views";
+import { useEffect, useMemo, useState } from "react";
+import {
+  EDITOR_PARTIES,
+  PARTIES,
+  PARTIES_BY_SEATS,
+  TOTAL_SEATS,
+  allyShade,
+  governmentShade,
+} from "@/lib/parties";
+import {
+  ELECTION_VIEWS,
+  FORECAST_VIEWS,
+  viewList,
+} from "@/lib/views";
 import { encodeShare, decodeShare, buildShareLines } from "@/lib/share";
-import { useI18n, errorMessage } from "@/lib/i18n";
+import { useI18n, errorMessage, formatDate } from "@/lib/i18n";
+import { useTimedFlag } from "@/lib/useTimedFlag";
 import SeatBar from "./SeatBar";
-import GovBar, { ALLY_HATCH } from "./GovBar";
 import Hemicycle from "./Hemicycle";
 import PartyLogo from "./PartyLogo";
+import GovSumCard from "./GovSumCard";
+import { CenterToast, BottomToast } from "./Toast";
 
 type Seats = Record<string, number>;
 
@@ -27,8 +40,8 @@ function emptySeats(): Seats {
 }
 
 // Valores por defecto do editor: o campo `seats` de cada partido
-// (totalmente modificables), limitados aos que se presentan
-// (runs: true). O botón "Limpar" pon todo a 0.
+// (totalmente modificables), limitados ás que presentan (runs: true).
+// O botón "Limpar" pon todo a 0.
 function defaultSeats(): Seats {
   return Object.fromEntries(
     PARTIES.map((p) => [p.id, p.runs ? p.seats : 0])
@@ -96,12 +109,12 @@ export default function Editor({
   const [allies, setAllies] = useState<Record<string, boolean>>({});
   const [title, setTitle] = useState(initialTitle ?? "");
   const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
-  const [shareNotice, setShareNotice] = useState<"ok" | "warn" | null>(null); // aviso de ligazón copiada
   const [local, setLocal] = useState<LocalPrediction[]>([]);
   const [localId, setLocalId] = useState<number | null>(null);
-  const toastTimer = useRef<number | null>(null);
-  const shareTimer = useRef<number | null>(null);
+  // Avisos temporais: erros (toast inferior) e aviso de copia
+  // da ligazón ("ok" na nube / "warn" no fallback de hash).
+  const toast = useTimedFlag<string>(2600);
+  const shareNotice = useTimedFlag<"ok" | "warn">(3200);
 
   useEffect(() => {
     try {
@@ -137,20 +150,8 @@ export default function Editor({
 
   // Eleccións e pronósticos con vista de só lectura propia (máis
   // recente primeiro). As vistas viven nas rutas /r/[slug] e /f/[slug].
-  const elections = useMemo(
-    () =>
-      Object.values(ELECTION_VIEWS)
-        .sort((a, b) => b.key.localeCompare(a.key))
-        .map((v) => ({ slug: v.slug, key: v.key })),
-    []
-  );
-  const forecasts = useMemo(
-    () =>
-      Object.values(FORECAST_VIEWS)
-        .sort((a, b) => b.key.localeCompare(a.key))
-        .map((v) => ({ slug: v.slug, key: v.key })),
-    []
-  );
+  const elections = useMemo(() => viewList(ELECTION_VIEWS), []);
+  const forecasts = useMemo(() => viewList(FORECAST_VIEWS), []);
 
   // Partidos marcados como gobernantes no editor, ordenados polos
   // escaños actuais (o maior leva a tonalidade de verde máis intensa).
@@ -163,14 +164,6 @@ export default function Editor({
     );
   }, [governs, seats]);
 
-  // Cor do partido gobernante con máis escaños: mostra na leyenda da
-  // barra o "cor de partido" (goberno vai sen trama; aliados, con ela).
-  const topGovColor = useMemo(() => {
-    const top = PARTIES.filter((p) => governs[p.id] && (seats[p.id] ?? 0) > 0)
-      .sort((a, b) => (seats[b.id] ?? 0) - (seats[a.id] ?? 0))[0];
-    return top?.color ?? governmentShade(0, 1);
-  }, [governs, seats]);
-
   // Marca un partido como goberno ou aliado (ou desmárcao co mesmo
   // clic). Os dous roles son mutuamente excluíntes.
   const setRole = (id: string, role: "gov" | "ally") => {
@@ -179,19 +172,6 @@ export default function Editor({
     setGoverns((g) => ({ ...g, [id]: next === "gov" }));
     setAllies((a) => ({ ...a, [id]: next === "ally" }));
   };
-
-  // Suma de escaños dos partidos marcados como gobernantes ou aliados
-  // e cor do indicador segundo os rangos establecidos.
-  const govTotal = useMemo(
-    () =>
-      PARTIES.reduce(
-        (acc, p) =>
-          acc + (governs[p.id] || allies[p.id] ? (seats[p.id] ?? 0) : 0),
-        0
-      ),
-    [governs, allies, seats]
-  );
-  const govColor = governmentSumColor(govTotal);
 
   const setParty = (id: string, value: number) =>
     setSeats((s) => ({
@@ -208,11 +188,7 @@ export default function Editor({
     setLocalId(null);
   };
 
-  const notify = (msg: string) => {
-    if (toastTimer.current !== null) window.clearTimeout(toastTimer.current);
-    setToast(msg);
-    toastTimer.current = window.setTimeout(() => setToast(null), 2600);
-  };
+  const notify = (msg: string) => toast.fire(msg);
 
   const persistLocal = (list: LocalPrediction[]) => {
     setLocal(list);
@@ -222,7 +198,7 @@ export default function Editor({
   const saveLocal = () => {
     const entryTitle =
       title.trim() ||
-      `Predición ${new Date().toLocaleDateString(lang === "gl" ? "gl-ES" : "es-ES")}`;
+      `Predición ${formatDate(new Date(), lang)}`;
     if (localId !== null) {
       // Actualiza a predición local cargada en vez de crear un duplicado.
       persistLocal(
@@ -308,13 +284,19 @@ export default function Editor({
     const text = `${t.shareTextTitle}\n\n${buildShareLines(seats, governs, allies, PARTIES).join("\n")}\n\n${url}`;
     try {
       await navigator.clipboard.writeText(text);
-      if (shareTimer.current !== null) window.clearTimeout(shareTimer.current);
-      setShareNotice(cloud ? "ok" : "warn");
-      shareTimer.current = window.setTimeout(() => setShareNotice(null), 3200);
+      shareNotice.fire(cloud ? "ok" : "warn");
     } catch {
       notify(t.shareError);
     }
   };
+
+  // Nota da suma de goberno: os escaños que sobran ou faltan, só se
+  // o reparto aínda non é exacto (dentro da insignia da tarxeta).
+  const diffNote = !exact ? (
+    <span style={{ color: "var(--muted)" }}>
+      {total > TOTAL_SEATS ? `${t.over} ${-diff}` : `${t.remaining} ${diff}`}
+    </span>
+  ) : null;
 
   return (
     <div className="anim-fade-up space-y-4 px-4 py-4">
@@ -360,54 +342,18 @@ export default function Editor({
       {/* Barra da suma de goberno: os partidos marcados van sumando
           segmentos (goberno primeiro, despois aliados) ata a liña da
           maioría. A leyenda vai arriba á dereita. */}
-      <section className="card space-y-2 p-4">
-        <div className="flex items-center justify-between gap-2">
-          <span
-            className="flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold"
-            style={{
-              background: `color-mix(in srgb, ${govColor} 15%, transparent)`,
-              color: govColor,
-            }}
-          >
-            {t.government}: {govTotal}
-            {!exact && (
-              <span style={{ color: "var(--muted)" }}>
-                {total > TOTAL_SEATS
-                  ? `${t.over} ${-diff}`
-                  : `${t.remaining} ${diff}`}
-              </span>
-            )}
-          </span>
-          <div
-            className="flex shrink-0 items-center gap-3 text-[11px] font-semibold"
-            style={{ color: "var(--muted)" }}
-          >
-            <span className="flex items-center gap-1">
-              <span
-                aria-hidden="true"
-                className="inline-block h-2.5 w-2.5 rounded-sm"
-                style={{ background: topGovColor }}
-              />
-              🏛️ {t.government}
-            </span>
-            <span className="flex items-center gap-1">
-              <span
-                aria-hidden="true"
-                className="inline-block h-2.5 w-2.5 rounded-sm"
-                style={{ backgroundColor: topGovColor, backgroundImage: ALLY_HATCH }}
-              />
-              🤝 {t.ally}
-            </span>
-          </div>
-        </div>
-        <GovBar seats={seats} governs={governs} allies={allies} />
-      </section>
+      <GovSumCard
+        seats={seats}
+        governs={governs}
+        allies={allies}
+        note={diffNote}
+        alwaysShow
+      />
 
-      {/* Partidos: lista compacta con input numérico, ordenada polo
-          campo order (empates alfabéticos, PARTIES_BY_ORDER). Os
-          desactivados (runs: false) non se amosan. */}
+      {/* Partidos: lista compacta con input numérico, só os que se
+          presentan (EDITOR_PARTIES, ordenados por order + nome). */}
       <section className="card divide-y overflow-hidden" style={{ borderColor: "var(--border)" }}>
-        {PARTIES_BY_ORDER.filter((p) => p.runs).map((p, i) => {
+        {EDITOR_PARTIES.map((p, i) => {
           const value = seats[p.id] ?? 0;
           const maxForParty = TOTAL_SEATS - (total - value);
           const gov = governmentRanks[p.id];
@@ -435,8 +381,8 @@ export default function Editor({
               </span>
               {value > 0 && (
                 /* Dous botóns pegados (control segmentado): goberno ou
-                   aliado, mutuamente excluíntes. En pantallas estreitas
-                   amósanse só os emojis, máis grandes. */
+                    aliado, mutuamente excluíntes. En pantallas estreitas
+                    amósanse só os emojis, máis grandes. */
                 <div
                   className="flex shrink-0 overflow-hidden rounded-lg border text-base font-bold leading-none sm:text-[11px]"
                   style={{ borderColor: "var(--border)" }}
@@ -555,7 +501,7 @@ export default function Editor({
         )}
       </section>
 
-      {/* Predicicións locais */}
+      {/* Predicións locais */}
       {local.length > 0 && (
         <section className="space-y-2">
           <h2 className="px-1 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
@@ -566,7 +512,7 @@ export default function Editor({
               <div className="flex items-center justify-between gap-2">
                 <p className="truncate text-sm font-semibold">{entry.title}</p>
                 <p className="shrink-0 text-xs tabular-nums" style={{ color: "var(--muted)" }}>
-                  {new Date(entry.createdAt).toLocaleDateString(lang === "gl" ? "gl-ES" : "es-ES")}
+                  {formatDate(entry.createdAt, lang)}
                 </p>
               </div>
               <SeatBar seats={entry.seats} />
@@ -629,37 +575,16 @@ export default function Editor({
 
       {/* Aviso: ligazón copiada (desaparece só), centrado na ventana visible.
           Verdoso azulado se se gardou na nube; laranxa se foi o fallback de hash. */}
-      {shareNotice && (
-        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="anim-toast mx-4 max-w-[calc(100vw-2rem)] rounded-2xl px-7 py-3 text-center text-sm font-semibold shadow-xl"
-            style={{
-              background:
-                shareNotice === "ok" ? "var(--copied)" : "var(--warn)",
-              color: "#ffffff",
-            }}
-            role="status"
-          >
-            {shareNotice === "ok" ? t.shareCopied : t.shareCopiedOffline}
-          </div>
-        </div>
+      {shareNotice.value && (
+        <CenterToast
+          background={shareNotice.value === "ok" ? "var(--copied)" : "var(--warn)"}
+        >
+          {shareNotice.value === "ok" ? t.shareCopied : t.shareCopiedOffline}
+        </CenterToast>
       )}
 
       {/* Toast: erros en granate, texto branco, abaixo á vista */}
-      {toast && (
-        <div
-          className="fixed bottom-6 left-1/2 z-50"
-          style={{ transform: "translateX(-50%)" }}
-        >
-          <div
-            className="anim-toast mx-4 max-w-[calc(100vw-2rem)] rounded-2xl px-7 py-3 text-center text-sm font-semibold shadow-xl"
-            style={{ background: "var(--error)", color: "#ffffff" }}
-            role="status"
-          >
-            {toast}
-          </div>
-        </div>
-      )}
+      {toast.value && <BottomToast>{toast.value}</BottomToast>}
     </div>
   );
 }

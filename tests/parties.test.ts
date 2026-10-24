@@ -2,12 +2,17 @@ import { describe, expect, it } from "vitest";
 import {
   PARTIES,
   PARTIES_BY_SEATS,
+  PARTIES_BY_AXIS,
+  EDITOR_PARTIES,
+  PARTY_BY_ID,
   TOTAL_SEATS,
   MAJORITY_SEATS,
   axisValue,
   textOn,
   governmentShade,
   governmentSumColor,
+  seatFraction,
+  seatPercent,
 } from "@/lib/parties";
 
 describe("parties", () => {
@@ -66,5 +71,36 @@ describe("parties", () => {
     expect(governmentSumColor(145)).not.toBe(governmentSumColor(144));
     expect(governmentSumColor(130)).not.toBe(governmentSumColor(129));
     expect(governmentSumColor(160)).not.toBe(governmentSumColor(159));
+  });
+});
+
+describe("tés de orde e axudantes", () => {
+  it("PARTIES_BY_AXIS está ordenada de esquerda a dereita", () => {
+    for (let i = 1; i < PARTIES_BY_AXIS.length; i++) {
+      expect(
+        axisValue(PARTIES_BY_AXIS[i - 1]) <= axisValue(PARTIES_BY_AXIS[i])
+      ).toBe(true);
+    }
+  });
+
+  it("PARTIES_BY_AXIS contén os mesmos partidos, cada un unha vez", () => {
+    expect(new Set(PARTIES_BY_AXIS.map((p) => p.id)).size).toBe(PARTIES.length);
+  });
+
+  it("EDITOR_PARTIES son só os que teñen runs: true", () => {
+    expect(EDITOR_PARTIES.every((p) => p.runs)).toBe(true);
+    expect(EDITOR_PARTIES.length).toBe(PARTIES.filter((p) => p.runs).length);
+  });
+
+  it("PARTY_BY_ID devolve o partido correcto", () => {
+    expect(PARTY_BY_ID["pp"].short).toBe("PP");
+    expect(PARTY_BY_ID["non-existe"]).toBeUndefined();
+  });
+
+  it("seatFraction e seatPercent son consistentes", () => {
+    expect(seatFraction(175)).toBe(50);
+    expect(seatPercent(87.5)).toBe("25.0%");
+    expect(seatPercent(1)).toBe("0.3%");
+    expect(seatPercent(0)).toBe("0.0%");
   });
 });

@@ -3,6 +3,11 @@ import crypto from "crypto";
 export const SESSION_COOKIE = "electo_session";
 export const SESSION_DAYS = 30;
 
+// Expiración en milisegundos (validación no servidor, ademais do
+// Max-Age da cookie) e segundos (Max-Age da propia cookie).
+export const SESSION_MAX_AGE_MS = SESSION_DAYS * 86_400_000;
+export const SESSION_MAX_AGE_S = SESSION_DAYS * 86_400;
+
 const secret = process.env.SESSION_SECRET ?? "dev-only-secret-change-me";
 
 function sign(payload: string): string {
@@ -22,10 +27,7 @@ export function parseSession(token?: string | null): number | null {
 
   // Expiración no servidor, ademais do Max-Age da cookie.
   const issuedAt = Number(ts);
-  if (
-    !Number.isFinite(issuedAt) ||
-    Date.now() - issuedAt > SESSION_DAYS * 86_400_000
-  ) {
+  if (!Number.isFinite(issuedAt) || Date.now() - issuedAt > SESSION_MAX_AGE_MS) {
     return null;
   }
 
@@ -38,10 +40,17 @@ export function parseSession(token?: string | null): number | null {
   return Number.isInteger(id) && id > 0 ? id : null;
 }
 
+// Commons da cookie: Path, HttpOnly, SameSite e Secure (só en
+// produción, para non romper o http local).
+function cookieBase(maxAge: number): string {
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  return `Path=/; HttpOnly; SameSite=Lax${secure}; Max-Age=${maxAge}`;
+}
+
 export function setSessionCookie(res: Response, userId: number) {
   res.headers.append(
     "Set-Cookie",
-    `${SESSION_COOKIE}=${sessionToken(userId)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${SESSION_DAYS * 86400}`
+    `${SESSION_COOKIE}=${sessionToken(userId)}; ${cookieBase(SESSION_MAX_AGE_S)}`
   );
 }
 

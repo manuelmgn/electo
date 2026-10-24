@@ -1,4 +1,4 @@
-import { PARTIES, axisValue, type Party } from "./parties";
+import { PARTIES_BY_AXIS, type Party } from "./parties";
 
 export type HemicycleSeat = {
   x: number;
@@ -19,14 +19,11 @@ export const HEMICYCLE = {
 } as const;
 
 // Xeración dos asentos: filas concéntricas proporcionais ao raio,
-// ordenadas esquerda → dereita polo eixo (-3 a 3) do partido.
+// ordenadas esquerda → dereita coa mesma orde de eixo que usa a barra
+// (PARTIES_BY_AXIS), de xeito que hemiciclo e barra coincidan.
 export function buildSeats(seats: Record<string, number>): HemicycleSeat[] {
   const total = Object.values(seats).reduce((a, b) => a + b, 0);
   if (total <= 0) return [];
-
-  const order = PARTIES.map((p, i) => ({ p, i })).sort(
-    (a, b) => axisValue(a.p) - axisValue(b.p) || a.i - b.i
-  );
 
   const radii = Array.from(
     { length: HEMICYCLE.rows },
@@ -62,7 +59,7 @@ export function buildSeats(seats: Record<string, number>): HemicycleSeat[] {
 
   const out: HemicycleSeat[] = [];
   let idx = 0;
-  for (const { p } of order) {
+  for (const p of PARTIES_BY_AXIS) {
     const n = seats[p.id] ?? 0;
     for (let k = 0; k < n && idx < positions.length; k++, idx++) {
       const { angle, r } = positions[idx];

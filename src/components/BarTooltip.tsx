@@ -1,9 +1,52 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { TOTAL_SEATS, type Party } from "@/lib/parties";
+import { type Party, seatPercent } from "@/lib/parties";
 import { useI18n } from "@/lib/i18n";
 import PartyLogo from "./PartyLogo";
+
+// Tooltip dun partido: siglas, escaños e porcentaxe. Compartido polas
+// barras (SeatBar/GovBar) e polo hemiciclo: mesmo aspecto en toda a app.
+// Ancórase horizontalmente no % de `left`; a posición vertical
+// (top/bottom) e calquera transformación extra vaian en `style`.
+export function SeatTooltip({
+  party,
+  count,
+  left,
+  style,
+}: {
+  party: Party;
+  count: number;
+  left: number;
+  style?: React.CSSProperties;
+}) {
+  const { t } = useI18n();
+  return (
+    <div
+      className="anim-pop pointer-events-none absolute z-10 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 shadow-xl"
+      style={{
+        left: `${left}%`,
+        background: "var(--surface)",
+        border: "1px solid var(--border)",
+        ...style,
+      }}
+    >
+      <PartyLogo party={party} className="h-7 w-7 text-[8px]" />
+      <div className="min-w-0 leading-tight">
+        <p className="max-w-40 truncate text-xs font-bold">{party.name}</p>
+        <p className="text-sm font-extrabold tabular-nums">
+          {count}{" "}
+          <span className="text-xs font-semibold" style={{ color: "var(--muted)" }}>
+            {t.seats}
+          </span>
+        </p>
+      </div>
+      <span className="text-sm font-bold tabular-nums" style={{ color: "var(--muted)" }}>
+        {seatPercent(count)}
+      </span>
+    </div>
+  );
+}
 
 // Xestión do partido activo nas barras (SeatBar/GovBar): mesmo comportamento
 // ca no hemiciclo — rato activa ao pasar e desactiva ao saír cun retardo
@@ -48,31 +91,13 @@ export default function BarTooltip({
   count: number;
   leftPct: number;
 }) {
-  const { t } = useI18n();
   const left = Math.min(92, Math.max(8, leftPct));
   return (
-    <div
-      className="anim-pop pointer-events-none absolute z-10 flex -translate-x-1/2 -translate-y-full items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 shadow-xl"
-      style={{
-        left: `${left}%`,
-        top: -6,
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
-    >
-      <PartyLogo party={party} className="h-7 w-7 text-[8px]" />
-      <div className="min-w-0 leading-tight">
-        <p className="max-w-40 truncate text-xs font-bold">{party.name}</p>
-        <p className="text-sm font-extrabold tabular-nums">
-          {count}{" "}
-          <span className="text-xs font-semibold" style={{ color: "var(--muted)" }}>
-            {t.seats}
-          </span>
-        </p>
-      </div>
-      <span className="text-sm font-bold tabular-nums" style={{ color: "var(--muted)" }}>
-        {((count / TOTAL_SEATS) * 100).toFixed(1)}%
-      </span>
-    </div>
+    <SeatTooltip
+      party={party}
+      count={count}
+      left={left}
+      style={{ top: -6, transform: "translate(-50%, -100%)" }}
+    />
   );
 }

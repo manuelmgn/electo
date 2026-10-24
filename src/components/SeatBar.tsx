@@ -1,12 +1,23 @@
 "use client";
 
-import { PARTIES, TOTAL_SEATS, MAJORITY_SEATS, axisValue, type Party } from "@/lib/parties";
+import {
+  PARTIES_BY_AXIS,
+  TOTAL_SEATS,
+  MAJORITY_SEATS,
+  seatFraction,
+  type Party,
+} from "@/lib/parties";
 import BarTooltip, { useBarHover } from "./BarTooltip";
 
 // Fronteira exacta entre os asentos 175 e 176 (inicio da maioría
 // absoluta), a mesma posición que a liña do hemiciclo.
 const MAJORITY_BOUNDARY_PCT = ((MAJORITY_SEATS - 1) / TOTAL_SEATS) * 100; // = 50%
 
+// Barra de escanos: un segmento por partido coa súa cor, na orde de
+// eixo (esquerda → dereita, a mesma que usa o hemiciclo). Cada un
+// ocupa o seu ancho proporcional aos 350, así a liña vertical marca
+// a fronteira da maioría absoluta (176). Ao pasar o rato ou tocar un
+// segmento móstrase o tooltip do partido e atenuase o resto.
 export default function SeatBar({
   seats,
   height = "h-4",
@@ -18,16 +29,13 @@ export default function SeatBar({
 }) {
   const { activeId, enter, leave, tap } = useBarHover();
 
-  // Orde esquerda → dereita polo eixo; os empates mantén a orde da lista.
-  // Cada segmento leva tamén o seu centro en % para ancorar o tooltip.
+  // Segmentos co seu centro en % para ancorar o tooltip.
   const segments: { party: Party; count: number; centerPct: number }[] = [];
   let acc = 0;
-  for (const { p, i } of PARTIES.map((p, i) => ({ p, i })).sort(
-    (a, b) => axisValue(a.p) - axisValue(b.p) || a.i - b.i
-  )) {
+  for (const p of PARTIES_BY_AXIS) {
     const count = seats[p.id] ?? 0;
     if (count <= 0) continue;
-    const widthPct = (count / TOTAL_SEATS) * 100;
+    const widthPct = seatFraction(count);
     segments.push({ party: p, count, centerPct: acc + widthPct / 2 });
     acc += widthPct;
   }
@@ -50,7 +58,7 @@ export default function SeatBar({
               key={s.party.id}
               className="h-full"
               style={{
-                width: `${(s.count / TOTAL_SEATS) * 100}%`,
+                width: `${seatFraction(s.count)}%`,
                 background: s.party.color,
                 opacity: dimmed ? 0.25 : 1,
                 cursor: "pointer",

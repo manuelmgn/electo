@@ -3,15 +3,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TOTAL_SEATS, MAJORITY_SEATS, type Party } from "@/lib/parties";
 import { buildSeats, HEMICYCLE } from "@/lib/hemicycle";
-import { useI18n } from "@/lib/i18n";
-import PartyLogo from "./PartyLogo";
+import { SeatTooltip } from "./BarTooltip";
 
 // Dimensións do viewBox do SVG (coordenadas → % para posicionar o tooltip).
 const VB_W = 400;
 const VB_H = 224;
 
 export default function Hemicycle({ seats }: { seats: Record<string, number> }) {
-  const { t } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const leaveTimer = useRef<number | undefined>(undefined);
@@ -159,29 +157,12 @@ export default function Hemicycle({ seats }: { seats: Record<string, number> }) 
       </svg>
 
       {active && (
-        <div
-          className="anim-pop pointer-events-none absolute z-10 flex -translate-x-1/2 items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 shadow-xl"
-          style={{
-            left: `${active.left}%`,
-            bottom: `calc(${100 - active.top}% + 14px)`,
-            background: "var(--surface)",
-            border: "1px solid var(--border)",
-          }}
-        >
-          <PartyLogo party={active.party} className="h-7 w-7 text-[8px]" />
-          <div className="min-w-0 leading-tight">
-            <p className="max-w-40 truncate text-xs font-bold">{active.party.name}</p>
-            <p className="text-sm font-extrabold tabular-nums">
-              {active.count}{" "}
-              <span className="text-xs font-semibold" style={{ color: "var(--muted)" }}>
-                {t.seats}
-              </span>
-            </p>
-          </div>
-          <span className="text-sm font-bold tabular-nums" style={{ color: "var(--muted)" }}>
-            {((active.count / TOTAL_SEATS) * 100).toFixed(1)}%
-          </span>
-        </div>
+        <SeatTooltip
+          party={active.party}
+          count={active.count}
+          left={active.left}
+          style={{ bottom: `calc(${100 - active.top}% + 14px)` }}
+        />
       )}
     </div>
   );

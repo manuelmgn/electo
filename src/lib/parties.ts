@@ -89,6 +89,24 @@ export const PARTIES_BY_SEATS: Party[] = [...PARTIES]
 export const PARTIES_BY_ORDER: Party[] = [...PARTIES]
   .sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
 
+// Partidos que se presentan (runs: true), na orde do editor. É o
+// conxunto que aparece na vista editable; os desactivados só se ven
+// nas vistas de resultados.
+export const EDITOR_PARTIES: Party[] = PARTIES_BY_ORDER.filter((p) => p.runs);
+
+// Partidos ordenados esquerda → dereita polo eixo (axe, -3 a 3); os
+// empates manteñen a orde da táboa. Úsase para o hemiciclo e a barra
+// de escanos, que comparten esta mesma orde.
+export const PARTIES_BY_AXIS: Party[] = [...PARTIES]
+  .map((p, i) => ({ p, i }))
+  .sort((a, b) => axisValue(a.p) - axisValue(b.p) || a.i - b.i)
+  .map(({ p }) => p);
+
+// Busca de partido por id: O(1) no canto de .find() sobre a lista.
+export const PARTY_BY_ID: Readonly<Record<string, Party>> = Object.fromEntries(
+  PARTIES.map((p) => [p.id, p])
+);
+
 // Valor de eixo normalizado: enteiro entre -3 e 3 (por se o dato
 // da táboa fose incorrecto, nunca rompe o debuxo).
 export function axisValue(party: Party): number {
@@ -120,6 +138,17 @@ export function governmentSumColor(sum: number): string {
   if (sum >= 145) return "#ca8a04";
   if (sum >= 130) return "#ea580c";
   return "#dc2626";
+}
+
+// Porcentaxe de escaños base das anchuras das barras e das posicións
+// dos tooltips (campo leftPct para BarTooltip).
+export function seatFraction(count: number): number {
+  return (count / TOTAL_SEATS) * 100;
+}
+
+// Porcentaxe con un decimal e o símbolo % ("8.3%"), para as listaxes.
+export function seatPercent(count: number): string {
+  return `${seatFraction(count).toFixed(1)}%`;
 }
 
 // Cor de texto lexible sobre un fondo de cor dada (branco ou case negro).

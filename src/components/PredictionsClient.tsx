@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PARTIES, textOn } from "@/lib/parties";
-import { useI18n } from "@/lib/i18n";
+import { useI18n, formatDate } from "@/lib/i18n";
 import SeatBar from "./SeatBar";
 
 export type PredictionDto = {
@@ -34,8 +34,6 @@ export default function PredictionsClient({
     }
   };
 
-  const locale = lang === "gl" ? "gl-ES" : "es-ES";
-
   return (
     <div className="anim-fade-up space-y-4 px-4 py-4">
       <div className="flex items-center justify-between">
@@ -64,7 +62,7 @@ export default function PredictionsClient({
             <div className="flex items-start justify-between gap-2">
               <h2 className="font-bold">{pred.title}</h2>
               <span className="shrink-0 text-xs" style={{ color: "var(--muted)" }}>
-                {new Date(pred.created_at).toLocaleDateString(locale)}
+                {formatDate(pred.created_at, lang)}
               </span>
             </div>
 

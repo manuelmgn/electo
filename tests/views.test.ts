@@ -5,6 +5,7 @@ import {
   FORECAST_VIEWS,
   getElectionView,
   getForecastView,
+  viewList,
 } from "@/lib/views";
 
 describe("slugifyKey", () => {
@@ -45,11 +46,20 @@ describe("vistas de resultados e pronósticos", () => {
     );
   });
 
-  it("os pronósticos non publicados non teñen vista", () => {
+  it("os pronósticos publicados teñen vista e os bloques baleiros non", () => {
     const published = Object.values(FORECAST_VIEWS).map((v) => v.key);
-    expect(published).toContain("2026-09 (CIS-Electomanía)");
-    expect(getForecastView("2026-09-cis-electomania")).not.toBeNull();
+    expect(published).toContain("26-09 (CIS-Electomanía)");
+    expect(getForecastView("26-09-cis-electomania")).not.toBeNull();
     expect(getForecastView("")).toBeNull();
+  });
+
+  it("viewList devolve slug + clave, ordenada polo mesmo comparador", () => {
+    const list = viewList(FORECAST_VIEWS);
+    const keys = Object.values(FORECAST_VIEWS)
+      .map((v) => v.key)
+      .sort((a, b) => b.localeCompare(a));
+    expect(list.map((v) => v.key)).toEqual(keys);
+    expect(list.every((v) => v.slug.length > 0)).toBe(true);
   });
 
   it("slug descoñecido devolve null", () => {
