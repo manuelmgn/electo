@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
-import { getSessionUser } from "@/lib/auth";
 
 // URL canónica para as imaxes sociais (/s/, /r/, /f/). Pódese
 // sobrescribir con NEXT_PUBLIC_SITE_URL na despregadura.
@@ -34,15 +33,15 @@ const themeInit = `(function(){try{var t=localStorage.getItem('theme');if(t==='l
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const user = await getSessionUser();
-
+  // Sen cookies aquí: o Header carga a sesión no cliente (useSessionUser)
+  // e así as vistas de só lectura /r e /f pódense prerenderizar.
   return (
     <html lang="gl" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className="min-h-screen antialiased">
-        <Header user={user ? { name: user.name } : null} />
+        <Header />
         <div className="mx-auto max-w-xl">
           <main className="pb-10">{children}</main>
         </div>

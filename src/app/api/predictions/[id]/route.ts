@@ -52,6 +52,8 @@ export async function PUT(req: Request, ctx: RouteCtx) {
     await sql.begin(async (tx) => {
       await tx`DELETE FROM prediction_seats WHERE prediction_id = ${predictionId}`;
       await insertSeats(predictionId, entries, tx);
+      // updated_at: pono explícito porque bases de datos anteriores ao
+      // trigger de schema.sql non o terían automático.
       await tx`
         UPDATE predictions SET title = ${title}, updated_at = now()
         WHERE id = ${predictionId}

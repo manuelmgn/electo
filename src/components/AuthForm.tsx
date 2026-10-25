@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useI18n, errorMessage } from "@/lib/i18n";
+import { notifySessionChanged } from "@/lib/session-event";
 
 export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const { t } = useI18n();
@@ -27,6 +28,8 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         ),
       });
       if (res.ok) {
+        // O Header recarga o estado de sesión sen recargar a páxina.
+        notifySessionChanged();
         router.push("/");
         router.refresh();
       } else {

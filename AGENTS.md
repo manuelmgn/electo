@@ -51,19 +51,20 @@ src/
   app/                  # App Router
     page.tsx            # páxina principal (editor + ligazóns a vistas)
     r/[slug]/           # vista de só lectura dun resultado electoral
-                        # (/r/2023, /r/2019-ii…); metadatos + OG propios
-    f/[slug]/           # igual para pronósticos publicados
+                        # (/r/2023, /r/2019-ii…); SSG dos slugs, metadatos
+                        # + OG propios
+    f/[slug]/           # igual para pronósticos publicados (SSG)
     s/[code]/           # predición compartida: código de 20 caracteres
                         # alfanuméricos único e inmutable (gárdase en BD)
-    login/, rexistro/   # páxinas de auth
+    login/, rexistro/   # páxinas de auth (redirect ao editor xa dentro)
     predicions/         # listado de predicicións na nube
-    api/auth/{login,register,logout}/route.ts
+    api/auth/{login,register,logout,me}/route.ts
     api/predictions/route.ts e api/predictions/[id]/route.ts
     api/share/route.ts  # crea a ligazón curta /s/<código> (POST)
   components/           # client components: Editor, ResultsView (vista
                         # só lectura compartida polas rutas r/f/s),
-                        # Hemicycle, SeatBar, GovBar, Header, AuthForm,
-                        # PartyLogo, PredictionsClient
+                        # Hemicycle, SeatBar, GovBar, GovSumCard, Header,
+                        # AuthForm, PartyLogo, PredictionsClient
   lib/
     parties.ts          # TÁBOA ÚNICA DE PARTIDOS (ver abaixo)
     results.ts          # resultados de eleccións anteriores (só lectura)
@@ -73,15 +74,18 @@ src/
                         # dende results.ts/forecasts.ts; viewSummary
     hemicycle.ts        # xeneración xeométrica dos asentos do hemiciclo
     predictions.ts      # validación do reparto (súa exacta = 350) + SQL
-    share.ts            # codificación base64url (#p=...) e
-                        # generateShareCode() (20 caracteres alfanuméricos)
+    share.ts            # codificación base64url (#p=...), códigos curtos
+                        # e isValidShareCode
     session.ts, auth.ts # tokens de sesión e usuario da sesión
-    db.ts               # cliente postgres.js
+    session-event.ts    # evento de sesión: Header cliente + /api/auth/me
+    db.ts               # cliente postgres.js (pooler de Neon)
+    api.ts              # axudantes de rutas API (readJson, requireDb)
     dictionaries.ts     # textos gl/es
     i18n.ts             # hook useI18n + detección de idioma
-tests/                  # tests Vitest (lóxica pura, sen DB nin DOM)
+tests/                  # tests Vitest: lóxica pura + integración de
+                        # rutas API (mock de sql/auth, sen DB real)
 scripts/schema.sql      # esquema: users, predictions, prediction_seats,
-                        # shared_predictions
+                        # shared_predictions + trigger de updated_at
 public/logos/           # logos dos partidos (nomes referenciados dende parties.ts)
 ```
 
@@ -129,13 +133,21 @@ devolven claves de dicionario (`errorMessage` tradúceas no cliente).
 
 ## Tests
 
-`npm test` (Vitest). Cubren só lóxica pura, sen base de datos nin DOM:
-hemiciclo (`buildSeats`), validación de escaños, sesións (`parseSession`,
-HMAC, expiración), táboas de partidos, vistas de só lectura (slugs en
-`src/lib/views.ts`) e compartición (`encodeShare` / `decodeShare` /
-`buildShareLines` / `generateShareCode`). Os tests usan o alias `@/` e viven
-en `tests/**/*.test.ts`. Ao modificar a lóxica de `src/lib`, actualiza ou
-engade tests no mesmo PR/commit.
+`npm test` (Vitest). Dous grupos:
+- **Lóxica pura** (sen BD nin DOM): hemiciclo (`buildSeats`), validación
+  de escaños, sesións (`parseSession`, HMAC, expiración), táboas de
+  partidos, vistas de só lectura (slugs en `src/lib/views.ts`) e
+  compartición (`encodeShare` / `decodeShare` / `buildShareLines` /
+  `generateShareCode`).
+- **Integración de rutas API** (`tests/api-routes.test.ts`): simúlanse
+  `@/lib/db` (cliente SQL falso con colas de filas/erros) e `@/lib/auth`
+  (sesión fixa), así que proban validación, autorización e as consultas
+  SQL de cada ruta sen BD real.
+
+Os tests usan o alias `@/`, viven en `tests/**/*.test.ts` e empregan
+mocks de módulo cos axudantes de Vitest (`vi.mock`, `vi.hoisted`). Ao
+modificar a lóxica de `src/lib` ou unha ruta API, actualiza ou engade
+tests no mesmo PR/commit.
 
 ## Seguridade
 

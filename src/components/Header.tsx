@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useI18n, type Lang } from "@/lib/i18n";
+import {
+  SESSION_EVENT,
+  notifySessionChanged,
+} from "@/lib/session-event";
 
 type Theme = "auto" | "light" | "dark";
 
@@ -13,7 +17,38 @@ const themeIcons: Record<Theme, string> = {
   dark: "☾",
 };
 
-export default function Header({ user }: { user: { name: string } | null }) {
+// Usuario da sesión, cargado no cliente vía /api/auth/me. O layout
+// root é estático (sen cookies) para poder xerar estáticas as vistas
+// /r e /f, polo que o estado de sesión hidrátase aquí. O evento
+// SESSION_EVENT fai recargar o usuario tras login/logout.
+function useSessionUser() {
+  const [user, setUser] = useState<{ name: string } | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    const load = () => {
+      fetch("/api/auth/me")
+        .then((r) => r.json())
+        .then((d: { user?: { name: string } | null }) => {
+          if (alive) setUser(d?.user ?? null);
+        })
+        .catch(() => {
+          // sen rede: móntrase o modo invitado
+        });
+    };
+    load();
+    window.addEventListener(SESSION_EVENT, load);
+    return () => {
+      alive = false;
+      window.removeEventListener(SESSION_EVENT, load);
+    };
+  }, []);
+
+  return user;
+}
+
+export default function Header() {
+  const user = useSessionUser();
   const { t, lang, setLang } = useI18n();
   const router = useRouter();
   const [theme, setTheme] = useState<Theme>("auto");
@@ -49,6 +84,8 @@ export default function Header({ user }: { user: { name: string } | null }) {
     } catch {
       // sen rede: pecha o menú igualmente e refresca o estado client-side
     }
+    // Recarga o usuario do Header (e refresca as páxinas de servidor).
+    notifySessionChanged();
     router.refresh();
   };
 

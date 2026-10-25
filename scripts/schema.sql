@@ -28,6 +28,21 @@ CREATE TABLE IF NOT EXISTS prediction_seats (
 
 CREATE INDEX IF NOT EXISTS idx_predictions_user ON predictions(user_id);
 
+-- updated_at automático para calquera UPDATE de predictions; as rutas
+-- API tamén o cubren de forma explícita, así que bases de datos
+-- anteriores a este trigger seguen funcionando sen cambios.
+CREATE OR REPLACE FUNCTION touch_updated_at() RETURNS trigger AS $$
+BEGIN
+  NEW.updated_at := now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_predictions_updated_at ON predictions;
+CREATE TRIGGER trg_predictions_updated_at
+BEFORE UPDATE ON predictions
+FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
+
 CREATE TABLE IF NOT EXISTS shared_predictions (
   code TEXT PRIMARY KEY,
   title TEXT NOT NULL DEFAULT '' CHECK (char_length(title) <= 120),
