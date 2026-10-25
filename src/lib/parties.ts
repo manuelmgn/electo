@@ -69,7 +69,7 @@ export const PARTIES: Party[] = [
   { id: "te",      name: "Teruel Existe",                                    order: 8, short: "TE",    color: "#027F51", logo: "te.png",     axis: 0, runs: false, seats: 0,  emoji: "🍗" },
   { id: "com",     name: "Compromís",                                        order: 6, short: "C.",    color: "#DB6E24", logo: "com.jpeg",   axis: -2, runs: true, seats: 1,  emoji: "😉" },
   { id: "mp",      name: "Más País",                                         order: 6, short: "MP",    color: "#6AD9C4", logo: "mp.png",     axis: -1, runs: false, seats: 0,  emoji: "🌽" },
-  { id: "prc",     name: "Partido Regionalista Cántabro",                    order: 7, short: "PRC",   color: "#BFCD16", logo: "prc.png",    axis: 0, runs: true, seats: 0,   emoji: "🍐" },
+  { id: "prc",     name: "Partido Regionalista Cántabro",                    order: 7, short: "PRC",   color: "#BFCD16", logo: "prc.png",    axis: 0, runs: false, seats: 0,   emoji: "🍐" },
   { id: "gb",      name: "Geroa Bai",                                        order: 8, short: "GB",    color: "#D43527", logo: "gb.png",    axis: 0, runs: false, seats: 0,   emoji: "🍒" },
   { id: "upl",     name: "Unión del Pueblo Leonés",                          order: 8, short: "UPL",   color: "#B71966", logo: "upl.png",    axis: 0, runs: false, seats: 0,   emoji: "🦁" },
   { id: "salf",    name: "Se Acabó La Fiesta",                               order: 8, short: "SALF",  color: "#785B46", logo: "salf.png",    axis: 0, runs: true, seats: 0,   emoji: "🐿️" },
