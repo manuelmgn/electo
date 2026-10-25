@@ -47,7 +47,7 @@ export const PARTIES: Party[] = [
   { id: "pp",      name: "Partido Popular",                                  order: 1, short: "PP",    color: "#0B5FA5", logo: "pp.png",     axis: 2, runs: true, seats: 137, emoji: "💧" },
   { id: "psoe",    name: "Partido Socialista Obrero Español",                order: 2, short: "PSOE",  color: "#E30613", logo: "psoe.png",   axis: -1, runs: true, seats: 121, emoji: "🌹" },
   { id: "vox",     name: "Vox",                                              order: 3, short: "Vox",   color: "#5AC035", logo: "vox.png",    axis: 3, runs: true, seats: 33,  emoji: "🥦" },
-  { id: "fa",      name: "Frente Amplio",                                    order: 4, short: "FA",    color: "#EC407A", logo: "fa.png",     axis: -2, runs: true, seats: 26,  emoji: "🌸" },
+  { id: "fa",      name: "Frente Amplio",                                    order: 4, short: "FA",    color: "#F03C01", logo: "fa.png",     axis: -2, runs: true, seats: 26,  emoji: "🌸" },
   { id: "jxc",     name: "Junts per Catalunya",                              order: 5, short: "JxC",   color: "#00C1B1", logo: "jxc.png",    axis: 1, runs: true, seats: 7,   emoji: "🥑" },
   { id: "erc",     name: "Esquerra Republicana de Catalunya",                order: 5, short: "ERC",   color: "#F9B233", logo: "erc.jpg",    axis: -2, runs: true, seats: 7,   emoji: "🍋" },
   { id: "ehb",     name: "EH Bildu",                                         order: 5, short: "EHB",   color: "#0BCFB5", logo: "ehb.jpg",    axis: -3, runs: true, seats: 6,   emoji: "🍃" },
