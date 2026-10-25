@@ -36,6 +36,51 @@ export type Forecast = {
 };
 
 export const FORECASTS: Record<string, Forecast> = {
+  "26-10-19 (Sigma Dos)": {
+    published: true,
+    seats: {
+      pp: 135,
+      psoe: 104,
+      vox: 66,
+      fa: 9,
+      erc: 9,
+      ehb: 6,
+      pnv: 5,
+      jxc: 6,
+      aa: 1,
+      podemos: 1,
+      com: 3,
+      bng: 2,
+      upn: 0,
+      cc: 1,
+      salf: 0,
+      cup: 0,
+    },
+    government: { pp: true, vox: true },
+    allies: {},
+  },  "26-10-12 (Sociométrica)": {
+    published: true,
+    seats: {
+      pp: 141,
+      psoe: 104,
+      vox: 64,
+      s: 5,
+      erc: 8,
+      ehb: 7,
+      pnv: 4,
+      jxc: 6,
+      aa: 1,
+      podemos: 2,
+      com: 3,
+      bng: 2,
+      upn: 1,
+      cc: 1,
+      salf: 0,
+      cup: 1,
+    },
+    government: { pp: true, vox: true },
+    allies: {},
+  },
   "26-10-04 (ElectoPanel)": {
     published: true,
     seats: {
