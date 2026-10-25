@@ -72,9 +72,12 @@ export default function PredictionsClient({
       )}
 
       {predictions.map((pred, i) => {
+        // Chips coa reparte: máximo 8, resto numérico oculto.
         const top = PARTIES.filter((p) => (pred.seats[p.id] ?? 0) > 0).sort(
           (a, b) => (pred.seats[b.id] ?? 0) - (pred.seats[a.id] ?? 0)
         );
+        const shown = top.slice(0, 8);
+        const hidden = top.length - shown.length;
         return (
           <article
             key={pred.id}
@@ -91,7 +94,7 @@ export default function PredictionsClient({
             <SeatBar seats={pred.seats} height="h-4" majorityLabel={t.majorityInfo} />
 
             <div className="flex flex-wrap gap-1.5">
-              {top.map((p) => (
+              {shown.map((p) => (
                 <span
                   key={p.id}
                   className="rounded-full px-2 py-0.5 text-xs font-bold"
@@ -100,6 +103,14 @@ export default function PredictionsClient({
                   {p.short} {pred.seats[p.id]}
                 </span>
               ))}
+              {hidden > 0 && (
+                <span
+                  className="rounded-full px-2 py-0.5 text-xs font-bold"
+                  style={{ background: "var(--surface-2)", color: "var(--muted)" }}
+                >
+                  +{hidden}
+                </span>
+              )}
             </div>
 
             <div className="flex gap-2">

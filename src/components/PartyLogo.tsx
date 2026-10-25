@@ -34,6 +34,8 @@ export default function PartyLogo({
       <img
         src={`/logos/${party.logo}`}
         alt={party.short}
+        loading="lazy"
+        decoding="async"
         className="h-full w-full object-contain"
         onError={() => setError(true)}
       />

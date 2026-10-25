@@ -5,6 +5,7 @@ import { PARTIES } from "@/lib/parties";
 import { sql, dbConfigured } from "@/lib/db";
 import { viewSummary } from "@/lib/views";
 import { isValidShareCode } from "@/lib/share";
+import { jsonbObject } from "@/lib/jsonb";
 
 type Params = { params: Promise<{ code: string }> };
 
@@ -27,18 +28,13 @@ async function loadShared(code: string): Promise<SharedRow | null> {
   `;
   if (rows.length === 0) return null;
   const r = rows[0];
-  // Dependendo do tipo de columna que reporte o servidor, o driver pode
-  // devolver os JSONB coma obxecto xa parseado ou coma cadea JSON.
-  const asMarks = (v: unknown): Record<string, boolean> =>
-    (typeof v === "string" ? JSON.parse(v) : v) as Record<string, boolean>;
-  const asSeats = (v: unknown): Record<string, number> =>
-    (typeof v === "string" ? JSON.parse(v) : v) as Record<string, number>;
   return {
     code: r.code as string,
     title: r.title as string,
-    seats: asSeats(r.seats),
-    governs: asMarks(r.governs),
-    allies: asMarks(r.allies),
+    // JSONB pode chegar coma string ou coma obxecto (según o driver).
+    seats: jsonbObject<Record<string, number>>(r.seats),
+    governs: jsonbObject<Record<string, boolean>>(r.governs),
+    allies: jsonbObject<Record<string, boolean>>(r.allies),
   };
 }
 

@@ -32,8 +32,16 @@ type LocalPrediction = {
   id: number;
   title: string;
   seats: Seats;
+  // Marcas de goberno/aliado (opcionais: predicións máis antigas non
+  // as tiveron).
+  governs?: Record<string, boolean>;
+  allies?: Record<string, boolean>;
   createdAt: string;
 };
+
+// Máximo de predicións locais gardadas no dispositivo (as vellas
+// recortan pola cola).
+const MAX_LOCAL_PREDICTIONS = 30;
 
 function emptySeats(): Seats {
   return Object.fromEntries(PARTIES.map((p) => [p.id, 0]));
@@ -198,6 +206,12 @@ export default function Editor({
     localStorage.setItem("localPredictions", JSON.stringify(list));
   };
 
+  // Deixa goberno e aliados "limpos": só ids con marca real.
+  const roles = (marks: Record<string, boolean>) =>
+    Object.fromEntries(
+      Object.entries(marks).filter(([, v]) => v)
+    ) as Record<string, boolean>;
+
   const saveLocal = () => {
     const entryTitle =
       title.trim() ||
@@ -205,17 +219,29 @@ export default function Editor({
     if (localId !== null) {
       // Actualiza a predición local cargada en vez de crear un duplicado.
       persistLocal(
-        local.map((p) => (p.id === localId ? { ...p, title: entryTitle, seats } : p))
+        local.map((p) =>
+          p.id === localId
+            ? {
+                ...p,
+                title: entryTitle,
+                seats,
+                governs: roles(governs),
+                allies: roles(allies),
+              }
+            : p
+        )
       );
     } else {
       const entry: LocalPrediction = {
         id: Date.now(),
         title: entryTitle,
         seats,
+        governs: roles(governs),
+        allies: roles(allies),
         createdAt: new Date().toISOString(),
       };
       setLocalId(entry.id);
-      persistLocal([entry, ...local]);
+      persistLocal([entry, ...local].slice(0, MAX_LOCAL_PREDICTIONS));
     }
     toast.fire(t.saved);
   };
@@ -254,9 +280,15 @@ export default function Editor({
 
   const loadLocal = (entry: LocalPrediction) => {
     setSeats({ ...defaultSeats(), ...entry.seats });
+    setGoverns(entry.governs ?? {});
+    setAllies(entry.allies ?? {});
     setTitle(entry.title);
     setLocalId(entry.id);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    // De volta ao editor: scroll suave, salvo reduce-motion.
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
   };
 
   const deleteLocal = (id: number) => {
@@ -483,6 +515,7 @@ export default function Editor({
           className="input"
           placeholder={t.predictionTitlePlaceholder}
           value={title}
+          maxLength={120}
           onChange={(e) => setTitle(e.target.value)}
           aria-label={t.predictionTitle}
         />

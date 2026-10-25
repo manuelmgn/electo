@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { parseSession, sessionToken, SESSION_DAYS } from "@/lib/session";
+import {
+  parseSession,
+  sessionToken,
+  setSessionCookie,
+  clearSessionCookie,
+  SESSION_DAYS,
+} from "@/lib/session";
 
 describe("sesión", () => {
   it("roundtrip: un token válido devolve o id de usuario", () => {
@@ -29,5 +35,27 @@ describe("sesión", () => {
 
   it("acepta tokens recentes", () => {
     expect(parseSession(sessionToken(7, Date.now() - 60_000))).toBe(7);
+  });
+});
+
+describe("cookie de sesión", () => {
+  it("setSessionCookie escribe unha cookie HttpOnly con token valedo", () => {
+    const res = new Response();
+    setSessionCookie(res, 42);
+    const cookie = res.headers.get("Set-Cookie") ?? "";
+    expect(cookie).toContain("electo_session=");
+    expect(cookie).toContain("HttpOnly");
+    expect(cookie).toContain("SameSite=Lax");
+    // O token da cookie parsea e devolve o usuario
+    const token = cookie.split(";")[0].split("=")[1];
+    expect(parseSession(decodeURIComponent(token))).toBe(42);
+  });
+
+  it("clearSessionCookie elimina a cookie (Max-Age=0)", () => {
+    const res = new Response();
+    clearSessionCookie(res);
+    const cookie = res.headers.get("Set-Cookie") ?? "";
+    expect(cookie).toContain("electo_session=");
+    expect(cookie).toContain("Max-Age=0");
   });
 });

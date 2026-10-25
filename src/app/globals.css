@@ -245,3 +245,34 @@ input[type="range"] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
+
+/* ---------- Accesibilidade ---------- */
+
+/* Anel de foco lexible para teclado en tódolos controis interactivos */
+.btn:focus-visible,
+.step-btn:focus-visible,
+div[role="button"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.step-btn:focus-visible {
+  outline-offset: 3px;
+}
+
+/* Respecta a preferencia de movemento reducido do usuario:
+   detense as animacións de entrada e desactívase o pulso */
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade-up,
+  .anim-pop,
+  .anim-toast,
+  .anim-glow {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  /* O pulso de perigo desactívase por completo (nunca é infinito) */
+  .anim-pulse-danger {
+    animation: none !important;
+  }
+}

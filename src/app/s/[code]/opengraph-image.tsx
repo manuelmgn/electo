@@ -3,6 +3,7 @@ import { PARTIES } from "@/lib/parties";
 import { sql, dbConfigured } from "@/lib/db";
 import { viewSummary } from "@/lib/views";
 import { isValidShareCode } from "@/lib/share";
+import { jsonbObject } from "@/lib/jsonb";
 
 export const dynamic = "force-dynamic";
 export { ogSize as size, ogContentType as contentType } from "@/lib/og";
@@ -16,10 +17,8 @@ export default async function Image({ params }: { params: Promise<{ code: string
     `;
     if (rows.length === 0) return ogFallback();
     const title = (rows[0].title as string) || "Predición compartida";
-    const rawSeats = rows[0].seats;
-    const seats = (
-      typeof rawSeats === "string" ? JSON.parse(rawSeats) : rawSeats
-    ) as Record<string, number>;
+    // JSONB pode chegar coma string ou coma obxecto (según o driver).
+    const seats = jsonbObject<Record<string, number>>(rows[0].seats);
     return ogHemicycle({
       title,
       summary: viewSummary(
