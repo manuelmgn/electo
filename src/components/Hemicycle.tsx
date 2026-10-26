@@ -13,6 +13,7 @@ export default function Hemicycle({ seats }: { seats: Record<string, number> }) 
   const [mounted, setMounted] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const leaveTimer = useRef<number | undefined>(undefined);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const t = requestAnimationFrame(() => setMounted(true));
@@ -45,37 +46,69 @@ export default function Hemicycle({ seats }: { seats: Record<string, number> }) 
     return {
       party,
       count,
-      left: Math.min(88, Math.max(12, (x / n / VB_W) * 100)),
+      // A mesma marxe ca nas barras: evita que o tooltip saia polos
+      // lados cando o partido está no extremo do hemiciclo.
+      left: Math.min(70, Math.max(30, (x / n / VB_W) * 100)),
       top: (y / n / VB_H) * 100,
     };
   }, [all, activeId]);
 
-  // Hover (rato): entrar activa, saír desactiva cun pequeno retardo para
-  // non pestanxear ao moverse entre asentos do mesmo partido.
-  const handleEnter = (id: string, pointerType: string) => {
-    if (pointerType === "touch") return;
-    window.clearTimeout(leaveTimer.current);
-    setActiveId(id);
+  // Asenta o punteiro no asento máis próximo (en coordenadas do viewBox).
+  // Antes cada asento tiña un círculo de toque invisible de r=11 que se
+  // solapaba co dos veciños e podía amosar o partido equivocado; así o
+  // cálculo é sempre o asento visible máis achegado.
+  const nearestParty = (clientX: number, clientY: number): string | null => {
+    const el = containerRef.current;
+    if (!el) return null;
+    const rect = el.getBoundingClientRect();
+    const x = ((clientX - rect.left) / rect.width) * VB_W;
+    const y = ((clientY - rect.top) / rect.height) * VB_H;
+    let best: (typeof all)[number] | null = null;
+    let bestDist = Infinity;
+    for (const seat of all) {
+      const dx = seat.x - x;
+      const dy = seat.y - y;
+      const dist = dx * dx + dy * dy;
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = seat;
+      }
+    }
+    // Fóra dos asentos (centro baleiro, marxes) non se activa nada.
+    return best && bestDist <= 16 * 16 ? best.party.id : null;
   };
 
-  const handleLeave = (id: string, pointerType: string) => {
-    if (pointerType === "touch") return;
-    leaveTimer.current = window.setTimeout(
-      () => setActiveId((cur) => (cur === id ? null : cur)),
-      100
-    );
+  // Hover (rato): segue o asento máis próximo.
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    window.clearTimeout(leaveTimer.current);
+    setActiveId(nearestParty(e.clientX, e.clientY));
+  };
+
+  // Saír do hemiciclo desactiva o tooltip (con retardo mínimo).
+  const handlePointerLeave = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    leaveTimer.current = window.setTimeout(() => setActiveId(null), 100);
   };
 
   // Toque (smartphone/tableta): alterna o tooltip; tocar outro asento cambia
   // de partido e tocar o mesmo péchao.
-  const handleTap = (id: string, pointerType: string) => {
-    if (pointerType === "mouse") return;
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse") return;
     window.clearTimeout(leaveTimer.current);
+    const id = nearestParty(e.clientX, e.clientY);
+    if (!id) return;
     setActiveId((cur) => (cur === id ? null : id));
   };
 
   return (
-    <div className="relative select-none">
+    <div
+      ref={containerRef}
+      className="relative cursor-pointer select-none"
+      onPointerMove={handlePointerMove}
+      onPointerLeave={handlePointerLeave}
+      onPointerDown={handlePointerDown}
+    >
       <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full" role="img" aria-label="Hemiciclo de escaños">
         {/* Liña da maioría absoluta: no centro separa os asentos 175 e 176 */}
         <line
@@ -104,18 +137,6 @@ export default function Hemicycle({ seats }: { seats: Record<string, number> }) 
           const dimmed = active !== null && !isActive;
           return (
             <g key={i}>
-              {/* Área de toque invisible: maior que o círculo visible para
-                  que sexa cómodo pulsar en pantallas pequenas. */}
-              <circle
-                cx={s.x}
-                cy={s.y}
-                r={11}
-                fill="transparent"
-                style={{ cursor: "pointer" }}
-                onPointerEnter={(e) => handleEnter(s.party.id, e.pointerType)}
-                onPointerLeave={(e) => handleLeave(s.party.id, e.pointerType)}
-                onPointerDown={(e) => handleTap(s.party.id, e.pointerType)}
-              />
               <circle
                 r={HEMICYCLE.seatRadius}
                 fill={s.color}
@@ -161,7 +182,11 @@ export default function Hemicycle({ seats }: { seats: Record<string, number> }) 
           party={active.party}
           count={active.count}
           left={active.left}
-          style={{ bottom: `calc(${100 - active.top}% + 14px)` }}
+          // Coloca o tooltip enriba do partido, pero sen saír pola parte
+          // superior do hemiciclo (nos asentos da primeira fila cortábase).
+          style={{
+            bottom: `min(calc(${100 - active.top}% + 14px), calc(100% - 66px))`,
+          }}
         />
       )}
     </div>

@@ -92,7 +92,11 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         </label>
 
         {error && (
-          <p className="anim-pop rounded-lg px-3 py-2 text-sm font-medium" style={{ color: "var(--danger)", background: "color-mix(in srgb, var(--danger) 10%, transparent)" }}>
+          <p
+            className="anim-pop rounded-lg px-3 py-2 text-sm font-medium"
+            style={{ color: "var(--danger)", background: "color-mix(in srgb, var(--danger) 10%, transparent)" }}
+            role="alert"
+          >
             {error}
           </p>
         )}

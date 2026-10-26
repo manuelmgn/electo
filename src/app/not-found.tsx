@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function NotFound() {
   return (
-    <div className="card text-center py-10">
+    <div className="card mx-4 my-8 px-6 py-10 text-center">
       <div className="text-5xl font-black mb-2" aria-hidden>
-        350
+        404
       </div>
       <h1 className="text-xl font-bold mb-1">Esta páxina non ten escaños</h1>
       <p className="text-sm opacity-70 mb-5">

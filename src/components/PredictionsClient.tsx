@@ -48,7 +48,7 @@ export default function PredictionsClient({
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-extrabold">{t.myPredictions}</h1>
         <Link href="/" className="btn btn-ghost !py-1.5 text-sm">
-          + {t.save}
+          + {t.newPrediction}
         </Link>
       </div>
 

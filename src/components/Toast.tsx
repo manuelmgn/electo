@@ -36,7 +36,7 @@ export function BottomToast({ children }: { children: React.ReactNode }) {
       <div
         className="anim-toast mx-4 max-w-[calc(100vw-2rem)] rounded-2xl px-7 py-3 text-center text-sm font-semibold shadow-xl"
         style={{ background: "var(--error)", color: "#ffffff" }}
-        role="status"
+        role="alert"
       >
         {children}
       </div>

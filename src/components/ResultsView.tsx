@@ -85,12 +85,12 @@ export default function ResultsView({
     <div className="anim-fade-up space-y-4 px-4 py-4">
       <section className="card hero-card space-y-3 p-4">
         <div className="flex items-center justify-between gap-2">
-          <h2
+          <h1
             className="min-w-0 truncate text-sm font-bold uppercase tracking-wide"
             style={{ color: "var(--muted)" }}
           >
             {title}
-          </h2>
+          </h1>
           <Link href="/" className="btn btn-ghost shrink-0 !px-3 !py-1 text-xs">
             {t.backToEdit}
           </Link>

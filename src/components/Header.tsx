@@ -54,6 +54,12 @@ export default function Header() {
   const [theme, setTheme] = useState<Theme>("auto");
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const themeLabels: Record<Theme, string> = {
+    auto: t.themeAuto,
+    light: t.themeLight,
+    dark: t.themeDark,
+  };
+
   useEffect(() => {
     const saved = localStorage.getItem("theme");
     if (saved === "light" || saved === "dark") setTheme(saved);
@@ -136,6 +142,7 @@ export default function Header() {
               <button
                 key={l}
                 onClick={() => switchLang(l)}
+                aria-pressed={lang === l}
                 className="px-2.5 py-1.5 uppercase transition-opacity sm:px-3.5 sm:py-2 lg:px-4"
                 style={
                   lang === l
@@ -152,8 +159,8 @@ export default function Header() {
             onClick={cycleTheme}
             className="flex h-8 w-8 items-center justify-center rounded-full text-sm sm:h-9 sm:w-9 lg:h-10 lg:w-10"
             style={{ background: "var(--surface-2)" }}
-            aria-label={t.theme}
-            title={theme}
+            aria-label={`${t.theme}: ${themeLabels[theme]}`}
+            title={themeLabels[theme]}
           >
             {themeIcons[theme]}
           </button>
@@ -163,7 +170,7 @@ export default function Header() {
               onClick={() => setMenuOpen((v) => !v)}
               className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold sm:h-9 sm:w-9 lg:h-10 lg:w-10"
               style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}
-              aria-label={t.hello}
+              aria-label={`${t.hello}, ${user.name}`}
               aria-expanded={menuOpen}
               aria-haspopup="menu"
             >

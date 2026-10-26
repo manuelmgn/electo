@@ -33,7 +33,12 @@ export function SeatTooltip({
     >
       <PartyLogo party={party} className="h-7 w-7 text-[8px]" />
       <div className="min-w-0 leading-tight">
-        <p className="max-w-40 truncate text-xs font-bold">{party.name}</p>
+        {/* En móbil abonda coas siglas: o nome completo fai o tooltip
+            tan ancho que sairía polos lados da pantalla. */}
+        <p className="max-w-40 truncate text-xs font-bold">
+          <span className="sm:hidden">{party.short}</span>
+          <span className="hidden sm:inline">{party.name}</span>
+        </p>
         <p className="text-sm font-extrabold tabular-nums">
           {count}{" "}
           <span className="text-xs font-semibold" style={{ color: "var(--muted)" }}>
@@ -41,7 +46,10 @@ export function SeatTooltip({
           </span>
         </p>
       </div>
-      <span className="text-sm font-bold tabular-nums" style={{ color: "var(--muted)" }}>
+      <span
+        className="hidden text-sm font-bold tabular-nums sm:inline"
+        style={{ color: "var(--muted)" }}
+      >
         {seatPercent(count)}
       </span>
     </div>
@@ -91,7 +99,9 @@ export default function BarTooltip({
   count: number;
   leftPct: number;
 }) {
-  const left = Math.min(92, Math.max(8, leftPct));
+  // Mantén o tooltip dentro da pantalla: nos segmentos dos extremos
+  // achégase cara ao centro o suficiente para que non se corte.
+  const left = Math.min(70, Math.max(30, leftPct));
   return (
     <SeatTooltip
       party={party}

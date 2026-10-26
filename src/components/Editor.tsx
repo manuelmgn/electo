@@ -110,8 +110,11 @@ export default function Editor({
   initialTitle?: string;
 }) {
   const { t, lang } = useI18n();
+  // Cando se carga unha predición gardada, as partes sen fila na BD
+  // valen 0: non hai que mesturar os escaños por defecto (senón a suma
+  // pasaría de 350). Os valores por defecto son só para o editor novo.
   const [seats, setSeats] = useState<Seats>(() =>
-    initialSeats ? { ...defaultSeats(), ...initialSeats } : defaultSeats()
+    initialSeats ? { ...emptySeats(), ...initialSeats } : defaultSeats()
   );
   const [governs, setGoverns] = useState<Record<string, boolean>>({});
   const [allies, setAllies] = useState<Record<string, boolean>>({});
@@ -279,7 +282,9 @@ export default function Editor({
   };
 
   const loadLocal = (entry: LocalPrediction) => {
-    setSeats({ ...defaultSeats(), ...entry.seats });
+    // Igual ca na carga da nube: os partidos que non estean no gardado
+    // quedan a 0 (as predicións antigas poden non ter tódalas claves).
+    setSeats({ ...emptySeats(), ...entry.seats });
     setGoverns(entry.governs ?? {});
     setAllies(entry.allies ?? {});
     setTitle(entry.title);
@@ -345,7 +350,9 @@ export default function Editor({
   return (
     <div className="anim-fade-up space-y-4 px-4 py-4">
       {/* Hemiciclo + estado */}
-      <section className="card hero-card space-y-3 overflow-hidden p-4">
+      {/* Sen overflow-hidden: o tooltip do hemiciclo sobresae da tarxeta
+          e quedaría cortado nas filas superiores. */}
+      <section className="card hero-card space-y-3 p-4">
         <Hemicycle seats={seats} />
 
         <div className="flex items-center justify-between">
