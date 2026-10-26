@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/Header";
+import PWARegister from "@/components/PWARegister";
 
 // URL canónica para as imaxes sociais (/s/, /r/, /f/). Pódese
 // sobrescribir con NEXT_PUBLIC_SITE_URL na despregadura.
@@ -45,6 +46,7 @@ export default async function RootLayout({
       </head>
       <body className="min-h-screen antialiased">
         <Header />
+        <PWARegister />
         <div className="mx-auto max-w-xl">
           <main className="pb-10">{children}</main>
         </div>

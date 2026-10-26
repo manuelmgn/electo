@@ -33,6 +33,7 @@ npm run dev     # servidor de desenvolvemento
 npm run build   # build de produción
 npm start       # servir o build
 npm test        # tests unitarios (vitest run)
+npm run test:e2e  # tests E2E (Playwright; build+a continuación no porto 3100)
 ```
 
 Desenvolvemento local: `cp .env.example .env.local` e enche `POSTGRES_URL` e
@@ -67,7 +68,8 @@ src/
   components/           # client components: Editor, ResultsView (vista
                         # só lectura compartida polas rutas r/f/s),
                         # Hemicycle, SeatBar, GovBar, GovSumCard, Header,
-                        # AuthForm, PartyLogo, PredictionsClient
+                        # AuthForm, PartyLogo, PredictionsClient,
+                        # PWARegister (rexistro do service worker)
   lib/
     parties.ts          # TÁBOA ÚNICA DE PARTIDOS (ver abaixo)
     results.ts          # resultados de eleccións anteriores (só lectura)
@@ -87,9 +89,14 @@ src/
     i18n.ts             # hook useI18n + detección de idioma
 tests/                  # tests Vitest: lóxica pura + integración de
                         # rutas API (mock de sql/auth, sen DB real)
+e2e/                    # tests E2E Playwright (build de prod no porto
+                        # 3100, sen POSTGRES_URL: modo localStorage)
 scripts/schema.sql      # esquema: users, predictions, prediction_seats,
                         # shared_predictions + trigger de updated_at
 public/logos/           # logos dos partidos (nomes referenciados dende parties.ts)
+public/sw.js            # service worker: caché de estáticos, fallback
+                        # offline (sin-conexion.html), non toca /api/
+playwright.config.ts    # config de E2E (proxectos chromium + iPhone)
 ```
 
 ## Convencións clave
@@ -151,6 +158,17 @@ Os tests usan o alias `@/`, viven en `tests/**/*.test.ts` e empregan
 mocks de módulo cos axudantes de Vitest (`vi.mock`, `vi.hoisted`). Ao
 modificar a lóxica de `src/lib` ou unha ruta API, actualiza ou engade
 tests no mesmo PR/commit.
+
+**E2E** (`npm run test:e2e`, `e2e/` + Playwright): contra o build de
+produción no porto **3100** con `POSTGRES_URL` baleiro e `distDir`
+propio (`.next-e2e`, definido en `next.config.ts` co env `E2E_DIST=1`)
+para non partir a caché `.next` do dev server. Proxectos: chromium
+(desktop) e iPhone 13 (WebKit — fallback offline só en Chromium porque
+WebKit non soporta `grantPermissions` de clipboard nin recarregar fóra
+de liña). Cobren o editor (reparto por defecto = 350, Límpar → ±1,
+input a man), predición no dispositivo, compartir (con ou sen
+clipboard permiso), idioma, tema, 404 propia, manifest, robots, vistas
+públicas, rexistro do SW e fóra de liña.
 
 ## Seguridade
 
