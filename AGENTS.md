@@ -60,7 +60,7 @@ src/
     predicions/         # listado de predicicións na nube
     not-found.tsx       # 404 propia (en galego)
     manifest.ts         # manifest PWA (/manifest.webmanifest)
-    robots.ts           # robots.txt (permite /, sobre /s/ e /api/)
+    robots.ts           # robots.txt (permite /, bloquea /s/ e /api/)
     api/auth/{login,register,logout,me}/route.ts
     api/predictions/route.ts e api/predictions/[id]/route.ts
     api/share/route.ts  # crea a ligazón curta /s/<código> (POST)
