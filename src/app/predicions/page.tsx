@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSessionUser } from "@/lib/auth";
-import { sql } from "@/lib/db";
+import { dbConfigured, sql } from "@/lib/db";
 import PredictionsClient, { type PredictionDto } from "@/components/PredictionsClient";
 
 export const metadata: Metadata = { title: "As miñas predicicións · Electo 26" };
 
 export default async function PredictionsPage() {
   const user = await getSessionUser();
-  if (!user) redirect("/login");
+  // Sen BD tamén manda ao login: estas predicións están na nube,
+  // non hai nada que amosar sen POSTGRES_URL.
+  if (!user || !dbConfigured()) redirect("/login");
 
   const preds = await sql`
     SELECT id, title, created_at FROM predictions
