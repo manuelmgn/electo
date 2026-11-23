@@ -28,7 +28,7 @@ export const gl = {
   newPrediction: "Nova predición",
   noPredictions: "Aínda non gardaches predicicións.",
   predictionTitle: "Título",
-  predictionTitlePlaceholder: "Ex.: maioría PP–Vox",
+  predictionTitlePlaceholder: "Nome da predición",
   guestNotice: "Non iniciaches sesión: a predición gárdase só neste dispositivo.",
   guestSave: "Gardar no dispositivo",
   loginToSave: "Inicia sesión para gardar na nube",

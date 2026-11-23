@@ -116,7 +116,7 @@ test.describe("Electo 26", () => {
     // O placeholder do título é distinto en cada lingua (visible tamén
     // no móbil, ao contrario do tagline escondido en viewport estreito).
     const input = page.getByLabel("Título");
-    await expect(input).toHaveAttribute("placeholder", "Ex.: maioría PP–Vox");
+    await expect(input).toHaveAttribute("placeholder", "Nome da predición");
 
     await page.getByRole("button", { name: "es", exact: true }).click();
     await expect(input).toHaveAttribute("placeholder", "Ej.: mayoría PP–Vox");
