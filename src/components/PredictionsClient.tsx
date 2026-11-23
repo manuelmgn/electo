@@ -121,6 +121,7 @@ export default function PredictionsClient({
                 {t.load}
               </Link>
               <button
+                type="button"
                 onClick={() => remove(pred.id)}
                 disabled={deleting === pred.id}
                 className="btn btn-ghost flex-1 !py-1.5 text-sm"

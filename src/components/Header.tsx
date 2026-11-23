@@ -149,6 +149,7 @@ export default function Header() {
             {(["gl", "es"] as Lang[]).map((l) => (
               <button
                 key={l}
+                type="button"
                 onClick={() => switchLang(l)}
                 aria-pressed={lang === l}
                 className="px-2.5 py-1.5 uppercase transition-opacity sm:px-3.5 sm:py-2 lg:px-4"
@@ -164,6 +165,7 @@ export default function Header() {
           </div>
 
           <button
+            type="button"
             onClick={cycleTheme}
             className="flex h-8 w-8 items-center justify-center rounded-full text-sm sm:h-9 sm:w-9 lg:h-10 lg:w-10"
             style={{ background: "var(--surface-2)" }}
@@ -175,6 +177,7 @@ export default function Header() {
 
           {user ? (
             <button
+              type="button"
               onClick={() => setMenuOpen((v) => !v)}
               className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold sm:h-9 sm:w-9 lg:h-10 lg:w-10"
               style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}
@@ -197,7 +200,7 @@ export default function Header() {
         {user && menuOpen && (
           <>
             {/* Backdrop: pecha o menú ao clicar fóra */}
-            <div className="fixed inset-0 z-20" onClick={() => setMenuOpen(false)} />
+            <div className="fixed inset-0 z-20" aria-hidden="true" onClick={() => setMenuOpen(false)} />
             <div
               role="menu"
               className="anim-pop absolute right-4 top-full z-30 mt-2 w-48 overflow-hidden py-1 shadow-xl sm:right-6 lg:right-12"
@@ -207,6 +210,7 @@ export default function Header() {
                 {t.hello}, {user.name}
               </p>
               <Link
+                role="menuitem"
                 href="/predicions"
                 onClick={() => setMenuOpen(false)}
                 className="block px-4 py-2 text-sm hover:opacity-80"
@@ -214,6 +218,8 @@ export default function Header() {
                 {t.myPredictions}
               </Link>
               <button
+                type="button"
+                role="menuitem"
                 onClick={logout}
                 className="block w-full px-4 py-2 text-left text-sm hover:opacity-80"
                 style={{ color: "var(--danger)" }}

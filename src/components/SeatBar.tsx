@@ -7,6 +7,7 @@ import {
   seatFraction,
   type Party,
 } from "@/lib/parties";
+import { useI18n } from "@/lib/i18n";
 import BarTooltip, { useBarHover } from "./BarTooltip";
 
 // Fronteira exacta entre os asentos 175 e 176 (inicio da maioría
@@ -27,6 +28,7 @@ export default function SeatBar({
   height?: string;
   majorityLabel?: string;
 }) {
+  const { t } = useI18n();
   const { activeId, enter, leave, tap } = useBarHover();
 
   // Segmentos co seu centro en % para ancorar o tooltip.
@@ -43,7 +45,7 @@ export default function SeatBar({
   const active = segments.find((s) => s.party.id === activeId) ?? null;
 
   return (
-    <div className="relative" role="img" aria-label="Distribución de escaños">
+    <div className="relative" role="img" aria-label={t.seatBarLabel}>
       <div
         className={`flex w-full overflow-hidden rounded-full ${height}`}
         style={{ background: "var(--surface-2)" }}

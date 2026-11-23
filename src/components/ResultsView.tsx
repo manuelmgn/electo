@@ -158,7 +158,7 @@ export default function ResultsView({
 
       {/* Compartir: copia o título + resumo de escaños + ligazón propia */}
       <section className="card p-4">
-        <button onClick={share} className="btn btn-primary w-full text-base">
+        <button type="button" onClick={share} className="btn btn-primary w-full text-base">
           {t.share}
         </button>
       </section>

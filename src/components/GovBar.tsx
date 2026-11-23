@@ -7,6 +7,7 @@ import {
   seatFraction,
   type Party,
 } from "@/lib/parties";
+import { useI18n } from "@/lib/i18n";
 import BarTooltip, { useBarHover } from "./BarTooltip";
 
 // Trama que se aplica sobre os segmentos de aliados na barra de suma:
@@ -39,6 +40,7 @@ export default function GovBar({
   governs: Record<string, boolean>;
   allies: Record<string, boolean>;
 }) {
+  const { t } = useI18n();
   const { activeId, enter, leave, tap } = useBarHover();
 
   const bySeatsDesc = (a: (typeof PARTIES)[number], b: (typeof PARTIES)[number]) =>
@@ -63,7 +65,7 @@ export default function GovBar({
   const active = segments.find((s) => s.party.id === activeId) ?? null;
 
   return (
-    <div className="relative" role="img" aria-label="Suma de goberno e aliados">
+    <div className="relative" role="img" aria-label={t.govBarLabel}>
       <div
         className="flex h-5 w-full overflow-hidden rounded-full"
         style={{ background: "var(--surface-2)" }}

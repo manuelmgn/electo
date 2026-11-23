@@ -55,6 +55,9 @@ export const gl = {
   "invalid-data": "Comproba os datos e inténtao de novo.",
   "need-login": "Tes que iniciar sesión.",
   "no-db": "Base de datos non configurada.",
+  hemicycleLabel: "Hemiciclo de escaños",
+  seatBarLabel: "Distribución de escaños",
+  govBarLabel: "Suma de goberno e aliados",
 };
 
 export const es = {
@@ -114,6 +117,9 @@ export const es = {
   "invalid-data": "Comprueba los datos e inténtalo de nuevo.",
   "need-login": "Tienes que iniciar sesión.",
   "no-db": "Base de datos no configurada.",
+  hemicycleLabel: "Hemiciclo de escaños",
+  seatBarLabel: "Distribución de escaños",
+  govBarLabel: "Suma de gobierno y aliados",
 };
 
 export type Dict = typeof gl;

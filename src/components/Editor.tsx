@@ -92,7 +92,7 @@ function SeatInput({
         const n = parseInt(raw, 10);
         if (!Number.isNaN(n)) onChange(Math.max(0, Math.min(n, max)));
       }}
-      className="seat-input w-12 rounded-lg border py-1 text-center text-sm font-bold tabular-nums outline-none focus:border-[var(--accent)]"
+      className="seat-input w-12 rounded-lg border py-1 text-center text-sm font-bold tabular-nums focus:border-[var(--accent)]"
       style={{ borderColor: "var(--border)", background: "transparent", color: "var(--text)" }}
     />
   );
@@ -357,6 +357,9 @@ export default function Editor({
 
   return (
     <div className="anim-fade-up space-y-4 px-4 py-4">
+      <h1 className="sr-only">
+        {t.appName} — {t.tagline}
+      </h1>
       {/* Hemiciclo + estado */}
       {/* Sen overflow-hidden: o tooltip do hemiciclo sobresae da tarxeta
           e quedaría cortado nas filas superiores. */}
@@ -388,6 +391,7 @@ export default function Editor({
               </span>
             )}
             <button
+              type="button"
               onClick={clearAll}
               disabled={total === 0}
               className="btn btn-ghost !px-3 !py-1 text-xs"
@@ -447,6 +451,7 @@ export default function Editor({
                   style={{ borderColor: "var(--border)" }}
                 >
                   <button
+                    type="button"
                     onClick={() => setRole(p.id, "gov")}
                     aria-pressed={!!gov}
                     aria-label={t.government}
@@ -466,6 +471,7 @@ export default function Editor({
                     🏛️<span className="hidden sm:inline"> {t.government}</span>
                   </button>
                   <button
+                    type="button"
                     onClick={() => setRole(p.id, "ally")}
                     aria-pressed={!!ally}
                     aria-label={t.ally}
@@ -489,6 +495,7 @@ export default function Editor({
               )}
               <div className="flex shrink-0 items-center gap-1">
                 <button
+                  type="button"
                   onClick={() => setParty(p.id, value - 1)}
                   disabled={value === 0}
                   className="step-btn"
@@ -503,6 +510,7 @@ export default function Editor({
                   onChange={(v) => setParty(p.id, v)}
                 />
                 <button
+                  type="button"
                   onClick={() => setParty(p.id, value + 1)}
                   disabled={value >= maxForParty}
                   className="step-btn"
@@ -520,6 +528,7 @@ export default function Editor({
           destacado); gardar queda como secundario. */}
       <section className="card space-y-3 p-4">
         <button
+          type="button"
           onClick={share}
           disabled={!exact}
           className="btn btn-primary w-full text-base"
@@ -536,6 +545,7 @@ export default function Editor({
         />
         {user ? (
           <button
+            type="button"
             onClick={saveCloud}
             disabled={!exact || saving}
             className="btn btn-ghost w-full text-base"
@@ -545,6 +555,7 @@ export default function Editor({
         ) : (
           <>
             <button
+              type="button"
               onClick={saveLocal}
               disabled={!exact}
               className="btn btn-ghost w-full text-base"
@@ -577,10 +588,11 @@ export default function Editor({
               </div>
               <SeatBar seats={entry.seats} />
               <div className="flex gap-2">
-                <button onClick={() => loadLocal(entry)} className="btn btn-ghost flex-1 !py-1.5 text-sm">
+                <button type="button" onClick={() => loadLocal(entry)} className="btn btn-ghost flex-1 !py-1.5 text-sm">
                   {t.load}
                 </button>
                 <button
+                  type="button"
                   onClick={() => deleteLocal(entry.id)}
                   className="btn btn-ghost flex-1 !py-1.5 text-sm"
                   style={{ color: "var(--danger)" }}

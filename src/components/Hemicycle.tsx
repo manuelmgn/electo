@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { TOTAL_SEATS, MAJORITY_SEATS, type Party } from "@/lib/parties";
 import { buildSeats, HEMICYCLE } from "@/lib/hemicycle";
+import { useI18n } from "@/lib/i18n";
 import { SeatTooltip } from "./BarTooltip";
 
 // Dimensións do viewBox do SVG (coordenadas → % para posicionar o tooltip).
@@ -10,6 +11,7 @@ const VB_W = 400;
 const VB_H = 224;
 
 export default function Hemicycle({ seats }: { seats: Record<string, number> }) {
+  const { t } = useI18n();
   const [mounted, setMounted] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const leaveTimer = useRef<number | undefined>(undefined);
@@ -109,7 +111,7 @@ export default function Hemicycle({ seats }: { seats: Record<string, number> }) 
       onPointerLeave={handlePointerLeave}
       onPointerDown={handlePointerDown}
     >
-      <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full" role="img" aria-label="Hemiciclo de escaños">
+      <svg viewBox={`0 0 ${VB_W} ${VB_H}`} className="w-full" role="img" aria-label={t.hemicycleLabel}>
         {/* Liña da maioría absoluta: no centro separa os asentos 175 e 176 */}
         <line
           x1={HEMICYCLE.cx}

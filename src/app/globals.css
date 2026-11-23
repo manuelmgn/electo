@@ -112,16 +112,6 @@ body {
   }
 }
 
-@keyframes glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 45%, transparent);
-  }
-  50% {
-    box-shadow: 0 0 0 6px transparent;
-  }
-}
-
 .anim-fade-up {
   animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -136,10 +126,6 @@ body {
 
 .anim-toast {
   animation: toast-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.anim-glow {
-  animation: glow 1.6s ease-in-out 2;
 }
 
 /* ---------- Compoñentes base ---------- */
@@ -197,7 +183,6 @@ body {
   border-radius: 0.75rem;
   padding: 0.7rem 0.9rem;
   color: var(--text);
-  outline: none;
   transition: border-color 0.15s ease;
 }
 
@@ -249,9 +234,7 @@ input[type="range"] {
 /* ---------- Accesibilidade ---------- */
 
 /* Anel de foco lexible para teclado en tódolos controis interactivos */
-.btn:focus-visible,
-.step-btn:focus-visible,
-div[role="button"]:focus-visible {
+:where(a:any-link, button, input, [tabindex]):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
@@ -265,8 +248,7 @@ div[role="button"]:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   .anim-fade-up,
   .anim-pop,
-  .anim-toast,
-  .anim-glow {
+  .anim-toast {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
