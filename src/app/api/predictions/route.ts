@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "need-login" }, { status: 401 });
   }
 
-  const body = await readJson<{ title?: string; seats?: unknown }>(req);
+  const body = await readJson<{ title?: unknown; seats?: unknown }>(req);
   if (!body) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
@@ -27,7 +27,8 @@ export async function POST(req: Request) {
   }
 
   try {
-    const title = body.title?.trim().slice(0, 120) || DEFAULT_PREDICTION_TITLE;
+    const rawTitle = typeof body.title === "string" ? body.title.trim().slice(0, 120) : "";
+    const title = rawTitle || DEFAULT_PREDICTION_TITLE;
     const predictionId = await sql.begin(async (tx) => {
       const preds =
         await tx`INSERT INTO predictions (user_id, title) VALUES (${user.id}, ${title}) RETURNING id`;

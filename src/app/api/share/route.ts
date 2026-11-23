@@ -1,23 +1,10 @@
 import { NextResponse } from "next/server";
 import { sql } from "@/lib/db";
 import { requireDb, readJson } from "@/lib/api";
-import { PARTIES } from "@/lib/parties";
 import { validateSeats } from "@/lib/predictions";
-import { generateShareCode } from "@/lib/share";
+import { generateShareCode, sanitizeMarks } from "@/lib/share";
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-// Sanitiza un mapa de marcas (goberno/aliados): só ids de partidos
-// coñecidos con valor true, coma fai decodeShare coas ligazóns de hash.
-function sanitizeMarks(raw: unknown): Record<string, boolean> {
-  if (typeof raw !== "object" || raw === null) return {};
-  const validIds = new Set(PARTIES.map((p) => p.id));
-  return Object.fromEntries(
-    Object.entries(raw as Record<string, unknown>).filter(
-      ([id, v]) => validIds.has(id) && v === true
-    )
-  ) as Record<string, boolean>;
-}
 
 // Crea unha ligazón curta e inmutable para unha predición compartida.
 // O código de 20 caracteres é aleatorio e único (PK da táboa).
@@ -26,7 +13,7 @@ export async function POST(req: Request) {
   if (dbError) return dbError;
 
   const body = await readJson<{
-    title?: string;
+    title?: unknown;
     seats?: unknown;
     governs?: unknown;
     allies?: unknown;
@@ -40,7 +27,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
 
-  const title = body.title?.trim().slice(0, 120) || "";
+  const title = typeof body.title === "string" ? body.title.trim().slice(0, 120) : "";
   const seats = Object.fromEntries(entries.map((e) => [e.partyId, e.seats]));
   const governs = sanitizeMarks(body.governs);
   const allies = sanitizeMarks(body.allies);

@@ -9,18 +9,20 @@ import { setSessionCookie } from "@/lib/auth";
 // así non se filtra por tempo de resposta que un correo ten conta.
 const DUMMY_HASH = "$2a$10$taQ/M3k0yGxbisgFCDvcYOnfj4g4dwfYRPpuvHlZiqDUE7oAL1QSC";
 
+const MAX_PASSWORD = 128;
+
 export async function POST(req: Request) {
   const dbError = requireDb();
   if (dbError) return dbError;
 
-  const body = await readJson<{ email?: string; password?: string }>(req);
-  if (!body) {
+  const body = await readJson<{ email?: unknown; password?: unknown }>(req);
+  if (!body || typeof body.email !== "string" || typeof body.password !== "string") {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
 
-  const email = body.email?.trim().toLowerCase();
+  const email = body.email.trim().toLowerCase();
   const password = body.password;
-  if (!email || !password) {
+  if (!email || !password || password.length > MAX_PASSWORD) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
 

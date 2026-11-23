@@ -19,9 +19,12 @@ describe("validateSeats", () => {
     expect(validateSeats({ pp: 351 })).toBeNull();
   });
 
-  it("rexeita valores non enteiros ou negativos", () => {
+  it("rexeita valores non enteiros, negativos ou non numéricos", () => {
     expect(validateSeats({ pp: 349.5 })).toBeNull();
     expect(validateSeats({ pp: -1 })).toBeNull();
+    expect(validateSeats({ pp: true, psoe: 349 })).toBeNull();
+    expect(validateSeats({ pp: "350" })).toBeNull();
+    expect(validateSeats({ pp: null, psoe: 350 })).toBeNull();
   });
 
   it("ignora ids descoñecidos", () => {

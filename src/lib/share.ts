@@ -72,8 +72,8 @@ export function decodeShare(code: string): SharedPrediction | null {
 }
 
 // Deixa só as marcas (goberno/aliados) de partidos coñecidos a true.
-function sanitizeMarks(raw: unknown): Record<string, boolean> {
-  if (typeof raw !== "object" || raw === null) return {};
+export function sanitizeMarks(raw: unknown): Record<string, boolean> {
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return {};
   const out: Record<string, boolean> = {};
   for (const [id, v] of Object.entries(raw as Record<string, unknown>)) {
     if (id in PARTY_BY_ID && v === true) out[id] = true;
@@ -103,6 +103,7 @@ export function buildShareLines(
     .filter((p) => p.n > 0)
     .sort((a, b) => b.n - a.n);
   const listed = ranked.filter((p, i) => i < 4 || p.gov || p.ally);
+  if (listed.length === 0) return [];
   const shortW = Math.max(...listed.map((p) => p.short.length));
   const numW = Math.max(...listed.map((p) => String(p.n).length));
   return listed.map((p) => {

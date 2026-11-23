@@ -15,14 +15,15 @@ type DbClient = postgres.Sql | postgres.TransactionSql;
 // 350. Devolve só os partidos con escaños (> 0), ou null se non é
 // válido. Úsase a cotío nas rutas (POST/PUT de predicións e compartir).
 export function validateSeats(raw: unknown): SeatEntry[] | null {
-  if (typeof raw !== "object" || raw === null) return null;
+  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) return null;
   const validIds = new Set(PARTIES.map((p) => p.id));
   const entries: SeatEntry[] = [];
   for (const [partyId, value] of Object.entries(raw as Record<string, unknown>)) {
     if (!validIds.has(partyId)) continue;
-    const seats = Number(value);
-    if (!Number.isInteger(seats) || seats < 0) return null;
-    if (seats > 0) entries.push({ partyId, seats });
+    if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
+      return null;
+    }
+    if (value > 0) entries.push({ partyId, seats: value });
   }
   const sum = entries.reduce((acc, e) => acc + e.seats, 0);
   return sum === TOTAL_SEATS ? entries : null;

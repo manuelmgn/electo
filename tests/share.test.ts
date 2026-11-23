@@ -119,6 +119,7 @@ describe("buildShareLines", () => {
     expect(buildShareLines({ pp: 0, psoe: 121 }, {}, {}, parties)).toEqual([
       "🌹 PSOE - 121",
     ]);
+    expect(buildShareLines({}, {}, {}, parties)).toEqual([]);
   });
 });
 

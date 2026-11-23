@@ -28,6 +28,9 @@ describe("jsonbObject", () => {
 
   it("fallback a obxecto baleiro con entradas inválidas", () => {
     expect(jsonbObject("non-e-json")).toEqual({});
+    expect(jsonbObject("null")).toEqual({});
+    expect(jsonbObject("[1,2]")).toEqual({});
+    expect(jsonbObject([1, 2])).toEqual({});
     expect(jsonbObject(null)).toEqual({});
     expect(jsonbObject(42)).toEqual({});
   });

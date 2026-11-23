@@ -8,19 +8,25 @@ import { setSessionCookie } from "@/lib/auth";
 const MAX_NAME = 60;
 const MAX_EMAIL = 254;
 const MIN_PASSWORD = 6;
+const MAX_PASSWORD = 128;
 
 export async function POST(req: Request) {
   const dbError = requireDb();
   if (dbError) return dbError;
 
-  const body = await readJson<{ name?: string; email?: string; password?: string }>(req);
-  if (!body) {
+  const body = await readJson<{ name?: unknown; email?: unknown; password?: unknown }>(req);
+  if (
+    !body ||
+    typeof body.name !== "string" ||
+    typeof body.email !== "string" ||
+    typeof body.password !== "string"
+  ) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
 
-  const name = body.name?.trim() ?? "";
-  const email = body.email?.trim().toLowerCase() ?? "";
-  const password = body.password ?? "";
+  const name = body.name.trim();
+  const email = body.email.trim().toLowerCase();
+  const password = body.password;
 
   if (!name || !email.includes("@") || !password) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
@@ -28,7 +34,7 @@ export async function POST(req: Request) {
   if (password.length < MIN_PASSWORD) {
     return NextResponse.json({ message: "short-password" }, { status: 400 });
   }
-  if (name.length > MAX_NAME || email.length > MAX_EMAIL) {
+  if (name.length > MAX_NAME || email.length > MAX_EMAIL || password.length > MAX_PASSWORD) {
     return NextResponse.json({ message: "invalid-data" }, { status: 400 });
   }
 
@@ -49,6 +55,10 @@ export async function POST(req: Request) {
     setSessionCookie(res, rows[0].id as number);
     return res;
   } catch (err) {
+    // Carreira de rexistro simultáneo co mesmo correo: unique_violation.
+    if ((err as { code?: string })?.code === "23505") {
+      return NextResponse.json({ message: "email-used" }, { status: 409 });
+    }
     console.error("[register] erro:", err);
     return NextResponse.json({ message: "errorGeneric" }, { status: 500 });
   }

@@ -185,7 +185,6 @@ describe("PUT/DELETE /api/predictions/[id]", () => {
 
   it("PUT 400 con reparto inválido", async () => {
     const mod = await import("@/app/api/predictions/[id]/route");
-    h.returning.push([{ id: 1 }]);
     const res = await api(mod).PUT(
       jsonReq({ title: "x", seats: { pp: 349, psoe: 1, vox: 0.5 } }),
       ctx
@@ -204,14 +203,16 @@ describe("PUT/DELETE /api/predictions/[id]", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ ok: true });
     expect(h.calls.some((c) => c.query.includes("DELETE FROM predictions"))).toBe(true);
-    // id non enteiro → 404 sen tocar BD
+    // id non enteiro ou non positivo → 404 sen tocar BD
     h.calls.length = 0;
-    const badCtx = { params: Promise.resolve({ id: "abc" }) };
-    const res2 = await api(mod).DELETE(
-      new Request("http://localhost/test", { method: "DELETE" }),
-      badCtx
-    );
-    expect(res2.status).toBe(404);
+    for (const badId of ["abc", "0", "-5"]) {
+      const badCtx = { params: Promise.resolve({ id: badId }) };
+      const res2 = await api(mod).DELETE(
+        new Request("http://localhost/test", { method: "DELETE" }),
+        badCtx
+      );
+      expect(res2.status).toBe(404);
+    }
     expect(h.calls.some((c) => c.query.includes("DELETE FROM predictions"))).toBe(false);
   });
 });
@@ -299,5 +300,27 @@ describe("POST /api/auth/login e rexistro", () => {
     );
     expect(res.status).toBe(400);
     expect((await res.json()).message).toBe("short-password");
+  });
+
+  it("rexistro 409 ante colisión concorrente (23505)", async () => {
+    const { POST } = await import("@/app/api/auth/register/route");
+    h.returning.push([]); // SELECT 1 devolve baleiro
+    h.errors.push(Object.assign(new Error("dup"), { code: "23505" }));
+    const res = await api({ POST }).POST(
+      jsonReq({ name: "A", email: "carreira@exemplo.gal", password: "contrasinal123" })
+    );
+    expect(res.status).toBe(409);
+    expect((await res.json()).message).toBe("email-used");
+  });
+
+  it("login e rexistro devolven 400 con campos non string", async () => {
+    const login = await import("@/app/api/auth/login/route");
+    const register = await import("@/app/api/auth/register/route");
+    const r1 = await api(login).POST(jsonReq({ email: 123, password: "abc" }));
+    expect(r1.status).toBe(400);
+    const r2 = await api(register).POST(
+      jsonReq({ name: ["Ana"], email: "a@b.gal", password: "contrasinal123" })
+    );
+    expect(r2.status).toBe(400);
   });
 });

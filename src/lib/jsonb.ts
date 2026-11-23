@@ -9,8 +9,10 @@
 
 export function jsonbObject<T extends object>(value: unknown): T {
   try {
-    if (typeof value === "string") return JSON.parse(value) as T;
-    if (typeof value === "object" && value !== null) return value as T;
+    const parsed = typeof value === "string" ? JSON.parse(value) : value;
+    if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+      return parsed as T;
+    }
   } catch {
     // JSON mal formado: obxecto baleiro
   }

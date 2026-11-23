@@ -8,10 +8,22 @@ export const SESSION_DAYS = 30;
 export const SESSION_MAX_AGE_MS = SESSION_DAYS * 86_400_000;
 export const SESSION_MAX_AGE_S = SESSION_DAYS * 86_400;
 
-const secret = process.env.SESSION_SECRET ?? "dev-only-secret-change-me";
+const DEV_FALLBACK_SECRET = "dev-only-secret-change-me";
+// Marxe máxima de reloxo cara ao futuro (1 min) para evitar tokens
+// con marcas de tempo absurdas.
+const MAX_FUTURE_SKEW_MS = 60_000;
+
+function getSecret(): string {
+  const configured = process.env.SESSION_SECRET?.trim();
+  if (configured) return configured;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("SESSION_SECRET obrigatorio en produción");
+  }
+  return DEV_FALLBACK_SECRET;
+}
 
 function sign(payload: string): string {
-  return crypto.createHmac("sha256", secret).update(payload).digest("base64url");
+  return crypto.createHmac("sha256", getSecret()).update(payload).digest("base64url");
 }
 
 export function sessionToken(userId: number, now = Date.now()): string {
@@ -27,11 +39,22 @@ export function parseSession(token?: string | null): number | null {
 
   // Expiración no servidor, ademais do Max-Age da cookie.
   const issuedAt = Number(ts);
-  if (!Number.isFinite(issuedAt) || Date.now() - issuedAt > SESSION_MAX_AGE_MS) {
+  const now = Date.now();
+  if (
+    !Number.isFinite(issuedAt) ||
+    issuedAt <= 0 ||
+    issuedAt > now + MAX_FUTURE_SKEW_MS ||
+    now - issuedAt > SESSION_MAX_AGE_MS
+  ) {
     return null;
   }
 
-  const expected = sign(`${userId}.${ts}`);
+  let expected: string;
+  try {
+    expected = sign(`${userId}.${ts}`);
+  } catch {
+    return null;
+  }
   const a = Buffer.from(sig);
   const b = Buffer.from(expected);
   if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return null;

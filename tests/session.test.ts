@@ -36,6 +36,11 @@ describe("sesión", () => {
   it("acepta tokens recentes", () => {
     expect(parseSession(sessionToken(7, Date.now() - 60_000))).toBe(7);
   });
+
+  it("rexeita tokens con marca de tempo no futuro ou non positiva", () => {
+    expect(parseSession(sessionToken(7, Date.now() + 300_000))).toBeNull();
+    expect(parseSession(sessionToken(7, 0))).toBeNull();
+  });
 });
 
 describe("cookie de sesión", () => {

@@ -5,5 +5,8 @@ import { getSessionUser } from "@/lib/auth";
 // cliente: o layout root é estático e non consulta as cookies.
 export async function GET() {
   const user = await getSessionUser();
-  return NextResponse.json({ user: user ? { name: user.name } : null });
+  return NextResponse.json(
+    { user: user ? { name: user.name } : null },
+    { headers: { "Cache-Control": "no-store" } }
+  );
 }
