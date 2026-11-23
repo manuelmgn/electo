@@ -103,12 +103,37 @@ test.describe("Electo 26", () => {
     }
     const shareButton = page.getByRole("button", { name: "Compartir" });
     await expect(shareButton).toBeEnabled();
+    await shareButton.scrollIntoViewIfNeeded();
     await shareButton.click();
-    // Debe saír unha das notizacións de share (copiada —nube ou
-    // fallback— ou erro ao copiar).
-    await expect(
-      page.getByText(/Ligazón copiada|Non se puido copiar/).first()
-    ).toBeVisible({ timeout: 5_000 });
+    // Debe saír unha das notificacións de share (copiada —nube ou
+    // fallback— ou erro ao copiar) dentro da pantalla visible do usuario.
+    const notice = page
+      .getByText(/Ligazón copiada|Non se puido copiar/)
+      .first();
+    await expect(notice).toBeVisible({ timeout: 5_000 });
+
+    // Comproba que o aviso aparece na zona visible do viewport (non
+    // ancorado ao centro da páxina enteira fóra de vista tras o scroll).
+    const box = await notice.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return {
+        top: r.top,
+        bottom: r.bottom,
+        left: r.left,
+        right: r.right,
+        role: el.getAttribute("role"),
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+      };
+    });
+    expect(box.top).toBeGreaterThanOrEqual(0);
+    expect(box.bottom).toBeLessThanOrEqual(box.vh);
+    if (box.role === "status") {
+      const centerY = (box.top + box.bottom) / 2;
+      const centerX = (box.left + box.right) / 2;
+      expect(Math.abs(centerY - box.vh / 2)).toBeLessThan(40);
+      expect(Math.abs(centerX - box.vw / 2)).toBeLessThan(40);
+    }
   });
 
   test("troco de idioma gl → es persiste", async ({ page }) => {
