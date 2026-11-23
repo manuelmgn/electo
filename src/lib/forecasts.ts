@@ -28,6 +28,11 @@
 // bórraos e pon os pronósticos reais que queiras publicar.
 // ============================================================
 
+// Interruptor temporal para amosar ou ocultar a sección "Pronósticos"
+// na interface (Editor e ResultsView). As rutas /f/[slug] seguen
+// activas; para volver amosala abonda con poñer isto a true.
+export const SHOW_FORECASTS_SECTION = false;
+
 export type Forecast = {
   published: boolean;
   seats: Record<string, number>;

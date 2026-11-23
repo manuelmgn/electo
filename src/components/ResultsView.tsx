@@ -14,6 +14,7 @@ import {
   FORECAST_VIEWS,
   viewList,
 } from "@/lib/views";
+import { SHOW_FORECASTS_SECTION } from "@/lib/forecasts";
 import { useI18n } from "@/lib/i18n";
 import { useTimedFlag } from "@/lib/useTimedFlag";
 import SeatBar from "./SeatBar";
@@ -183,18 +184,20 @@ export default function ResultsView({
       </section>
 
       {/* Pronósticos precargados */}
-      <section className="space-y-2">
-        <h2 className="px-1 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
-          {t.forecasts}
-        </h2>
-        <div className="flex flex-wrap gap-2">
-          {forecasts.map((f) => (
-            <Link key={f.slug} href={`/f/${f.slug}`} className="btn btn-ghost !py-1.5 text-sm">
-              {f.key}
-            </Link>
-          ))}
-        </div>
-      </section>
+      {SHOW_FORECASTS_SECTION && forecasts.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="px-1 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
+            {t.forecasts}
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {forecasts.map((f) => (
+              <Link key={f.slug} href={`/f/${f.slug}`} className="btn btn-ghost !py-1.5 text-sm">
+                {f.key}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Aviso: ligazón copiada (desaparece só), centrado na ventana visible */}
       {shareNotice.value && (

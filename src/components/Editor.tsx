@@ -15,6 +15,7 @@ import {
   FORECAST_VIEWS,
   viewList,
 } from "@/lib/views";
+import { SHOW_FORECASTS_SECTION } from "@/lib/forecasts";
 import { encodeShare, decodeShare, buildShareLines } from "@/lib/share";
 import { useI18n, errorMessage, formatDate } from "@/lib/i18n";
 import { useTimedFlag } from "@/lib/useTimedFlag";
@@ -626,7 +627,7 @@ export default function Editor({
       )}
 
       {/* Pronósticos precargados (só os marcados como publicados) */}
-      {forecasts.length > 0 && (
+      {SHOW_FORECASTS_SECTION && forecasts.length > 0 && (
         <section className="space-y-2">
           <h2 className="px-1 text-xs font-bold uppercase tracking-wide" style={{ color: "var(--muted)" }}>
             {t.forecasts}
