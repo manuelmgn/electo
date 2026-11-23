@@ -204,9 +204,16 @@ export default function Editor({
     setLocalId(null);
   };
 
-  const persistLocal = (list: LocalPrediction[]) => {
+  const persistLocal = (list: LocalPrediction[]): boolean => {
     setLocal(list);
-    localStorage.setItem("localPredictions", JSON.stringify(list));
+    try {
+      localStorage.setItem("localPredictions", JSON.stringify(list));
+      return true;
+    } catch {
+      // Modo privado ou cota esgotada: queda na memoria desta sesión.
+      toast.fire(t.errorGeneric);
+      return false;
+    }
   };
 
   // Deixa goberno e aliados "limpos": só ids con marca real.
@@ -219,9 +226,10 @@ export default function Editor({
     const entryTitle =
       title.trim() ||
       `Predición ${formatDate(new Date(), lang)}`;
+    let ok = false;
     if (localId !== null) {
       // Actualiza a predición local cargada en vez de crear un duplicado.
-      persistLocal(
+      ok = persistLocal(
         local.map((p) =>
           p.id === localId
             ? {
@@ -244,9 +252,9 @@ export default function Editor({
         createdAt: new Date().toISOString(),
       };
       setLocalId(entry.id);
-      persistLocal([entry, ...local].slice(0, MAX_LOCAL_PREDICTIONS));
+      ok = persistLocal([entry, ...local].slice(0, MAX_LOCAL_PREDICTIONS));
     }
-    toast.fire(t.saved);
+    if (ok) toast.fire(t.saved);
   };
 
   const saveCloud = async () => {

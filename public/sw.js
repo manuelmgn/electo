@@ -13,7 +13,7 @@
 // Cando se mude algo aquí, sobe a versión: libera cachés antigas.
 // ============================================================
 
-const VERSION = "v1";
+const VERSION = "v2";
 const STATIC_CACHE = `electo-static-${VERSION}`;
 const RUNTIME_CACHE = `electo-runtime-${VERSION}`;
 const OFFLINE_URL = "/sin-conexion.html";
@@ -79,15 +79,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Estáticos inmutables do build: caché primeiro.
+  // Estáticos inmutables do build: caché primeiro (só respostas ok).
   if (url.pathname.startsWith("/_next/static/")) {
     event.respondWith(
       caches.match(request).then(
         (hit) =>
           hit ||
           fetch(request).then((res) => {
-            const copy = res.clone();
-            caches.open(STATIC_CACHE).then((c) => c.put(request, copy));
+            if (res.ok) {
+              const copy = res.clone();
+              caches.open(STATIC_CACHE).then((c) => c.put(request, copy));
+            }
             return res;
           })
       )
@@ -102,8 +104,10 @@ self.addEventListener("fetch", (event) => {
         (hit) =>
           hit ||
           fetch(request).then((res) => {
-            const copy = res.clone();
-            caches.open(RUNTIME_CACHE).then((c) => c.put(request, copy));
+            if (res.ok) {
+              const copy = res.clone();
+              caches.open(RUNTIME_CACHE).then((c) => c.put(request, copy));
+            }
             return res;
           })
       )

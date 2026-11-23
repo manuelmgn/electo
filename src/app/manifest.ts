@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
-// Manifest PWA: permite "Instalar app" no móbil (sen service worker:
-// a app corre ben sen el e evitamos cacheado de ferramenta da API).
+// Manifest PWA: permite "Instalar app" no móbil, apoiado polo
+// service worker de public/sw.js (caché de estáticos + sin-conexion).
 export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Electo 26 · Predicións eleccións xerais 2026",

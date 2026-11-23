@@ -61,19 +61,27 @@ export default function Header() {
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem("theme");
-    if (saved === "light" || saved === "dark") setTheme(saved);
+    try {
+      const saved = localStorage.getItem("theme");
+      if (saved === "light" || saved === "dark") setTheme(saved);
+    } catch {
+      // modo privado sen almacenamento: queda en "auto"
+    }
   }, []);
 
   const cycleTheme = () => {
     const order: Theme[] = ["auto", "light", "dark"];
     const next = order[(order.indexOf(theme) + 1) % order.length];
     setTheme(next);
+    try {
+      if (next === "auto") localStorage.removeItem("theme");
+      else localStorage.setItem("theme", next);
+    } catch {
+      // sen almacenamento: o tema aplícase igualmente nesta sesión
+    }
     if (next === "auto") {
-      localStorage.removeItem("theme");
       delete document.documentElement.dataset.theme;
     } else {
-      localStorage.setItem("theme", next);
       document.documentElement.dataset.theme = next;
     }
   };

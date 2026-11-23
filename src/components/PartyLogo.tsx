@@ -12,7 +12,11 @@ export default function PartyLogo({
   party: Party;
   className?: string;
 }) {
-  const [error, setError] = useState(false);
+  // Gárdase o logo que fallou (non un booleano) para que, se o
+  // compoñente se reutiliza con outro partido (p. ex. nun tooltip),
+  // o erro anterior non quede pegado ao novo partido.
+  const [failedLogo, setFailedLogo] = useState<string | null>(null);
+  const error = failedLogo === party.logo;
 
   if (error) {
     return (
@@ -37,7 +41,7 @@ export default function PartyLogo({
         loading="lazy"
         decoding="async"
         className="h-full w-full object-contain"
-        onError={() => setError(true)}
+        onError={() => setFailedLogo(party.logo)}
       />
     </span>
   );

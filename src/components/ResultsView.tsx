@@ -20,7 +20,7 @@ import SeatBar from "./SeatBar";
 import Hemicycle from "./Hemicycle";
 import PartyLogo from "./PartyLogo";
 import GovSumCard from "./GovSumCard";
-import { CenterToast } from "./Toast";
+import { CenterToast, BottomToast } from "./Toast";
 
 type Seats = Record<string, number>;
 
@@ -42,6 +42,7 @@ export default function ResultsView({
 }) {
   const { t } = useI18n();
   const shareNotice = useTimedFlag<"ok">(3200);
+  const toast = useTimedFlag<string>(2600);
 
   // Partidos con escaños, ordenados por escaños; en caso de empate,
   // alfabeticamente polo nome.
@@ -77,7 +78,7 @@ export default function ResultsView({
       await navigator.clipboard.writeText(text);
       shareNotice.fire("ok");
     } catch {
-      // sen permiso de portapapeis: non se amosa aviso
+      toast.fire(t.shareError);
     }
   };
 
@@ -199,6 +200,7 @@ export default function ResultsView({
       {shareNotice.value && (
         <CenterToast background="var(--copied)">{t.shareCopied}</CenterToast>
       )}
+      {toast.value && <BottomToast>{toast.value}</BottomToast>}
     </div>
   );
 }
