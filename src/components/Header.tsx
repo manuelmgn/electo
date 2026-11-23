@@ -10,14 +10,6 @@ import {
   notifySessionChanged,
 } from "@/lib/session-event";
 
-type Theme = "auto" | "light" | "dark";
-
-const themeIcons: Record<Theme, string> = {
-  auto: "◐",
-  light: "☀",
-  dark: "☾",
-};
-
 // Usuario da sesión, cargado no cliente vía /api/auth/me. O layout
 // root é estático (sen cookies) para poder xerar estáticas as vistas
 // /r e /f, polo que o estado de sesión hidrátase aquí. O evento
@@ -53,40 +45,7 @@ export default function Header() {
   const user = useSessionUser();
   const { t, lang, setLang } = useI18n();
   const router = useRouter();
-  const [theme, setTheme] = useState<Theme>("auto");
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const themeLabels: Record<Theme, string> = {
-    auto: t.themeAuto,
-    light: t.themeLight,
-    dark: t.themeDark,
-  };
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("theme");
-      if (saved === "light" || saved === "dark") setTheme(saved);
-    } catch {
-      // modo privado sen almacenamento: queda en "auto"
-    }
-  }, []);
-
-  const cycleTheme = () => {
-    const order: Theme[] = ["auto", "light", "dark"];
-    const next = order[(order.indexOf(theme) + 1) % order.length];
-    setTheme(next);
-    try {
-      if (next === "auto") localStorage.removeItem("theme");
-      else localStorage.setItem("theme", next);
-    } catch {
-      // sen almacenamento: o tema aplícase igualmente nesta sesión
-    }
-    if (next === "auto") {
-      delete document.documentElement.dataset.theme;
-    } else {
-      document.documentElement.dataset.theme = next;
-    }
-  };
 
   const switchLang = (l: Lang) => {
     setLang(l);
@@ -165,17 +124,6 @@ export default function Header() {
               </button>
             ))}
           </div>
-
-          <button
-            type="button"
-            onClick={cycleTheme}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-sm sm:h-9 sm:w-9 lg:h-10 lg:w-10"
-            style={{ background: "var(--surface-2)" }}
-            aria-label={`${t.theme}: ${themeLabels[theme]}`}
-            title={themeLabels[theme]}
-          >
-            {themeIcons[theme]}
-          </button>
 
           {SHOW_AUTH_UI &&
             (user ? (

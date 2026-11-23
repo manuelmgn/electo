@@ -31,19 +31,13 @@ export const viewport: Viewport = {
   ],
 };
 
-// Aplica o tema gardado antes da primeira pintada para evitar parpadeo.
-const themeInit = `(function(){try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t}}catch(e){}})();`;
-
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   // Sen cookies aquí: o Header carga a sesión no cliente (useSessionUser)
   // e así as vistas de só lectura /r e /f pódense prerenderizar.
   return (
-    <html lang="gl" suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInit }} />
-      </head>
+    <html lang="gl">
       <body className="min-h-screen antialiased">
         <Header />
         <PWARegister />

@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
-/* ---------- Temas: claro por defecto, escuro por preferencia do navegador ---------- */
+/* ---------- Tema automático segundo a preferencia do dispositivo ---------- */
 
-:root,
-[data-theme="light"] {
+:root {
   --bg: #f4f6fb;
   --surface: #ffffff;
   --surface-2: #e9edf5;
@@ -20,25 +19,8 @@
   color-scheme: light;
 }
 
-[data-theme="dark"] {
-  --bg: #0b0e15;
-  --surface: #131926;
-  --surface-2: #1c2434;
-  --text: #e9edf5;
-  --muted: #93a0b6;
-  --border: #263043;
-  --accent: #5b8cff;
-  --accent-contrast: #0b0e15;
-  --danger: #ff6b5e;
-  --ok: #3ecf7a;
-  --warn: #fb923c;
-  --copied: #0e7490;
-  --error: #991b1b;
-  color-scheme: dark;
-}
-
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+  :root {
     --bg: #0b0e15;
     --surface: #131926;
     --surface-2: #1c2434;

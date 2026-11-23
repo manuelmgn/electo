@@ -133,29 +133,25 @@ test.describe("Electo 26", () => {
     await page.evaluate(() => localStorage.removeItem("lang"));
   });
 
-  test("tema claro/escuro gárdase e sobrevive á recarga", async ({ page }) => {
+  test("tema adáptase automaticamente á preferencia do dispositivo", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/");
-    const themeBtn = page.getByRole("button", { name: /Tema: / });
-    // Estado inicial: "Automático" (title do botón). Clicar leva a
-    // "Claro": data-theme no documento e localStorage.
-    await expect(themeBtn).toHaveAttribute("title", "Automático");
-    await themeBtn.click();
-    await expect(themeBtn).toHaveAttribute("title", "Claro");
     await expect
-      .poll(() => page.evaluate(() => document.documentElement.dataset.theme))
-      .toBe("light");
-    await expect
-      .poll(() => page.evaluate(() => localStorage.getItem("theme")))
-      .toBe("light");
+      .poll(() =>
+        page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()
+        )
+      )
+      .toBe("#f4f6fb");
 
-    // Tras recargar, o themeInit do layout restitúe light antes da
-    // primeira pintada (sen parpadeo a auto).
-    await page.reload();
+    await page.emulateMedia({ colorScheme: "dark" });
     await expect
-      .poll(() => page.evaluate(() => document.documentElement.dataset.theme))
-      .toBe("light");
-
-    await page.evaluate(() => localStorage.removeItem("theme"));
+      .poll(() =>
+        page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()
+        )
+      )
+      .toBe("#0b0e15");
   });
 
   test("404 propia en galego", async ({ page }) => {
