@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useI18n, type Lang } from "@/lib/i18n";
 import {
   SESSION_EVENT,
+  SHOW_AUTH_UI,
   notifySessionChanged,
 } from "@/lib/session-event";
 
@@ -25,6 +26,7 @@ function useSessionUser() {
   const [user, setUser] = useState<{ name: string } | null>(null);
 
   useEffect(() => {
+    if (!SHOW_AUTH_UI) return;
     let alive = true;
     const load = () => {
       fetch("/api/auth/me")
@@ -175,29 +177,30 @@ export default function Header() {
             {themeIcons[theme]}
           </button>
 
-          {user ? (
-            <button
-              type="button"
-              onClick={() => setMenuOpen((v) => !v)}
-              className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold sm:h-9 sm:w-9 lg:h-10 lg:w-10"
-              style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}
-              aria-label={`${t.hello}, ${user.name}`}
-              aria-expanded={menuOpen}
-              aria-haspopup="menu"
-            >
-              {user.name.charAt(0).toUpperCase()}
-            </button>
-          ) : (
-            <Link
-              href="/login"
-              className="btn btn-primary !px-3 !py-1.5 text-sm lg:!px-5 lg:!py-2 lg:text-base"
-            >
-              {t.login}
-            </Link>
-          )}
+          {SHOW_AUTH_UI &&
+            (user ? (
+              <button
+                type="button"
+                onClick={() => setMenuOpen((v) => !v)}
+                className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold sm:h-9 sm:w-9 lg:h-10 lg:w-10"
+                style={{ background: "var(--accent)", color: "var(--accent-contrast)" }}
+                aria-label={`${t.hello}, ${user.name}`}
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
+              >
+                {user.name.charAt(0).toUpperCase()}
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                className="btn btn-primary !px-3 !py-1.5 text-sm lg:!px-5 lg:!py-2 lg:text-base"
+              >
+                {t.login}
+              </Link>
+            ))}
         </div>
 
-        {user && menuOpen && (
+        {SHOW_AUTH_UI && user && menuOpen && (
           <>
             {/* Backdrop: pecha o menú ao clicar fóra */}
             <div className="fixed inset-0 z-20" aria-hidden="true" onClick={() => setMenuOpen(false)} />

@@ -11,6 +11,11 @@
 // Header recargue o estado sen recargar a páxina.
 // ============================================================
 
+// Interruptor temporal para amosar ou ocultar a interface de inicio
+// de sesión (botón do Header e aviso no Editor). As rutas /login,
+// /rexistro e a API seguen activas; para volver amosala pon isto a true.
+export const SHOW_AUTH_UI = false;
+
 export const SESSION_EVENT = "electo:session";
 
 export function notifySessionChanged(): void {

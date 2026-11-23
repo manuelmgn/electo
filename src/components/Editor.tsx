@@ -18,6 +18,7 @@ import {
 import { SHOW_FORECASTS_SECTION } from "@/lib/forecasts";
 import { encodeShare, decodeShare, buildShareLines } from "@/lib/share";
 import { useI18n, errorMessage, formatDate } from "@/lib/i18n";
+import { SHOW_AUTH_UI } from "@/lib/session-event";
 import { useTimedFlag } from "@/lib/useTimedFlag";
 import SeatBar from "./SeatBar";
 import Hemicycle from "./Hemicycle";
@@ -563,12 +564,14 @@ export default function Editor({
             >
               {t.guestSave}
             </button>
-            <p className="text-center text-xs" style={{ color: "var(--muted)" }}>
-              {t.guestNotice}{" "}
-              <Link href="/login" className="font-semibold underline" style={{ color: "var(--accent)" }}>
-                {t.loginToSave}
-              </Link>
-            </p>
+            {SHOW_AUTH_UI && (
+              <p className="text-center text-xs" style={{ color: "var(--muted)" }}>
+                {t.guestNotice}{" "}
+                <Link href="/login" className="font-semibold underline" style={{ color: "var(--accent)" }}>
+                  {t.loginToSave}
+                </Link>
+              </p>
+            )}
           </>
         )}
       </section>
